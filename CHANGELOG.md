@@ -125,6 +125,16 @@
 
 ---
 
+## [0.2.1] - 2026-05-17
+
+### Kit 完整性修复
+
+- **go.work 补齐**：将 compression/messaging/registry/scheduler/shorturl 5 个遗漏模块加入 workspace
+- **新增 share 模块**：`ShareLink` 实体，`ShareGenerator`/`ShareRepository`/`ShareService` 接口，内存适配器
+- 总 Go 模块数：23 个（全部 `go build` + `go vet` 通过）
+
+---
+
 ### [0.3.0] - 计划中
 - [ ] 添加更多 ASR 适配器 (百度、讯飞)
 - [ ] 添加更多支付适配器 (Apple Pay、Google Pay)
