@@ -76,6 +76,55 @@
 - [ ] 发布到 npm + Go proxy
 - [ ] 添加 Benchmark 性能测试
 
+## [0.2.0] - 2026-05-17
+
+### 🔧 Feature Gap Fill — 全面补齐可插拔基础设施接口
+
+#### 后端新增 Go 模块 (Phase 1)
+
+| 模块 | 端口接口 | 内置适配器 | 说明 |
+|------|----------|-----------|------|
+| `ratelimiter` | `RateLimiter` | `MemoryRateLimiter` (滑动窗口) | 请求限流，支持按 key 配置 |
+| `security` | `IPFilter` | `MemoryIPFilter` | IP 黑白名单过滤，whitelist/blacklist/both 模式 |
+| `concurrency` | `Semaphore`, `WorkerPool` | Channel-based | 并发控制，信号量 + 工作池 |
+| `circuitbreaker` | `CircuitBreaker` | `MemoryCircuitBreaker` | 熔断器，closed/open/half-open 状态机 |
+| `crypto` | `Encryptor`, `Hasher`, `Signer` | AES-GCM + bcrypt | 加解密/哈希/签名统一抽象 |
+| `compression` | `Compressor` | `GzipCompressor` | HTTP 压缩/解压 |
+| `scheduler` | `Scheduler`, `Job` | `MemoryScheduler` | 定时任务调度 |
+| `shorturl` | `ShortURLGenerator` | `MemoryShortURL` (base62) | 短链生成与解析 |
+| `messaging` | `Channel`, `Presence` | `MemoryChannel` | IM 消息通道抽象 |
+| `registry` | `ServiceRegistry`, `ConfigCenter` | `MemoryRegistry` | 服务注册/发现 + 配置中心 |
+
+#### 前端新增 Node.js 框架抽象 (Phase 2)
+
+| 包名 | 说明 |
+|------|------|
+| `@voxera-kit/server` | Node.js HTTP 服务器抽象: `IHttpServer`/`Router`/`Middleware` 接口 |
+| — `RawHttpServer` | 基于 `node:http` 的完整实现 |
+| — Koa/Express/Fastify stubs | 可插拔框架适配器存根 |
+| — 7 个内置中间件 | cors, bodyParser, requestId, responseTime, helmet, compress, rateLimit |
+
+#### 后端 ORM 扩展 (Phase 3)
+
+- `database` 模块新增: `QueryBuilder[T]` 泛型查询构建器
+- `QueryCondition`, `SortOrder`, `OrderBy`, `Pagination` 类型
+- `Migration` + `Migrator` 接口 (版本化数据库迁移)
+- `DBCluster` + `DBClusterConfig` (主从读写分离)
+
+#### 前端增强 (Phase 4)
+
+| 包名 | 新增功能 |
+|------|----------|
+| `@voxera-kit/cache` | **新包** — `ICache` 接口 + `MemoryCache` (LRU 淘汰策略) |
+| `@voxera-kit/seo` | **新包** — `SEOManager` (meta/OG/twitter) + `SitemapGenerator` (XML) |
+| `@voxera-kit/api-client` | 新增 `SSEClient` (EventSource + 自动重连 + 指数退避) |
+| `@voxera-kit/di` | Container 新增 `registerClass()` 装饰器自动装配 |
+| `@voxera-kit/observability` | `TracingClient.activeSpan()` + `FrontendLogger.withTracing()` TraceId 自动注入 |
+
+**编译验证**: 22 个 Go 模块 `go build` + `go vet` ✅ | 11 个 TS 包 `tsc --noEmit` ✅ | `gofmt` 零问题 ✅
+
+---
+
 ### [0.3.0] - 计划中
 - [ ] 添加更多 ASR 适配器 (百度、讯飞)
 - [ ] 添加更多支付适配器 (Apple Pay、Google Pay)
