@@ -1,0 +1,11 @@
+{
+  "name": "@voxera-kit/config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./tsconfig": "./tsconfig.base.json",
+    "./eslint": "./eslint.config.ts",
+    "./prettier": "./prettier.config.ts"
+  }
+}
