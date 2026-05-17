@@ -128,3 +128,49 @@
 - [ ] 添加更多支付适配器 (Apple Pay、Google Pay)
 - [ ] framework 模块添加 go-zero 适配器
 - [ ] 前端包添加 Vitest 单元测试
+
+---
+
+## [0.4.0] - 2026-05-17
+
+### 🔧 DevOps / DX 工程化全面加固
+
+**变更类型**: chore, ci, docs
+
+#### 新增配置
+
+| 文件 | 说明 |
+|------|------|
+| `backend/.golangci.yml` | golangci-lint 共享配置，启用 15 个 linter，0-warning 策略 |
+| `frontend/.prettierrc.json` | Prettier 根配置 (singleQuote, trailingComma, 100 字符) |
+| `commitlint.config.ts` | Conventional Commits 规范校验 |
+| `.husky/pre-commit` | lint-staged (TS) + gofmt 检查 (Go) |
+| `.husky/commit-msg` | commitlint 校验提交信息 |
+| `Makefile` | 12 个 Make 目标: lint/fmt/test/build/vet/typecheck/clean |
+| `package.json` (root) | husky + commitlint 依赖 |
+
+#### CI/CD 完善
+
+| Workflow | 触发 | 内容 |
+|----------|------|------|
+| `ci.yml` | push/PR | Go lint+vet+build+test (25 模块) + TS lint+typecheck (15 包) |
+| `reusable-go-ci.yml` | workflow_call | Go 可复用模板 (供 voxera/finera 调用) |
+| `reusable-ts-ci.yml` | workflow_call | TS 可复用模板 |
+| `reusable-docker-build.yml` | workflow_call | Docker build+push 可复用模板 |
+
+#### 文档体系
+
+| 文档 | 内容 |
+|------|------|
+| `CONTRIBUTING.md` | 贡献指南: 环境要求, 代码风格, commit 规范, PR 流程 |
+| `docs/architecture.md` | 模块关系图, 接口设计原则, 适配器模式 |
+| `docs/development.md` | 本地开发环境搭建, 调试方法 |
+| `docs/adding-module.md` | 如何添加新的 kit 模块 (Go + TS) |
+| `.github/pull_request_template.md` | PR 模板 |
+
+#### DX 增强
+
+- `.editorconfig` 增加 TS/Go/YAML/Makefile 分段规则
+- `.vscode/settings.json` 增加 rulers=[100], goimports, eslint validate
+- `.vscode/extensions.json` 补齐推荐扩展
+- `frontend/package.json` 新增 `format` 脚本
