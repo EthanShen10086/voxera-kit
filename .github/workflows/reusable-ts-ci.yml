@@ -1,0 +1,30 @@
+name: Reusable TypeScript CI
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        type: string
+        default: "22"
+      working-directory:
+        type: string
+        required: true
+
+jobs:
+  ts-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: pnpm
+          cache-dependency-path: ${{ inputs.working-directory }}/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+        working-directory: ${{ inputs.working-directory }}
+      - name: Lint
+        working-directory: ${{ inputs.working-directory }}
+        run: pnpm turbo lint
+      - name: Typecheck
+        working-directory: ${{ inputs.working-directory }}
+        run: pnpm turbo typecheck

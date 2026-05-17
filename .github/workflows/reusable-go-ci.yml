@@ -1,0 +1,39 @@
+name: Reusable Go CI
+on:
+  workflow_call:
+    inputs:
+      go-version:
+        type: string
+        default: "1.22"
+      working-directory:
+        type: string
+        required: true
+      golangci-config:
+        type: string
+        default: ""
+
+jobs:
+  go-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ inputs.go-version }}
+          cache: true
+      - name: golangci-lint
+        if: inputs.golangci-config != ''
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          working-directory: ${{ inputs.working-directory }}
+          args: --config=${{ inputs.golangci-config }} --timeout=5m
+      - name: Go Vet
+        working-directory: ${{ inputs.working-directory }}
+        run: go vet ./...
+      - name: Go Build
+        working-directory: ${{ inputs.working-directory }}
+        run: go build ./...
+      - name: Go Test
+        working-directory: ${{ inputs.working-directory }}
+        run: go test ./... -race -count=1
