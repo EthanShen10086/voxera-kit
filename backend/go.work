@@ -18,9 +18,10 @@ use (
 	./concurrency
 	./circuitbreaker
 	./crypto
-	./scheduler
-	./shorturl
+	./compression
 	./messaging
 	./registry
-	./compression
+	./scheduler
+	./shorturl
+	./share
 )
