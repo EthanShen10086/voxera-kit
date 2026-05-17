@@ -13,4 +13,14 @@ use (
 	./framework
 	./config
 	./errors
+	./ratelimiter
+	./security
+	./concurrency
+	./circuitbreaker
+	./crypto
+	./scheduler
+	./shorturl
+	./messaging
+	./registry
+	./compression
 )
