@@ -75,6 +75,16 @@ export class TracingClient {
     return Math.random() < (this.config.sampleRate ?? 1.0);
   }
 
+  activeSpan(): SpanContext | null {
+    let latest: SpanContext | null = null;
+    for (const span of this.activeSpans.values()) {
+      if (!latest || span.startTime > latest.startTime) {
+        latest = span;
+      }
+    }
+    return latest;
+  }
+
   /** Stub – in production this would send spans to the configured endpoint. */
   private exportSpan(_span: SpanContext): void {
     // No-op: integrate with an OTLP exporter in production.

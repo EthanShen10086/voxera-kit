@@ -1,5 +1,6 @@
 import { LogLevel } from "./types.js";
 import type { ILogger, LogEntry } from "./types.js";
+import type { TracingClient } from "./tracing.js";
 
 export interface FrontendLoggerOptions {
   level?: LogLevel;
@@ -12,6 +13,7 @@ export interface FrontendLoggerOptions {
   onFlush?: (entries: LogEntry[]) => void | Promise<void>;
   /** Print to console in addition to buffering (typically enabled in dev). */
   console?: boolean;
+  tracer?: TracingClient;
 }
 
 const LOG_LEVEL_LABELS: Record<LogLevel, string> = {
@@ -29,6 +31,7 @@ export class FrontendLogger implements ILogger {
   private readonly batchSize: number;
   private readonly onFlush?: (entries: LogEntry[]) => void | Promise<void>;
   private readonly useConsole: boolean;
+  private readonly tracer?: TracingClient;
   private flushTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor(options: FrontendLoggerOptions = {}) {
@@ -37,6 +40,7 @@ export class FrontendLogger implements ILogger {
     this.batchSize = options.batchSize ?? 50;
     this.onFlush = options.onFlush;
     this.useConsole = options.console ?? true;
+    this.tracer = options.tracer;
 
     if (options.flushInterval && options.flushInterval > 0) {
       this.flushTimer = setInterval(() => {
@@ -69,6 +73,17 @@ export class FrontendLogger implements ILogger {
     this.level = level;
   }
 
+  withTracing(tracer: TracingClient): FrontendLogger {
+    return new FrontendLogger({
+      level: this.level,
+      context: { ...this.context },
+      batchSize: this.batchSize,
+      onFlush: this.onFlush,
+      console: this.useConsole,
+      tracer,
+    });
+  }
+
   child(context: Record<string, unknown>): ILogger {
     return new FrontendLogger({
       level: this.level,
@@ -76,6 +91,7 @@ export class FrontendLogger implements ILogger {
       batchSize: this.batchSize,
       onFlush: this.onFlush,
       console: this.useConsole,
+      tracer: this.tracer,
     });
   }
 
@@ -97,12 +113,22 @@ export class FrontendLogger implements ILogger {
   private log(level: LogLevel, message: string, context?: Record<string, unknown>): void {
     if (level < this.level) return;
 
+    const mergedContext: Record<string, unknown> = { ...this.context, ...context };
+
     const entry: LogEntry = {
       level,
       message,
       timestamp: Date.now(),
-      context: { ...this.context, ...context },
+      context: mergedContext,
     };
+
+    if (this.tracer) {
+      const span = this.tracer.activeSpan();
+      if (span) {
+        entry.traceId = span.traceId;
+        entry.spanId = span.spanId;
+      }
+    }
 
     this.buffer.push(entry);
 
