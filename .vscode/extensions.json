@@ -3,7 +3,7 @@
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
     "golang.go",
-    "EditorConfig.EditorConfig",
+    "editorconfig.editorconfig",
     "ms-vscode.vscode-typescript-next",
     "bradlc.vscode-tailwindcss",
     "streetsidesoftware.code-spell-checker",

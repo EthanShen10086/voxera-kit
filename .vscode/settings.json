@@ -1,10 +1,12 @@
 {
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.rulers": [100],
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit",
     "source.organizeImports": "explicit"
   },
+  "eslint.validate": ["javascript", "typescript", "typescriptreact"],
   "typescript.tsdk": "frontend/node_modules/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "[go]": {
@@ -13,6 +15,7 @@
       "source.organizeImports": "explicit"
     }
   },
+  "go.formatTool": "goimports",
   "go.toolsManagement.autoUpdate": true,
   "go.lintTool": "golangci-lint",
   "go.useLanguageServer": true,
