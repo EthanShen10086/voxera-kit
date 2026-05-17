@@ -24,4 +24,6 @@ use (
 	./scheduler
 	./shorturl
 	./share
+	./dataprovider
+	./dataparser
 )

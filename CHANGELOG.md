@@ -67,73 +67,61 @@
 
 ---
 
+## [0.3.0] - 2026-05-17
+
+### Finera 驱动的新增模块 -- 数据分析能力扩展
+
+为支持 Finera 金融数据分析平台，kit 新增 5 个可插拔模块：
+
+#### 前端新增 (3 个 TS 包)
+
+- **@voxera-kit/spreadsheet**: 电子表格引擎抽象
+  - `ISpreadsheetAdapter` 接口 (mount/destroy/setData/getData/setCellValue/exportXlsx 等)
+  - `UniverAdapter` 适配器 (Univer Canvas2D 电子表格)
+  - `AGGridAdapter` 适配器 (AG Grid 数据网格)
+  - `SpreadsheetFactory` 工厂方法
+  - 支持条件格式、冻结窗格、XLSX 导入导出
+
+- **@voxera-kit/chart**: 图表引擎抽象
+  - `IChartAdapter` 接口 (mount/destroy/render/resize/exportImage)
+  - 7 种图表类型: Line, Bar, Pie, Sankey, Area, Waterfall, Radar
+  - `EChartsAdapter` 适配器 (百度 ECharts)
+  - `VisxAdapter` 适配器 (Airbnb visx)
+  - `ChartFactory` 工厂方法
+
+- **@voxera-kit/clipboard**: 剪贴板表格解析
+  - `IClipboardParser` 接口 (parse/parseText/parseHtml/detectSource)
+  - 自动识别来源: Excel, Google Sheets, 飞书, 腾讯文档, 钉钉
+  - 智能类型推断: 数字、百分比、日期、布尔值
+  - 支持会计格式负数 `(1,234)` 解析
+
+#### 后端新增 (2 个 Go 模块)
+
+- **dataprovider**: 数据源抽象
+  - `DataProvider` 通用数据源接口
+  - `FinancialProvider` 金融数据特化接口 (GetQuote/GetFinancials/ListMarkets)
+  - `StubAdapter` 内存模拟适配器 (含 A 股/港股/美股 mock 数据)
+  - 支持三大市场: US, HK, SH/SZ
+
+- **dataparser**: 文档解析抽象
+  - `DocumentParser` 接口 (Parse/ExtractTables/SupportedFormats)
+  - `CSVAdapter` 完整 CSV 解析实现 (encoding/csv)
+  - `StubAdapter` 测试用模拟适配器
+  - 支持格式: PDF, CSV, XLSX, HTML, JSON
+
+**Go 模块总数**: 25 个 (新增 2 个)
+**前端包总数**: 15 个 (新增 3 个)
+
+---
+
 ## 待办 (Planned)
 
-### [0.2.0] - 计划中
+### [0.4.0] - 计划中
 - [ ] 完善所有 Go adapter 的真实实现 (连接池、错误处理、重试逻辑)
 - [ ] 添加单元测试 (目标覆盖率 80%+)
 - [ ] 添加集成测试 (使用 testcontainers-go)
 - [ ] 发布到 npm + Go proxy
 - [ ] 添加 Benchmark 性能测试
-
-## [0.2.0] - 2026-05-17
-
-### 🔧 Feature Gap Fill — 全面补齐可插拔基础设施接口
-
-#### 后端新增 Go 模块 (Phase 1)
-
-| 模块 | 端口接口 | 内置适配器 | 说明 |
-|------|----------|-----------|------|
-| `ratelimiter` | `RateLimiter` | `MemoryRateLimiter` (滑动窗口) | 请求限流，支持按 key 配置 |
-| `security` | `IPFilter` | `MemoryIPFilter` | IP 黑白名单过滤，whitelist/blacklist/both 模式 |
-| `concurrency` | `Semaphore`, `WorkerPool` | Channel-based | 并发控制，信号量 + 工作池 |
-| `circuitbreaker` | `CircuitBreaker` | `MemoryCircuitBreaker` | 熔断器，closed/open/half-open 状态机 |
-| `crypto` | `Encryptor`, `Hasher`, `Signer` | AES-GCM + bcrypt | 加解密/哈希/签名统一抽象 |
-| `compression` | `Compressor` | `GzipCompressor` | HTTP 压缩/解压 |
-| `scheduler` | `Scheduler`, `Job` | `MemoryScheduler` | 定时任务调度 |
-| `shorturl` | `ShortURLGenerator` | `MemoryShortURL` (base62) | 短链生成与解析 |
-| `messaging` | `Channel`, `Presence` | `MemoryChannel` | IM 消息通道抽象 |
-| `registry` | `ServiceRegistry`, `ConfigCenter` | `MemoryRegistry` | 服务注册/发现 + 配置中心 |
-
-#### 前端新增 Node.js 框架抽象 (Phase 2)
-
-| 包名 | 说明 |
-|------|------|
-| `@voxera-kit/server` | Node.js HTTP 服务器抽象: `IHttpServer`/`Router`/`Middleware` 接口 |
-| — `RawHttpServer` | 基于 `node:http` 的完整实现 |
-| — Koa/Express/Fastify stubs | 可插拔框架适配器存根 |
-| — 7 个内置中间件 | cors, bodyParser, requestId, responseTime, helmet, compress, rateLimit |
-
-#### 后端 ORM 扩展 (Phase 3)
-
-- `database` 模块新增: `QueryBuilder[T]` 泛型查询构建器
-- `QueryCondition`, `SortOrder`, `OrderBy`, `Pagination` 类型
-- `Migration` + `Migrator` 接口 (版本化数据库迁移)
-- `DBCluster` + `DBClusterConfig` (主从读写分离)
-
-#### 前端增强 (Phase 4)
-
-| 包名 | 新增功能 |
-|------|----------|
-| `@voxera-kit/cache` | **新包** — `ICache` 接口 + `MemoryCache` (LRU 淘汰策略) |
-| `@voxera-kit/seo` | **新包** — `SEOManager` (meta/OG/twitter) + `SitemapGenerator` (XML) |
-| `@voxera-kit/api-client` | 新增 `SSEClient` (EventSource + 自动重连 + 指数退避) |
-| `@voxera-kit/di` | Container 新增 `registerClass()` 装饰器自动装配 |
-| `@voxera-kit/observability` | `TracingClient.activeSpan()` + `FrontendLogger.withTracing()` TraceId 自动注入 |
-
-**编译验证**: 22 个 Go 模块 `go build` + `go vet` ✅ | 11 个 TS 包 `tsc --noEmit` ✅ | `gofmt` 零问题 ✅
-
----
-
-## [0.2.1] - 2026-05-17
-
-### Kit 完整性修复
-
-- **go.work 补齐**：将 compression/messaging/registry/scheduler/shorturl 5 个遗漏模块加入 workspace
-- **新增 share 模块**：`ShareLink` 实体，`ShareGenerator`/`ShareRepository`/`ShareService` 接口，内存适配器
-- 总 Go 模块数：23 个（全部 `go build` + `go vet` 通过）
-
----
 
 ### [0.3.0] - 计划中
 - [ ] 添加更多 ASR 适配器 (百度、讯飞)
