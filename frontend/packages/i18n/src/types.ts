@@ -1,6 +1,8 @@
 export type Locale = string;
 
-export type TranslationMap = Record<string, string | TranslationMap>;
+export interface TranslationMap {
+  [key: string]: string | TranslationMap;
+}
 
 export type InterpolationParams = Record<string, string | number>;
 

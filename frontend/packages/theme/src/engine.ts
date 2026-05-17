@@ -12,7 +12,7 @@ export class ThemeEngine implements IThemeEngine {
 
   apply(preset: ThemePreset): void {
     this.currentPreset = preset;
-    const properties = this.flattenTokens(preset.tokens);
+    const properties = this.flattenTokens(preset.tokens as unknown as Record<string, unknown>);
 
     if (typeof document !== "undefined") {
       const root = document.documentElement;
@@ -41,7 +41,7 @@ export class ThemeEngine implements IThemeEngine {
     }
 
     if (!this.currentPreset) return undefined;
-    return this.resolveTokenPath(this.currentPreset.tokens, path);
+    return this.resolveTokenPath(this.currentPreset.tokens as unknown as Record<string, unknown>, path);
   }
 
   getCurrentPreset(): ThemePreset | null {

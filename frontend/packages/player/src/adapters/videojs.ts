@@ -26,7 +26,6 @@ const EVENT_MAP: Record<PlayerEvent, string> = {
  * Wire up video.js SDK methods once the dependency is installed.
  */
 export class VideoJSAdapter implements IPlayerAdapter {
-  private player: unknown = null;
   private listeners = new Map<string, Set<PlayerEventHandler>>();
 
   async init(_container: HTMLElement, _options?: PlayerOptions): Promise<void> {
@@ -94,7 +93,6 @@ export class VideoJSAdapter implements IPlayerAdapter {
 
   destroy(): void {
     this.listeners.clear();
-    // TODO: this.player.dispose()
-    this.player = null;
+    // TODO: dispose video.js instance
   }
 }

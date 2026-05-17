@@ -26,7 +26,6 @@ const EVENT_MAP: Record<PlayerEvent, string> = {
  * Uses a raw <video> element with hls.js for HLS stream support.
  */
 export class HLSJSAdapter implements IPlayerAdapter {
-  private hls: unknown = null;
   private videoElement: HTMLVideoElement | null = null;
   private listeners = new Map<string, Set<PlayerEventHandler>>();
 
@@ -95,7 +94,7 @@ export class HLSJSAdapter implements IPlayerAdapter {
 
   destroy(): void {
     this.listeners.clear();
-    // TODO: this.hls.destroy()
+    // TODO: destroy hls.js instance
     if (this.videoElement) {
       this.videoElement.pause();
       this.videoElement.removeAttribute("src");
@@ -103,6 +102,5 @@ export class HLSJSAdapter implements IPlayerAdapter {
       this.videoElement.remove();
       this.videoElement = null;
     }
-    this.hls = null;
   }
 }

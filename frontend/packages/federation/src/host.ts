@@ -50,7 +50,7 @@ async function initContainer(
 
   await __webpack_init_sharing__("default");
 
-  const container = (window as Record<string, unknown>)[scope] as
+  const container = (window as unknown as Record<string, unknown>)[scope] as
     | { init: (scopes: unknown) => Promise<void>; get: (module: string) => Promise<() => unknown> }
     | undefined;
 
@@ -122,5 +122,5 @@ export function unloadRemoteModule(scope: string): void {
   const script = document.querySelector(`script[data-federation="${scope}"]`);
   script?.remove();
 
-  delete (window as Record<string, unknown>)[scope];
+  delete (window as unknown as Record<string, unknown>)[scope];
 }

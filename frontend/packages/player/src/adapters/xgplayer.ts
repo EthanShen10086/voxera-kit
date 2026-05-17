@@ -26,7 +26,6 @@ const EVENT_MAP: Record<PlayerEvent, string> = {
  * Wire up xgplayer SDK methods once the dependency is installed.
  */
 export class XGPlayerAdapter implements IPlayerAdapter {
-  private player: unknown = null;
   private listeners = new Map<string, Set<PlayerEventHandler>>();
 
   async init(_container: HTMLElement, _options?: PlayerOptions): Promise<void> {
@@ -94,7 +93,6 @@ export class XGPlayerAdapter implements IPlayerAdapter {
 
   destroy(): void {
     this.listeners.clear();
-    // TODO: this.player.destroy()
-    this.player = null;
+    // TODO: destroy xgplayer instance
   }
 }
