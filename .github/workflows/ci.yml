@@ -1,48 +1,88 @@
 name: CI
-
 on:
   push:
-    branches: [main, develop]
+    branches: [master, main, develop]
   pull_request:
-    branches: [main]
+    branches: [master, main, develop]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  frontend-lint-test:
-    name: Frontend Lint & Test
+  go-lint:
+    name: Go Lint & Vet
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
-          cache-dependency-path: frontend/pnpm-lock.yaml
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm turbo lint
-      - run: pnpm turbo typecheck
-      - run: pnpm turbo test
-
-  backend-lint-test:
-    name: Backend Lint & Test
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
-          cache-dependency-path: backend/**/go.sum
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v6
+          go-version: "1.22"
+          cache: true
+      - uses: golangci/golangci-lint-action@v6
         with:
+          version: latest
           working-directory: backend
-      - name: Run tests
-        run: go work sync && go test ./...
+          args: --timeout=5m
+      - name: Go Vet (all modules)
+        working-directory: backend
+        run: |
+          for dir in $(grep -oP '\.\/\K[a-z]+' go.work); do
+            echo "=== vet $dir ==="
+            cd "$dir" && go vet ./... && cd ..
+          done
+
+  go-build:
+    name: Go Build
+    runs-on: ubuntu-latest
+    needs: go-lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache: true
+      - name: Build all modules
+        working-directory: backend
+        run: |
+          for dir in $(grep -oP '\.\/\K[a-z]+' go.work); do
+            echo "=== build $dir ==="
+            cd "$dir" && go build ./... && cd ..
+          done
+
+  go-test:
+    name: Go Test
+    runs-on: ubuntu-latest
+    needs: go-lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache: true
+      - name: Test all modules
+        working-directory: backend
+        run: |
+          for dir in $(grep -oP '\.\/\K[a-z]+' go.work); do
+            echo "=== test $dir ==="
+            cd "$dir" && go test ./... -race -coverprofile=coverage.out && cd ..
+          done
+
+  ts-lint:
+    name: TypeScript Lint & Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+        working-directory: frontend
+      - name: ESLint
+        working-directory: frontend
+        run: pnpm turbo lint
+      - name: TypeScript typecheck
+        working-directory: frontend
+        run: pnpm turbo typecheck
