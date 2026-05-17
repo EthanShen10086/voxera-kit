@@ -121,10 +121,10 @@ func buildTable(records [][]string, hasHeader bool) dataparser.Table {
 				val = strings.TrimSpace(records[ri][ci])
 			}
 			row[ci] = dataparser.Cell{
-				Row:  ri - startRow,
-				Col:  ci,
+				Row:   ri - startRow,
+				Col:   ci,
 				Value: val,
-				Type: inferCellType(val),
+				Type:  inferCellType(val),
 			}
 		}
 		rows = append(rows, row)

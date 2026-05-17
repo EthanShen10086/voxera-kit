@@ -10,12 +10,12 @@ import (
 )
 
 var mockStocks = map[string]dp.SearchResult{
-	"AAPL": {Symbol: "AAPL", Name: "Apple Inc.", Market: "US", Type: "stock", Currency: "USD"},
-	"MSFT": {Symbol: "MSFT", Name: "Microsoft Corporation", Market: "US", Type: "stock", Currency: "USD"},
-	"GOOGL": {Symbol: "GOOGL", Name: "Alphabet Inc.", Market: "US", Type: "stock", Currency: "USD"},
-	"AMZN": {Symbol: "AMZN", Name: "Amazon.com Inc.", Market: "US", Type: "stock", Currency: "USD"},
-	"00700.HK": {Symbol: "00700.HK", Name: "Tencent Holdings Ltd.", Market: "HK", Type: "stock", Currency: "HKD"},
-	"09988.HK": {Symbol: "09988.HK", Name: "Alibaba Group Holding Ltd.", Market: "HK", Type: "stock", Currency: "HKD"},
+	"AAPL":      {Symbol: "AAPL", Name: "Apple Inc.", Market: "US", Type: "stock", Currency: "USD"},
+	"MSFT":      {Symbol: "MSFT", Name: "Microsoft Corporation", Market: "US", Type: "stock", Currency: "USD"},
+	"GOOGL":     {Symbol: "GOOGL", Name: "Alphabet Inc.", Market: "US", Type: "stock", Currency: "USD"},
+	"AMZN":      {Symbol: "AMZN", Name: "Amazon.com Inc.", Market: "US", Type: "stock", Currency: "USD"},
+	"00700.HK":  {Symbol: "00700.HK", Name: "Tencent Holdings Ltd.", Market: "HK", Type: "stock", Currency: "HKD"},
+	"09988.HK":  {Symbol: "09988.HK", Name: "Alibaba Group Holding Ltd.", Market: "HK", Type: "stock", Currency: "HKD"},
 	"600519.SH": {Symbol: "600519.SH", Name: "贵州茅台", Market: "SH", Type: "stock", Currency: "CNY"},
 	"000858.SZ": {Symbol: "000858.SZ", Name: "五粮液", Market: "SZ", Type: "stock", Currency: "CNY"},
 }
