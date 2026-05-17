@@ -70,3 +70,85 @@ type Database interface {
 	// Transaction returns a new Transaction for atomic multi-statement operations.
 	Transaction() Transaction
 }
+
+// QueryCondition represents a single filter predicate for query building.
+type QueryCondition struct {
+	Field    string
+	Operator string
+	Value    any
+}
+
+// SortOrder defines the direction of an ORDER BY clause.
+type SortOrder int
+
+const (
+	Asc SortOrder = iota
+	Desc
+)
+
+// OrderBy specifies a single sort field and its direction.
+type OrderBy struct {
+	Field string
+	Order SortOrder
+}
+
+// Pagination holds paging metadata for paginated query results.
+type Pagination struct {
+	Page  int
+	Size  int
+	Total int64
+}
+
+// QueryBuilder provides a fluent API for constructing type-safe queries.
+type QueryBuilder[T any] interface {
+	Where(field string, op string, value any) QueryBuilder[T]
+	And(field string, op string, value any) QueryBuilder[T]
+	Or(field string, op string, value any) QueryBuilder[T]
+	OrderBy(field string, order SortOrder) QueryBuilder[T]
+	Limit(n int) QueryBuilder[T]
+	Offset(n int) QueryBuilder[T]
+	Select(fields ...string) QueryBuilder[T]
+	Execute(ctx context.Context) ([]T, error)
+	Count(ctx context.Context) (int64, error)
+	First(ctx context.Context) (*T, error)
+	Paginate(ctx context.Context, page, size int) ([]T, *Pagination, error)
+}
+
+// Migration represents a single versioned schema migration.
+type Migration interface {
+	Up(ctx context.Context) error
+	Down(ctx context.Context) error
+	Version() string
+	Name() string
+}
+
+// MigrationStatus records the state of an applied migration.
+type MigrationStatus struct {
+	Version   string
+	Name      string
+	AppliedAt time.Time
+	Status    string
+}
+
+// Migrator manages the execution and tracking of schema migrations.
+type Migrator interface {
+	Apply(ctx context.Context, migrations ...Migration) error
+	Rollback(ctx context.Context, steps int) error
+	Status(ctx context.Context) ([]MigrationStatus, error)
+}
+
+// DBCluster abstracts a master-slave database cluster topology.
+type DBCluster interface {
+	Master() Database
+	Slave() Database
+	Close() error
+}
+
+// DBClusterConfig holds connection parameters for a master-slave cluster.
+type DBClusterConfig struct {
+	MasterDSN       string
+	SlaveDSNs       []string
+	MaxIdleConns    int
+	MaxOpenConns    int
+	ConnMaxLifetime time.Duration
+}
