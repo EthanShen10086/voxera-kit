@@ -32,10 +32,10 @@ func (s *Store) GetUsage(_ context.Context, userID string) (*aiquota.Usage, erro
 	return &aiquota.Usage{UserID: userID}, nil
 }
 
-// GetQuota returns a permissive unlimited quota.
+// GetQuota returns a permissive quota (noop allows everything).
 func (s *Store) GetQuota(_ context.Context, _ string) (*aiquota.Quota, error) {
 	return &aiquota.Quota{
-		Tier:      aiquota.TierAdmin,
+		Tier:      aiquota.TierEnterprise,
 		OverQuota: aiquota.PolicyNotify,
 	}, nil
 }

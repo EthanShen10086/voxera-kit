@@ -39,6 +39,8 @@ func CalculateCost(model string, inputTokens, outputTokens int) int64 {
 }
 
 // DefaultQuotas returns the standard quota configurations for each tier.
+// All tiers have finite quotas. Unlimited access is ONLY granted via the
+// configurable whitelist (admin-managed), never automatically by tier.
 func DefaultQuotas() map[Tier]Quota {
 	allModels := make([]string, 0, len(DefaultPricing()))
 	for _, p := range DefaultPricing() {
@@ -78,28 +80,6 @@ func DefaultQuotas() map[Tier]Quota {
 			AllowedModels:   allModels,
 			ConcurrentLimit: 20,
 			Priority:        10,
-			OverQuota:       PolicyNotify,
-		},
-		TierVIP: {
-			Tier:            TierVIP,
-			DailyTokens:     0,
-			MonthlyTokens:   0,
-			DailyRequests:   0,
-			MonthlyRequests: 0,
-			AllowedModels:   allModels,
-			ConcurrentLimit: 50,
-			Priority:        15,
-			OverQuota:       PolicyNotify,
-		},
-		TierAdmin: {
-			Tier:            TierAdmin,
-			DailyTokens:     0,
-			MonthlyTokens:   0,
-			DailyRequests:   0,
-			MonthlyRequests: 0,
-			AllowedModels:   allModels,
-			ConcurrentLimit: 100,
-			Priority:        20,
 			OverQuota:       PolicyNotify,
 		},
 	}

@@ -1,5 +1,5 @@
-// Package aiquota manages AI usage quotas, metering, billing,
-// whitelist/VIP access for expensive LLM calls.
+// Package aiquota manages AI usage quotas, metering, billing, and
+// configurable whitelist overrides for expensive LLM calls.
 package aiquota
 
 import (
@@ -17,20 +17,18 @@ var ErrModelNotAllowed = errors.New("aiquota: model not allowed for this tier")
 // ErrConcurrencyLimit indicates too many concurrent AI requests for this user.
 var ErrConcurrencyLimit = errors.New("aiquota: concurrent request limit reached")
 
-// Tier defines the AI access level for a user or tenant.
+// Tier defines the AI access level for a user or tenant. All tiers have
+// finite quotas. Unlimited access is ONLY granted through the configurable
+// whitelist (managed by administrators), never automatically by tier.
 type Tier string
 
 const (
-	// TierFree is the basic free access tier.
+	// TierFree is the basic free access tier with strict limits.
 	TierFree Tier = "free"
-	// TierPro is the paid professional tier.
+	// TierPro is the paid professional tier with moderate limits.
 	TierPro Tier = "pro"
-	// TierEnterprise is the enterprise tier with higher limits.
+	// TierEnterprise is the enterprise tier with high limits.
 	TierEnterprise Tier = "enterprise"
-	// TierVIP is the VIP tier with unlimited access.
-	TierVIP Tier = "vip"
-	// TierAdmin is the administrative tier with full access.
-	TierAdmin Tier = "admin"
 )
 
 // OverQuotaPolicy controls behavior when a user exceeds their quota.
