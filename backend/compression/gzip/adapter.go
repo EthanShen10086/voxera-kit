@@ -49,7 +49,7 @@ func (a *Adapter) Decompress(data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("gzip: failed to create reader: %w", err)
 	}
-	defer r.Close()
+	defer func() { _ = r.Close() }()
 
 	result, err := io.ReadAll(r)
 	if err != nil {
