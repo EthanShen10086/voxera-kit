@@ -26,4 +26,6 @@ use (
 	./share
 	./dataprovider
 	./dataparser
+	./scraper
+	./notification
 )
