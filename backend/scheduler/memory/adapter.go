@@ -1,5 +1,11 @@
-// Package memory provides an in-memory implementation of the scheduler.Scheduler interface
-// using time.Timer and goroutines for job scheduling.
+// Package memory provides a lightweight in-memory implementation of the scheduler.Scheduler
+// interface using time.Timer and goroutines for job scheduling.
+//
+// This adapter is intended as a fallback when the full cron adapter is not available.
+// It supports "@every <duration>" syntax (e.g. "@every 30s", "@every 5m") for interval-based
+// scheduling. Standard five-field cron expressions are not fully parsed; they fall back to a
+// default interval of one minute. For production use with real cron expressions, prefer the
+// cron adapter in the sibling "cron" package.
 package memory
 
 import (
@@ -156,9 +162,17 @@ func (a *Adapter) IsRunning() bool {
 	return a.running.Load()
 }
 
-// TODO: Implement full cron expression parsing. Currently uses a fixed 1-minute interval
-// as a placeholder. Replace with a proper cron parser to evaluate cronExpr.
-func (a *Adapter) nextRunDuration(_ string) time.Duration {
+// nextRunDuration parses the cron expression to determine the interval between runs.
+// It supports "@every <duration>" syntax (e.g. "@every 30s", "@every 5m"). For standard
+// cron expressions that cannot be parsed as an interval, it falls back to one minute.
+func (a *Adapter) nextRunDuration(cronExpr string) time.Duration {
+	const prefix = "@every "
+	if len(cronExpr) > len(prefix) && cronExpr[:len(prefix)] == prefix {
+		d, err := time.ParseDuration(cronExpr[len(prefix):])
+		if err == nil && d > 0 {
+			return d
+		}
+	}
 	return time.Minute
 }
 
