@@ -10,21 +10,21 @@ import (
 	"github.com/EthanShen10086/voxera-kit/secret"
 )
 
-// EnvManager reads and writes secrets as environment variables using a
+// Manager reads and writes secrets as environment variables using a
 // configurable prefix (e.g., "APP_SECRET").
-type EnvManager struct {
+type Manager struct {
 	prefix string
 }
 
-// NewEnvManager creates a new EnvManager that maps secret keys to environment
+// NewManager creates a Manager that maps secret keys to environment
 // variables formatted as PREFIX_KEY.
-func NewEnvManager(prefix string) *EnvManager {
-	return &EnvManager{prefix: prefix}
+func NewManager(prefix string) *Manager {
+	return &Manager{prefix: prefix}
 }
 
 // Get retrieves a secret value from the corresponding environment variable.
 // Returns ErrNotFound if the variable is not set.
-func (m *EnvManager) Get(_ context.Context, key string) (string, error) {
+func (m *Manager) Get(_ context.Context, key string) (string, error) {
 	envKey := m.envKey(key)
 	val, ok := os.LookupEnv(envKey)
 	if !ok {
@@ -34,18 +34,18 @@ func (m *EnvManager) Get(_ context.Context, key string) (string, error) {
 }
 
 // Set stores a secret by setting the corresponding environment variable.
-func (m *EnvManager) Set(_ context.Context, key string, value string) error {
+func (m *Manager) Set(_ context.Context, key string, value string) error {
 	return os.Setenv(m.envKey(key), value)
 }
 
 // Delete removes a secret by unsetting the corresponding environment variable.
-func (m *EnvManager) Delete(_ context.Context, key string) error {
+func (m *Manager) Delete(_ context.Context, key string) error {
 	return os.Unsetenv(m.envKey(key))
 }
 
 // List returns all secret keys (without the prefix) that match the given prefix
 // filter within the environment.
-func (m *EnvManager) List(_ context.Context, prefix string) ([]string, error) {
+func (m *Manager) List(_ context.Context, prefix string) ([]string, error) {
 	fullPrefix := m.envKey(prefix)
 	var keys []string
 	for _, env := range os.Environ() {
@@ -62,6 +62,6 @@ func (m *EnvManager) List(_ context.Context, prefix string) ([]string, error) {
 	return keys, nil
 }
 
-func (m *EnvManager) envKey(key string) string {
+func (m *Manager) envKey(key string) string {
 	return m.prefix + "_" + key
 }
