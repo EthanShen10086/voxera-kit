@@ -1,0 +1,3 @@
+module github.com/EthanShen10086/voxera-kit/scraper
+
+go 1.22
