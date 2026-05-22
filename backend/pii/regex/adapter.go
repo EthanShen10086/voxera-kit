@@ -17,14 +17,14 @@ var (
 	ipPattern         = regexp.MustCompile(`\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b`)
 )
 
-// RegexRedactor applies PII redaction rules using regular expressions.
-type RegexRedactor struct {
+// Redactor applies PII redaction rules using regular expressions.
+type Redactor struct {
 	cfg pii.Config
 }
 
-// NewRegexRedactor creates a new RegexRedactor with the given configuration.
-func NewRegexRedactor(cfg pii.Config) *RegexRedactor {
-	return &RegexRedactor{cfg: cfg}
+// NewRedactor creates a new Redactor with the given configuration.
+func NewRedactor(cfg pii.Config) *Redactor {
+	return &Redactor{cfg: cfg}
 }
 
 // DefaultRules returns a set of pre-built rules for common PII patterns
@@ -40,7 +40,7 @@ func DefaultRules() []pii.Rule {
 }
 
 // Redact applies all configured rules sequentially to the given string value.
-func (r *RegexRedactor) Redact(value string) string {
+func (r *Redactor) Redact(value string) string {
 	result := value
 	for _, rule := range r.cfg.Rules {
 		if rule.Pattern != nil {
@@ -56,7 +56,7 @@ func (r *RegexRedactor) Redact(value string) string {
 
 // RedactFields recursively processes map values, applying redaction rules to
 // string values and descending into nested maps.
-func (r *RegexRedactor) RedactFields(data map[string]any) map[string]any {
+func (r *Redactor) RedactFields(data map[string]any) map[string]any {
 	result := make(map[string]any, len(data))
 	for k, v := range data {
 		result[k] = r.redactValue(k, v)
@@ -64,7 +64,7 @@ func (r *RegexRedactor) RedactFields(data map[string]any) map[string]any {
 	return result
 }
 
-func (r *RegexRedactor) redactValue(fieldName string, value any) any {
+func (r *Redactor) redactValue(fieldName string, value any) any {
 	for _, rule := range r.cfg.Rules {
 		if rule.FieldName != "" && rule.FieldName == fieldName {
 			mask := rule.Replacement
