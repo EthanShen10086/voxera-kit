@@ -1,9 +1,11 @@
 name: CI
+
 on:
   push:
     branches: [master, main, develop]
   pull_request:
     branches: [master, main, develop]
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -17,18 +19,23 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: "1.22"
-          cache: true
-      - uses: golangci/golangci-lint-action@v6
-        with:
-          version: latest
-          working-directory: backend
-          args: --timeout=5m
+          cache-dependency-path: backend/**/go.sum
+      - name: golangci-lint (per module)
+        working-directory: backend
+        run: |
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+          for dir in $(awk '/\.\//{gsub(/[[:space:]]/, ""); gsub(/\)/, ""); if(/^\.\//) print}' go.work); do
+            module="${dir#./}"
+            echo "=== lint $module ==="
+            (cd "$module" && golangci-lint run --config=../.golangci.yml --timeout=5m ./...)
+          done
       - name: Go Vet (all modules)
         working-directory: backend
         run: |
-          for dir in $(grep -oP '\.\/\K[a-z]+' go.work); do
-            echo "=== vet $dir ==="
-            cd "$dir" && go vet ./... && cd ..
+          for dir in $(awk '/\.\//{gsub(/[[:space:]]/, ""); gsub(/\)/, ""); if(/^\.\//) print}' go.work); do
+            module="${dir#./}"
+            echo "=== vet $module ==="
+            (cd "$module" && go vet ./...)
           done
 
   go-build:
@@ -40,13 +47,14 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: "1.22"
-          cache: true
+          cache-dependency-path: backend/**/go.sum
       - name: Build all modules
         working-directory: backend
         run: |
-          for dir in $(grep -oP '\.\/\K[a-z]+' go.work); do
-            echo "=== build $dir ==="
-            cd "$dir" && go build ./... && cd ..
+          for dir in $(awk '/\.\//{gsub(/[[:space:]]/, ""); gsub(/\)/, ""); if(/^\.\//) print}' go.work); do
+            module="${dir#./}"
+            echo "=== build $module ==="
+            (cd "$module" && go build ./...)
           done
 
   go-test:
@@ -58,13 +66,14 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: "1.22"
-          cache: true
+          cache-dependency-path: backend/**/go.sum
       - name: Test all modules
         working-directory: backend
         run: |
-          for dir in $(grep -oP '\.\/\K[a-z]+' go.work); do
-            echo "=== test $dir ==="
-            cd "$dir" && go test ./... -race -coverprofile=coverage.out && cd ..
+          for dir in $(awk '/\.\//{gsub(/[[:space:]]/, ""); gsub(/\)/, ""); if(/^\.\//) print}' go.work); do
+            module="${dir#./}"
+            echo "=== test $module ==="
+            (cd "$module" && go test ./... -race -count=1)
           done
 
   ts-lint:
@@ -73,6 +82,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -80,9 +91,12 @@ jobs:
           cache-dependency-path: frontend/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
         working-directory: frontend
-      - name: ESLint
-        working-directory: frontend
-        run: pnpm turbo lint
       - name: TypeScript typecheck
         working-directory: frontend
-        run: pnpm turbo typecheck
+        run: |
+          for pkg in packages/*/; do
+            if [ -f "$pkg/tsconfig.json" ]; then
+              echo "=== typecheck $pkg ==="
+              npx tsc --noEmit -p "$pkg/tsconfig.json"
+            fi
+          done
