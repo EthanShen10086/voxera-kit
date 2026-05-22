@@ -95,7 +95,7 @@ graph TB
 | 架构模式 | Hexagonal (Port+Adapter) | Convention over Config | DDD + Clean Architecture | Monolithic toolkit |
 | 语言 | Go + TypeScript 全栈 | Java only | Go only | Go only |
 | 耦合度 | 模块独立 go.mod，按需引入 | 全家桶绑定 | 框架绑定 | 框架绑定 |
-| 前端覆盖 | 16 个 TS 包（observability/i18n/theme/di/player...） | 无 | 无 | 无 |
+| 前端覆盖 | 19 个 TS 包（observability/analytics/experiment/i18n/theme/di/player...） | 无 | 无 | 无 |
 | 可插拔适配器 | 每个模块 2-4 个适配器可选 | Starter 自动装配 | 内置唯一实现 | 内置唯一实现 |
 | 部署配套 | OTel + Prometheus + Grafana + Alertmanager | Actuator + Micrometer | 无 | 无 |
 
@@ -117,7 +117,7 @@ voxera-kit 提供三种开箱即用的变现路径：
 
 ## 后端模块索引
 
-共 **38** 个 Go 模块（含子模块），均遵循 Port + Adapter 模式。
+共 **40** 个 Go 模块（含子模块），均遵循 Port + Adapter 模式。
 
 ### 可观测性
 
@@ -188,6 +188,13 @@ voxera-kit 提供三种开箱即用的变现路径：
 | `shorturl` | ✅ | `ShortURL` | memory | 短链接 |
 | `share` | ✅ | `ShareService` | memory | 分享服务 |
 
+### 产品分析
+
+| 模块 | 状态 | 端口（接口） | 适配器 | 说明 |
+|------|------|-------------|--------|------|
+| `analytics` | ✅ | `Collector`, `Querier` | engine, posthog, noop | 事件采集 + 漏斗/留存/路径分析 |
+| `experiment` | ✅ | `Manager` | memory, posthog, noop | A/B 实验分组 + 统计显著性 |
+
 ### 基础设施
 
 | 模块 | 状态 | 端口（接口） | 适配器 | 说明 |
@@ -199,7 +206,7 @@ voxera-kit 提供三种开箱即用的变现路径：
 
 ## 前端包索引
 
-共 **17** 个 TypeScript 包，Turborepo + pnpm workspace 管理。
+共 **19** 个 TypeScript 包，Turborepo + pnpm workspace 管理。
 
 | 包名 | 说明 | 状态 |
 |------|------|------|
@@ -220,6 +227,33 @@ voxera-kit 提供三种开箱即用的变现路径：
 | `@voxera-kit/seo` | SEO 工具集 | ✅ |
 | `@voxera-kit/server` | 服务端渲染工具 | ✅ |
 | `@voxera-kit/cache` | 前端缓存策略 | ✅ |
+| `@voxera-kit/analytics` | 前端行为采集 SDK（AutoTracker 自动埋点 + 会话管理 + 归因） | ✅ |
+| `@voxera-kit/experiment` | 前端实验客户端（分组缓存 + 框架无关 hooks） | ✅ |
+
+---
+
+## 产品分析 (Product Analytics)
+
+voxera-kit 内置完整的产品分析能力，支持数据驱动的产品迭代：
+
+### 后端
+| 模块 | 接口 | 适配器 | 能力 |
+|------|------|--------|------|
+| `analytics/` | Collector + Querier | engine / posthog / noop | 事件采集、漏斗、留存、路径、画像 |
+| `experiment/` | Manager | memory / posthog / noop | A/B 分组、指标收集、统计显著性 |
+
+### 前端
+| 包 | 核心类 | 能力 |
+|----|--------|------|
+| `@voxera-kit/analytics` | AnalyticsClient, AutoTracker | 自动/手动埋点、会话、归因 |
+| `@voxera-kit/experiment` | ExperimentClient, hooks | 实验分组、曝光上报、React 集成 |
+
+### 数据飞轮
+```
+采集 → 分析 → 洞察 → 实验 → 验证 → 迭代
+```
+
+通过 `analytics` 采集用户行为，用漏斗/留存/路径发现问题，创建 `experiment` 验证假设，形成产品数据飞轮。
 
 ---
 

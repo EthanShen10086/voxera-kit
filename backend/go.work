@@ -15,6 +15,7 @@ use (
 	./dataparser
 	./dataprovider
 	./errors
+	./experiment
 	./featureflag
 	./framework
 	./license
@@ -39,4 +40,5 @@ use (
 	./storage
 	./translation
 	./audit
+	./analytics
 )

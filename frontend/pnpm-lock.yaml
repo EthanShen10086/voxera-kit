@@ -39,6 +39,15 @@ importers:
         specifier: ^5.0.0
         version: 5.9.3
 
+  packages/analytics:
+    devDependencies:
+      '@voxera-kit/config':
+        specifier: workspace:*
+        version: link:../config
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+
   packages/api-client:
     devDependencies:
       '@voxera-kit/config':
@@ -69,6 +78,15 @@ importers:
   packages/config: {}
 
   packages/di:
+    devDependencies:
+      '@voxera-kit/config':
+        specifier: workspace:*
+        version: link:../config
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+
+  packages/experiment:
     devDependencies:
       '@voxera-kit/config':
         specifier: workspace:*

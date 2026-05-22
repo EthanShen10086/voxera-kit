@@ -5,6 +5,43 @@
 
 ---
 
+## [0.9.0] - 2026-05-22
+
+### Added
+- **产品分析模块 (`analytics/`)**: 用户行为追踪与数据分析引擎
+  - `analytics.Collector` — 事件采集接口 (Track/TrackBatch/Identify/Alias)
+  - `analytics.Querier` — 分析查询接口 (Funnel/Retention/Path/Events/Profile)
+  - `analytics/engine` — 自研内存分析引擎（漏斗/留存/路径计算）
+  - `analytics/posthog` — PostHog API 适配器
+  - `analytics/noop` — 空操作适配器
+- **A/B 实验模块 (`experiment/`)**: 实验分组与统计显著性分析
+  - `experiment.Manager` — 实验生命周期管理接口
+  - `experiment/memory` — 内存实现（SHA-256 确定性分桶 + z-test/t-test 显著性）
+  - `experiment/posthog` — PostHog Experiments 适配器
+  - `experiment/noop` — 空操作适配器
+- **前端行为采集 SDK (`@voxera-kit/analytics`)**:
+  - `AnalyticsClient` — 批量缓冲 + 自动上下文丰富
+  - `AutoTracker` — 页面浏览/点击/滚动深度/表单/外链/停留时长自动采集
+  - `SessionManager` — 30 分钟不活跃自动轮转
+  - `AttributionTracker` — UTM 首次/末次触达归因
+  - `HttpProvider` / `PostHogProvider` — 可插拔后端
+- **前端实验客户端 (`@voxera-kit/experiment`)**:
+  - `ExperimentClient` — 分组缓存 + localStorage 持久化
+  - `createExperimentHook` / `createVariantHook` — 框架无关 hooks
+  - `HttpProvider` / `PostHogProvider` — 可插拔后端
+
+### 产品分析能力矩阵
+| 能力 | Kit 模块 | 对标产品 |
+|------|----------|----------|
+| 行为追踪 | analytics/ + @voxera-kit/analytics | Amplitude, Mixpanel |
+| 漏斗分析 | analytics.QueryFunnel | Amplitude Funnels |
+| 留存分析 | analytics.QueryRetention | PostHog Lifecycle |
+| 路径分析 | analytics.QueryPath | Amplitude Pathfinder |
+| A/B 实验 | experiment/ + @voxera-kit/experiment | LaunchDarkly, Statsig |
+| 渠道归因 | AttributionTracker (UTM) | AppsFlyer, Branch |
+
+---
+
 ## [0.8.0] - 2026-05-22
 
 ### Added
