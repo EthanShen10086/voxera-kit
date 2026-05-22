@@ -87,7 +87,7 @@ func (p *WorkerPool) worker() {
 			}
 			p.pending.Add(-1)
 			p.running.Add(1)
-			task(context.Background())
+			_ = task(context.Background())
 			p.running.Add(-1)
 		case <-p.quit:
 			return
