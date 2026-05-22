@@ -5,6 +5,45 @@
 
 ---
 
+## [1.0.0] - 2026-05-22
+
+### Added
+- **大模型集成模块 (`llm/`)**: 统一多 Provider LLM 接口
+  - `llm.Provider` 接口 — Chat / ChatStream / Embed / ListModels
+  - `llm.Router` — 多模型优先级路由、自动降级、成本感知选择
+  - `llm/openai` — OpenAI GPT-4o/GPT-4/GPT-3.5 适配器（含流式 SSE）
+  - `llm/deepseek` — DeepSeek V3/Coder/Chat 适配器（OpenAI 兼容格式）
+  - `llm/qwen` — 通义千问 DashScope API 适配器
+  - `llm/claude` — Anthropic Claude Messages API 适配器
+  - `llm/hunyuan` — 腾讯混元 API 适配器
+  - `llm/prompt` — 模板引擎 + 7 个预置模板 (Summarize/Translate/Analyze/QA/Sentiment/Classify/Extract)
+  - `llm/token` — Token 估算 + 成本计算工具
+- **AI 配额计费模块 (`aiquota/`)**: 用量管理与成本控制
+  - 五级 Tier 体系: Free / Pro / Enterprise / VIP / Admin
+  - 每日/每月 Token + 请求次数配额
+  - 模型白名单（Free 用户只能用 DeepSeek）
+  - 并发控制（AcquireConcurrency）
+  - 管理员白名单（无限额）
+  - 超额策略: Reject / Degrade / Queue / Notify
+  - 成本报告（按模型/用户聚合）
+  - `aiquota/memory` — 内存实现（自动日/月重置）
+  - `aiquota/noop` — 无限放行
+- **前端 AI SDK (`@voxera-kit/ai`)**:
+  - `AIClient` — 流式 SSE 对话 + 重试 + AbortController
+  - `createChatHook` / `createCompletionHook` / `createSummaryHook` — 框架无关 hooks
+- **ASR Whisper 真实实现**: HTTP multipart 调用 OpenAI Whisper API
+- **Translation OpenAI 真实实现**: 基于 chat completions 的翻译/检测
+
+### AI 配额方案
+| Tier | 每日 Token | 每月 Token | 每日请求 | 可用模型 |
+|------|-----------|-----------|---------|---------|
+| free | 10,000 | 100,000 | 20 | deepseek-chat, hunyuan-lite |
+| pro | 500,000 | 5,000,000 | 500 | gpt-4o-mini, deepseek, qwen |
+| enterprise | 5,000,000 | 50,000,000 | 5,000 | 全部模型 |
+| vip/admin | 无限 | 无限 | 无限 | 全部模型 |
+
+---
+
 ## [0.9.0] - 2026-05-22
 
 ### Added

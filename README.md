@@ -117,7 +117,7 @@ voxera-kit 提供三种开箱即用的变现路径：
 
 ## 后端模块索引
 
-共 **40** 个 Go 模块（含子模块），均遵循 Port + Adapter 模式。
+共 **42** 个 Go 模块（含子模块），均遵循 Port + Adapter 模式。
 
 ### 可观测性
 
@@ -195,6 +195,13 @@ voxera-kit 提供三种开箱即用的变现路径：
 | `analytics` | ✅ | `Collector`, `Querier` | engine, posthog, noop | 事件采集 + 漏斗/留存/路径分析 |
 | `experiment` | ✅ | `Manager` | memory, posthog, noop | A/B 实验分组 + 统计显著性 |
 
+### AI / 大模型
+
+| 模块 | 状态 | 端口（接口） | 适配器 | 说明 |
+|------|------|-------------|--------|------|
+| `llm` | ✅ | `Provider`, `Router` | openai, deepseek, qwen, claude, hunyuan, noop | 统一 LLM 接口 + 多模型路由 |
+| `aiquota` | ✅ | `Manager` | memory, noop | AI 配额计费（五级 Tier + 超额策略） |
+
 ### 基础设施
 
 | 模块 | 状态 | 端口（接口） | 适配器 | 说明 |
@@ -206,7 +213,7 @@ voxera-kit 提供三种开箱即用的变现路径：
 
 ## 前端包索引
 
-共 **19** 个 TypeScript 包，Turborepo + pnpm workspace 管理。
+共 **20** 个 TypeScript 包，Turborepo + pnpm workspace 管理。
 
 | 包名 | 说明 | 状态 |
 |------|------|------|
@@ -229,6 +236,29 @@ voxera-kit 提供三种开箱即用的变现路径：
 | `@voxera-kit/cache` | 前端缓存策略 | ✅ |
 | `@voxera-kit/analytics` | 前端行为采集 SDK（AutoTracker 自动埋点 + 会话管理 + 归因） | ✅ |
 | `@voxera-kit/experiment` | 前端实验客户端（分组缓存 + 框架无关 hooks） | ✅ |
+| `@voxera-kit/ai` | 前端 AI SDK（流式 SSE 对话 + hooks） | ✅ |
+
+---
+
+## AI / 大模型 (LLM Integration)
+
+voxera-kit 提供完整的多模型 LLM 集成能力：
+
+### 后端模块
+| 模块 | 核心接口 | 适配器 |
+|------|---------|--------|
+| `llm/` | Provider (Chat/Stream/Embed) | openai, deepseek, qwen, claude, hunyuan, noop |
+| `aiquota/` | Manager (Quota/Metering/Billing) | memory, noop |
+| `asr/` | Recognizer | whisper |
+| `llm/prompt/` | Template | 7 预置模板 |
+
+### 前端包
+| 包 | 核心类 | 能力 |
+|----|--------|------|
+| `@voxera-kit/ai` | AIClient, hooks | 流式对话、摘要、翻译、用量查询 |
+
+### 配额体系
+五级 Tier (Free→Pro→Enterprise→VIP→Admin)，按 token/请求/并发/模型四维度控制，支持管理员白名单和超额降级策略。
 
 ---
 

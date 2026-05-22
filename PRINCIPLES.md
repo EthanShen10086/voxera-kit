@@ -67,3 +67,12 @@
 - **README**：反映当前真实架构，含对标矩阵
 - **Conventional Commits**：feat/fix/docs/refactor 前缀
 - **Git Tag**：语义化版本，每次发布打 tag
+
+## 10. AI-First (AI 原生)
+
+- **统一 Provider 接口**: 所有 LLM 调用通过 `llm.Provider` 接口，一行代码切换模型
+- **成本可控**: `aiquota` 模块强制配额，防止 AI 费用失控
+- **流式优先**: 所有对话默认 SSE 流式，提升用户体验
+- **优雅降级**: 高级模型不可用时自动降级到廉价模型
+- **Prompt 工程**: 预置模板标准化常见任务，避免 prompt 散落各处
+- **白名单/VIP**: 管理员和特邀用户绕过配额，保障核心用户体验
