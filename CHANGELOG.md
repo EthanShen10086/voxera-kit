@@ -5,6 +5,31 @@
 
 ---
 
+## [0.8.0] - 2026-05-22
+
+### Added
+- **广告变现模块 (`ad/`)**: 可插拔广告 Provider 架构
+  - `ad.Provider` / `ad.Router` / `ad.EventTracker` 接口
+  - `ad/google` — Google Ads 适配器（桩）
+  - `ad/selfhosted` — 本地库存加权随机适配器
+  - `ad/noop` — 空操作适配器（付费用户/禁用时使用）
+  - `DefaultRouter` — 优先级路由、付费/未成年人策略、Fallback
+- **部署授权模块 (`license/`)**: 私有部署许可证管理
+  - `license.Manager` 接口
+  - `license/offline` — RSA 离线签名验证
+  - `license/online` — 远程许可证服务器验证
+- **前端广告包 (`@voxera-kit/ad`)**: 浏览器端广告 SDK
+  - `AdRouter` 优先级调度
+  - `AdTracker` 批量上报（keepalive）
+  - `IAdProvider` 接口
+- **PRINCIPLES.md**: 9 大核心设计原则文档
+- **变现三路径**: SaaS 订阅 + 私有部署授权 + 广告变现
+
+### Changed
+- Gateway 路由配置补全 (subscriptions/usage/callbacks/scheduler/shorturl/share/im)
+
+---
+
 ## [0.7.0] - 2026-05-22
 
 ### 定时任务 + 文档体系完善

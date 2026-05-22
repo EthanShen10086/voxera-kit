@@ -101,6 +101,20 @@ graph TB
 
 ---
 
+## 变现架构 (Monetization Architecture)
+
+voxera-kit 提供三种开箱即用的变现路径：
+
+| 路径 | Kit 模块 | 描述 |
+|------|----------|------|
+| SaaS 订阅 | `payment/` | Stripe/微信/支付宝/PayPal 四渠道，Free/Pro/Enterprise 三档 |
+| 私有部署 | `license/` | RSA 离线验证 + 在线心跳，支持 Trial/Standard/Enterprise |
+| 广告变现 | `ad/` + `@voxera-kit/ad` | 可插拔 Provider，付费用户自动隐藏，未成年人安全策略 |
+
+三种路径可任意组合，通过 `featureflag` 模块动态控制各路径的启用/禁用。
+
+---
+
 ## 后端模块索引
 
 共 **38** 个 Go 模块（含子模块），均遵循 Port + Adapter 模式。
@@ -164,6 +178,8 @@ graph TB
 | 模块 | 状态 | 端口（接口） | 适配器 | 说明 |
 |------|------|-------------|--------|------|
 | `payment` | ✅ | `PaymentGateway` | Stripe, 微信支付, 支付宝, PayPal | 支付网关 |
+| `ad` | ✅ | `Provider`, `Router`, `EventTracker` | Google Ads, selfhosted, noop | 广告变现 |
+| `license` | ✅ | `Manager` | offline (RSA), online | 部署授权 |
 | `asr` | ✅ | `Recognizer` | Whisper, Azure, 阿里云, 自部署 | 语音识别 |
 | `translation` | ✅ | `Translator` | OpenAI, DeepL, Google | 文本翻译 |
 | `notification` | ✅ | `Notifier` | Email, 飞书, 企业微信, stub | 通知推送 |
@@ -183,10 +199,11 @@ graph TB
 
 ## 前端包索引
 
-共 **16** 个 TypeScript 包，Turborepo + pnpm workspace 管理。
+共 **17** 个 TypeScript 包，Turborepo + pnpm workspace 管理。
 
 | 包名 | 说明 | 状态 |
 |------|------|------|
+| `@voxera-kit/ad` | 浏览器端广告 SDK（AdRouter 优先级调度 + AdTracker 批量上报） | ✅ |
 | `@voxera-kit/di` | IoC/DI 容器，Singleton/Transient 生命周期，层级子容器 | ✅ |
 | `@voxera-kit/plugin` | 插件系统，生命周期管理，依赖拓扑排序 | ✅ |
 | `@voxera-kit/player` | 播放器抽象层（xgplayer / video.js / hls.js） | ✅ |

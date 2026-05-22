@@ -1,6 +1,7 @@
 go 1.25.0
 
 use (
+	./ad
 	./asr
 	./auth
 	./bulkhead
@@ -14,7 +15,9 @@ use (
 	./dataparser
 	./dataprovider
 	./errors
+	./featureflag
 	./framework
+	./license
 	./loadshed
 	./messaging
 	./middleware
@@ -22,11 +25,13 @@ use (
 	./notification
 	./observability
 	./payment
+	./pii
 	./ratelimiter
 	./registry
 	./retry
 	./scheduler
 	./scraper
+	./secret
 	./security
 	./share
 	./shorturl
@@ -34,7 +39,4 @@ use (
 	./storage
 	./translation
 	./audit
-	./secret
-	./pii
-	./featureflag
 )
