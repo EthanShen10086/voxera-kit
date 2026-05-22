@@ -4,8 +4,9 @@ package memory
 
 import (
 	"context"
+	"crypto/rand"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"sync"
 	"time"
 
@@ -19,7 +20,6 @@ type Adapter struct {
 	mu     sync.RWMutex
 	urls   map[string]*shorturl.ShortURL
 	config shorturl.ShortURLConfig
-	rng    *rand.Rand
 }
 
 // New creates a new in-memory short URL adapter with the given configuration.
@@ -32,7 +32,6 @@ func New(config shorturl.ShortURLConfig) *Adapter {
 	return &Adapter{
 		urls:   make(map[string]*shorturl.ShortURL),
 		config: config,
-		rng:    rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 }
 
@@ -41,7 +40,11 @@ func (a *Adapter) Generate(_ context.Context, originalURL string, opts ...shortu
 
 	code := params.CustomCode
 	if code == "" {
-		code = a.generateCode()
+		var err error
+		code, err = a.generateCode()
+		if err != nil {
+			return nil, fmt.Errorf("shorturl: failed to generate code: %w", err)
+		}
 	} else if !a.config.AllowCustomCode {
 		return nil, fmt.Errorf("shorturl: custom codes are not allowed")
 	}
@@ -134,10 +137,15 @@ func (a *Adapter) ListByCreator(_ context.Context, creatorID string, offset, lim
 	return results[offset:end], nil
 }
 
-func (a *Adapter) generateCode() string {
+func (a *Adapter) generateCode() (string, error) {
+	alphabetLen := big.NewInt(int64(len(base62Alphabet)))
 	b := make([]byte, a.config.CodeLength)
 	for i := range b {
-		b[i] = base62Alphabet[a.rng.Intn(len(base62Alphabet))]
+		n, err := rand.Int(rand.Reader, alphabetLen)
+		if err != nil {
+			return "", err
+		}
+		b[i] = base62Alphabet[n.Int64()]
 	}
-	return string(b)
+	return string(b), nil
 }
