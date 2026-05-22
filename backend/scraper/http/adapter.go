@@ -4,9 +4,10 @@ package http
 
 import (
 	"context"
+	"crypto/rand"
 	"crypto/tls"
 	"fmt"
-	"math/rand/v2"
+	"math/big"
 	"net"
 	"net/http"
 	"net/url"
@@ -103,7 +104,11 @@ func (a *Adapter) Fetch(ctx context.Context, req *scraper.FetchRequest) (*scrape
 }
 
 func (a *Adapter) randomUA() string {
-	return a.config.UserAgents[rand.IntN(len(a.config.UserAgents))]
+	n, err := rand.Int(rand.Reader, big.NewInt(int64(len(a.config.UserAgents))))
+	if err != nil {
+		return a.config.UserAgents[0]
+	}
+	return a.config.UserAgents[n.Int64()]
 }
 
 func defaultUserAgents() []string {
