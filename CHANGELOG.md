@@ -174,3 +174,43 @@
 - `.vscode/settings.json` 增加 rulers=[100], goimports, eslint validate
 - `.vscode/extensions.json` 补齐推荐扩展
 - `frontend/package.json` 新增 `format` 脚本
+
+---
+
+## [0.5.0] - 2026-05-22
+
+### 新增模块 — Pulsera 支撑
+
+**变更类型**: feat
+
+#### backend/scraper — 抓取引擎抽象
+
+| 接口/类型 | 说明 |
+|-----------|------|
+| `Fetcher` | HTTP 请求抽象（代理轮换、UA 池、重试退避） |
+| `Parser` | 内容解析（HTML/JSON → Post） |
+| `ProxyPool` | 代理池管理（添加/移除/健康检查/轮换） |
+| `RateLimiter` | 平台级限流策略 |
+| `Tracker` | 定时追踪编排器 |
+| `Post` | 统一帖子模型 |
+
+适配器: `http/`（标准库 + 代理 + UA 随机化）、`memory/`（内存代理池）
+
+#### backend/notification — 通知渠道抽象
+
+| 接口/类型 | 说明 |
+|-----------|------|
+| `Notifier` | 通知发送接口 |
+| `Router` | 多渠道消息路由 |
+| `Message` | 统一消息模型 |
+| `DeliveryResult` | 投递结果 |
+
+适配器: `wecom/`（企业微信 Webhook）、`feishu/`（飞书 Webhook）、`email/`（SMTP）、`stub/`（测试桩）
+
+#### frontend/packages/feed — Feed 时间线抽象
+
+| 接口 | 说明 |
+|------|------|
+| `IFeedAdapter` | Feed 数据源接口 |
+| `IFeedRenderer` | Feed 渲染器接口 |
+| `FeedItem` | 统一 Feed 项模型 |
