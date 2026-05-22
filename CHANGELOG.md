@@ -5,6 +5,88 @@
 
 ---
 
+## [0.6.0] - 2026-05-22
+
+### 企业级基础设施全面加固
+
+**Commit**: `52e1332`  
+**分支**: `master`  
+**变更类型**: feat (重大功能增强)
+
+#### Phase 1: 可观测性落地（真实实现替代 stub）
+
+| 模块 | 变更 |
+|------|------|
+| `observability/logger/zap.go` | 真实 ZapLogger 实现（functional options, 结构化 Field 转换, WithTraceID） |
+| `observability/logger/slog.go` | 新增 SlogAdapter（标准库 slog.Handler 适配） |
+| `observability/tracing/otel.go` | 真实 OTelTracer（OTLP HTTP exporter, BatchSpanProcessor, 采样率） |
+| `observability/metrics/prometheus.go` | 真实 PrometheusRecorder（sync.Map 缓存 metric vectors） |
+| `observability/metrics/handler.go` | 新增 HTTPHandler() 返回 promhttp.Handler |
+| `observability/profiling/pprof.go` | 新增 pprof 端点注册（可配置开关） |
+
+#### Phase 2: 性能优化模块（全新）
+
+| 模块 | 接口 | 适配器 |
+|------|------|--------|
+| `singleflight/` | `Deduplicator` | `sync/adapter.go`（封装 x/sync/singleflight） |
+| `retry/` | `Retrier` + `Policy` | `exponential/adapter.go`（退避+jitter+crypto/rand） |
+| `bulkhead/` | `Bulkhead` + `ErrBulkheadFull` | `semaphore/adapter.go`（buffered channel） |
+| `loadshed/` | `Shedder` + `Token` + `ErrOverloaded` | `adaptive/adapter.go`（AIMD 算法） |
+
+#### Phase 3: 安全合规模块（全新）
+
+| 模块 | 接口 | 适配器 |
+|------|------|--------|
+| `audit/` | `Writer` + `Reader` + `Entry` + `Filter` | memory + noop |
+| `secret/` | `Manager` + `ErrNotFound` | env adapter（前缀环境变量） |
+| `pii/` | `Redactor` + `Rule` | regex adapter（email/phone/CC/SSN/IP） |
+| `featureflag/` | `Store` + `Flag` + `EvalContext` | memory（SHA-256 确定性百分比） |
+| `security/headers/` | `Config` + `HSTSConfig` | `DefaultStrict()` / `DefaultPermissive()` |
+| `crypto/tls/` | `Config` | `NewServerTLSConfig` / `NewClientTLSConfig`（mTLS） |
+
+#### Phase 4: 可复用 HTTP 中间件模块（全新）
+
+`middleware/` 模块提供 12 个开箱即用的 `net/http` 中间件：
+
+| 中间件 | 功能 |
+|--------|------|
+| `Chain` | 中间件组合器 |
+| `RequestID` | crypto/rand X-Request-ID 生成/传播 |
+| `Logging` | 结构化请求日志（via kit Logger） |
+| `Tracing` | OTel span + X-Trace-ID 传播 |
+| `Metrics` | RED 指标（请求数/延迟/在途） |
+| `Audit` | 审计日志（mutating + 敏感路径） |
+| `Recovery` | panic 恢复 + 栈追踪 |
+| `HealthCheck` | /health + /ready（依赖探测） |
+| `Timeout` | 请求级超时 |
+| `LoadShed` | 过载保护（503 + Retry-After） |
+| `SecurityHeaders` | HSTS/CSP/X-Frame 等 |
+| `PIIRedact` | 错误响应 PII 脱敏 |
+
+#### Phase 5: 前端可观测性增强
+
+| 能力 | 变更 |
+|------|------|
+| Web Vitals | 完整 LCP/CLS/INP/FID（PerformanceObserver） |
+| Long Task | longtask observer（>50ms） |
+| Resource Timing | 慢资源检测（可配置阈值） |
+| TracingClient | 真实 OTLP JSON batch export via fetch |
+| ErrorTracker | 远程上报（采样率 + beforeSend + debounce） |
+| AuditClient | 用户操作审计（batch + visibilitychange flush） |
+
+#### Phase 7: 部署配套
+
+| 文件 | 说明 |
+|------|------|
+| `deploy/otel-collector.yaml` | OTLP 接收 → Jaeger + Prometheus 导出 |
+| `deploy/prometheus.yml` | 3 组服务抓取配置 |
+| `deploy/alertmanager.yml` | 告警路由 |
+| `deploy/alert-rules.yml` | 5 条告警规则 |
+| `deploy/docker-compose.observability.yml` | 一键本地可观测性栈 |
+| `deploy/grafana/` | Dashboard + Provisioning 配置 |
+
+---
+
 ## [0.1.0] - 2026-05-17
 
 ### 🏗️ 初始化 - 可插拔基础设施 SDK 脚手架
