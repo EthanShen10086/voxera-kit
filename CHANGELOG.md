@@ -5,6 +5,25 @@
 
 ---
 
+## [0.7.0] - 2026-05-22
+
+### 定时任务 + 文档体系完善
+
+**Commit**: `aa8b8a2`
+
+#### 定时任务 (Cron) 真实实现
+- `scheduler/cron/` — 基于 robfig/cron/v3 的生产级 cron 调度器
+  - 支持标准 cron 表达式（`0 */5 * * *`）+ 扩展语法（`@every 30s`、`@hourly`）
+  - 信号量并发控制 + panic 恢复 + Location 时区
+- `scheduler/memory/` — 修复为可用的轻量 fallback（解析 `@every` 格式）
+- 对标：Kubernetes CronJob / Quartz / Airflow
+
+#### 文档
+- README 全面重写（304 行）：Mermaid 架构图、38 模块索引、企业级特性对标矩阵
+- 企业级特性对标表：24 项能力 vs Google/Netflix/Alibaba/AWS 方案
+
+---
+
 ## [0.6.0] - 2026-05-22
 
 ### 企业级基础设施全面加固

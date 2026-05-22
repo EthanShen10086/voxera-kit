@@ -58,6 +58,49 @@ graph TB
 
 ---
 
+## 企业级特性对标
+
+以下是 voxera-kit 覆盖的核心基础设施能力，及其对标的业界标杆方案：
+
+| 能力域 | voxera-kit 实现 | 对标方案 | 状态 |
+|--------|----------------|----------|------|
+| **结构化日志** | `logger/` — Zap + Slog adapter, TraceID 自动注入, 批量 flush | Google Cloud Logging, ELK Stack, Uber Zap | ✅ 生产可用 |
+| **分布式链路追踪** | `tracing/` — OpenTelemetry SDK, OTLP HTTP export, 采样率控制 | Google Dapper, Jaeger, Zipkin, AWS X-Ray | ✅ 生产可用 |
+| **指标采集 (RED/USE)** | `metrics/` — Prometheus client, 自动 HTTP RED metrics | Google Borgmon, Prometheus, Datadog | ✅ 生产可用 |
+| **性能剖析** | `profiling/` — pprof 按需开启 | Google-Wide Profiling, Pyroscope | ✅ 生产可用 |
+| **熔断器** | `circuitbreaker/` — Closed/Open/HalfOpen 状态机 | Netflix Hystrix, Alibaba Sentinel, resilience4j | ✅ 生产可用 |
+| **限流** | `ratelimiter/` — Token Bucket | Google Cloud Armor, Alibaba Sentinel, Kong | ✅ 生产可用 |
+| **过载保护 (Load Shedding)** | `loadshed/` — AIMD 自适应算法 | Google Doorman, Envoy Adaptive Concurrency | ✅ 生产可用 |
+| **隔离舱 (Bulkhead)** | `bulkhead/` — Semaphore 并发隔离 | Netflix Hystrix Bulkhead, resilience4j | ✅ 生产可用 |
+| **请求去重** | `singleflight/` — x/sync/singleflight 封装 | Google Singleflight, Fastly Collapse | ✅ 生产可用 |
+| **指数退避重试** | `retry/` — Exponential backoff + jitter + context | AWS SDK Retry, Google API Client | ✅ 生产可用 |
+| **审计日志** | `audit/` — Writer/Reader 接口, 结构化 Entry | Google Cloud Audit Logs, AWS CloudTrail | ✅ 生产可用 |
+| **PII 脱敏** | `pii/` — Regex 规则引擎 (email/phone/CC/SSN/IP) | Google DLP, AWS Macie | ✅ 生产可用 |
+| **密钥管理** | `secret/` — Manager 接口, Env adapter | HashiCorp Vault, AWS Secrets Manager, GCP KMS | ✅ 接口就绪 |
+| **特性开关 (Feature Flag)** | `featureflag/` — 确定性百分比分桶 (SHA-256) | LaunchDarkly, Google Experimentation, Unleash | ✅ 生产可用 |
+| **mTLS** | `crypto/tls/` — Server + Client 双向 TLS | Istio mTLS, Google ALTS | ✅ 生产可用 |
+| **安全响应头** | `security/headers/` — HSTS/CSP/X-Frame 预设 | Cloudflare, AWS WAF Headers | ✅ 生产可用 |
+| **定时任务 (Cron)** | `scheduler/cron/` — robfig/cron/v3, 弹性调度 | Kubernetes CronJob, Quartz, Airflow | ✅ 生产可用 |
+| **HTTP 中间件栈** | `middleware/` — 12 个可组合中间件 | go-chi middleware, Echo middleware, Gin | ✅ 生产可用 |
+| **健康检查** | `middleware/healthcheck` — Liveness + Readiness + 依赖探测 | Kubernetes probes, Consul health checks | ✅ 生产可用 |
+| **前端 Web Vitals** | `observability/` — LCP/CLS/INP/FID/Long Task 全采集 | Google Lighthouse, Sentry Performance | ✅ 生产可用 |
+| **前端错误追踪** | `observability/` — 远程上报, 采样, beforeSend | Sentry, Bugsnag, Datadog RUM | ✅ 生产可用 |
+| **前端用户审计** | `observability/audit` — 操作 batch 上报 | Amplitude, Mixpanel, FullStory | ✅ 生产可用 |
+| **可观测性部署栈** | `deploy/` — OTel Collector + Prometheus + Grafana + Alertmanager | Google SRE Stack, Grafana Cloud | ✅ 配置就绪 |
+
+### 与业界框架的定位差异
+
+| 维度 | voxera-kit | Spring Boot | go-kratos | go-zero |
+|------|-----------|-------------|-----------|---------|
+| 架构模式 | Hexagonal (Port+Adapter) | Convention over Config | DDD + Clean Architecture | Monolithic toolkit |
+| 语言 | Go + TypeScript 全栈 | Java only | Go only | Go only |
+| 耦合度 | 模块独立 go.mod，按需引入 | 全家桶绑定 | 框架绑定 | 框架绑定 |
+| 前端覆盖 | 16 个 TS 包（observability/i18n/theme/di/player...） | 无 | 无 | 无 |
+| 可插拔适配器 | 每个模块 2-4 个适配器可选 | Starter 自动装配 | 内置唯一实现 | 内置唯一实现 |
+| 部署配套 | OTel + Prometheus + Grafana + Alertmanager | Actuator + Micrometer | 无 | 无 |
+
+---
+
 ## 后端模块索引
 
 共 **38** 个 Go 模块（含子模块），均遵循 Port + Adapter 模式。
