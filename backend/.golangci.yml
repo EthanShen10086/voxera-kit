@@ -32,7 +32,7 @@ linters-settings:
   gofmt:
     simplify: true
   misspell:
-    locale: US
+    locale: ""
 
 issues:
   max-issues-per-linter: 0
