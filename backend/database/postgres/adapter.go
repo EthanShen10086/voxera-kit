@@ -21,7 +21,7 @@ func New() *Adapter {
 }
 
 // Connect establishes a connection pool to the PostgreSQL database.
-func (a *Adapter) Connect(ctx context.Context, cfg database.DatabaseConfig) error {
+func (a *Adapter) Connect(ctx context.Context, cfg database.Config) error {
 	// TODO: implement using pgx
 	return nil
 }

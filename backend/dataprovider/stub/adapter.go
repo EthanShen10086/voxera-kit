@@ -60,13 +60,16 @@ var markets = []dp.Market{
 	{Code: "SZ", Name: "Shenzhen", Currency: "CNY", Timezone: "Asia/Shanghai"},
 }
 
-type StubAdapter struct{}
+// Adapter is a stub financial data provider backed by in-memory mock data.
+type Adapter struct{}
 
-func New() *StubAdapter {
-	return &StubAdapter{}
+// New creates a new stub Adapter.
+func New() *Adapter {
+	return &Adapter{}
 }
 
-func (s *StubAdapter) Search(_ context.Context, query string) ([]dp.SearchResult, error) {
+// Search returns mock stocks matching the query string.
+func (s *Adapter) Search(_ context.Context, query string) ([]dp.SearchResult, error) {
 	query = strings.ToUpper(query)
 	var results []dp.SearchResult
 	for symbol, sr := range mockStocks {
@@ -78,7 +81,8 @@ func (s *StubAdapter) Search(_ context.Context, query string) ([]dp.SearchResult
 	return results, nil
 }
 
-func (s *StubAdapter) GetQuote(_ context.Context, symbol string) (*dp.Quote, error) {
+// GetQuote returns a mock quote for the given symbol.
+func (s *Adapter) GetQuote(_ context.Context, symbol string) (*dp.Quote, error) {
 	q, ok := mockQuotes[symbol]
 	if !ok {
 		return nil, fmt.Errorf("stub: quote not found for %s", symbol)
@@ -87,7 +91,8 @@ func (s *StubAdapter) GetQuote(_ context.Context, symbol string) (*dp.Quote, err
 	return &q, nil
 }
 
-func (s *StubAdapter) GetFinancials(_ context.Context, symbol string, period dp.Period) (*dp.FinancialStatements, error) {
+// GetFinancials returns mock financial statements for the given symbol and period.
+func (s *Adapter) GetFinancials(_ context.Context, symbol string, period dp.Period) (*dp.FinancialStatements, error) {
 	if _, ok := mockStocks[symbol]; !ok {
 		return nil, fmt.Errorf("stub: financials not found for %s", symbol)
 	}
@@ -207,11 +212,13 @@ func (s *StubAdapter) GetFinancials(_ context.Context, symbol string, period dp.
 	return fs, nil
 }
 
-func (s *StubAdapter) ListMarkets() []dp.Market {
+// ListMarkets returns the list of available mock markets.
+func (s *Adapter) ListMarkets() []dp.Market {
 	return markets
 }
 
-func (s *StubAdapter) Fetch(_ context.Context, sourceID string, params dp.FetchParams) (*dp.DataSet, error) {
+// Fetch returns mock historical price data for the given source.
+func (s *Adapter) Fetch(_ context.Context, sourceID string, params dp.FetchParams) (*dp.DataSet, error) {
 	ds := &dp.DataSet{
 		Columns: []string{"date", "open", "high", "low", "close", "volume"},
 		Rows: []map[string]interface{}{
@@ -223,12 +230,14 @@ func (s *StubAdapter) Fetch(_ context.Context, sourceID string, params dp.FetchP
 	return ds, nil
 }
 
-func (s *StubAdapter) Subscribe(_ context.Context, _ string, _ dp.DataHandler) error {
+// Subscribe is a no-op for the stub adapter.
+func (s *Adapter) Subscribe(_ context.Context, _ string, _ dp.DataHandler) error {
 	return nil
 }
 
-func (s *StubAdapter) Close() error {
+// Close is a no-op for the stub adapter.
+func (s *Adapter) Close() error {
 	return nil
 }
 
-var _ dp.FinancialProvider = (*StubAdapter)(nil)
+var _ dp.FinancialProvider = (*Adapter)(nil)

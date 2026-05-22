@@ -1,4 +1,4 @@
-// Package paypal provides a PayPal implementation of the payment.PaymentGateway interface.
+// Package paypal provides a PayPal implementation of the payment.Gateway interface.
 // It is intended to use github.com/plutov/paypal/v4 as the underlying SDK.
 package paypal
 
@@ -8,16 +8,16 @@ import (
 	"github.com/EthanShen10086/voxera-kit/payment"
 )
 
-// Adapter implements the payment.PaymentGateway interface using PayPal.
+// Adapter implements the payment.Gateway interface using PayPal.
 //
 // Intended dependency: github.com/plutov/paypal/v4
 type Adapter struct {
 	// client *paypal.Client // TODO: uncomment when paypal SDK dependency is added
-	cfg payment.PaymentConfig
+	cfg payment.Config
 }
 
 // New creates a new PayPal Adapter with the provided configuration.
-func New(cfg payment.PaymentConfig) *Adapter {
+func New(cfg payment.Config) *Adapter {
 	return &Adapter{cfg: cfg}
 }
 

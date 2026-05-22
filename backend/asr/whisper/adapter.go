@@ -14,11 +14,11 @@ import (
 // Intended dependency: github.com/sashabaranov/go-openai
 type Adapter struct {
 	// client *openai.Client // TODO: uncomment when go-openai dependency is added
-	cfg asr.ASRConfig
+	cfg asr.Config
 }
 
 // New creates a new OpenAI Whisper Adapter with the provided configuration.
-func New(cfg asr.ASRConfig) *Adapter {
+func New(cfg asr.Config) *Adapter {
 	return &Adapter{cfg: cfg}
 }
 

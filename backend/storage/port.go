@@ -53,8 +53,8 @@ type ObjectStore interface {
 	Close() error
 }
 
-// StorageConfig holds the connection parameters for an object storage backend.
-type StorageConfig struct {
+// Config holds the connection parameters for an object storage backend.
+type Config struct {
 	// Endpoint is the storage service endpoint URL.
 	Endpoint string
 	// AccessKey is the access key ID for authentication.

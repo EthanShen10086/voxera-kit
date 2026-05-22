@@ -1,3 +1,5 @@
+// Package memory provides in-memory implementations of share.ShareRepository
+// and share.ShareGenerator.
 package memory
 
 import (
@@ -11,22 +13,25 @@ import (
 	"github.com/EthanShen10086/voxera-kit/share"
 )
 
+// Repository implements share.ShareRepository using in-memory maps.
 type Repository struct {
 	mu      sync.RWMutex
-	byID    map[string]*share.ShareLink
-	byToken map[string]*share.ShareLink
-	byUser  map[string][]*share.ShareLink
+	byID    map[string]*share.Link
+	byToken map[string]*share.Link
+	byUser  map[string][]*share.Link
 }
 
+// NewRepository creates a new in-memory share repository.
 func NewRepository() *Repository {
 	return &Repository{
-		byID:    make(map[string]*share.ShareLink),
-		byToken: make(map[string]*share.ShareLink),
-		byUser:  make(map[string][]*share.ShareLink),
+		byID:    make(map[string]*share.Link),
+		byToken: make(map[string]*share.Link),
+		byUser:  make(map[string][]*share.Link),
 	}
 }
 
-func (r *Repository) Save(_ context.Context, link *share.ShareLink) error {
+// Save persists a share link in memory.
+func (r *Repository) Save(_ context.Context, link *share.Link) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.byID[link.ID] = link
@@ -35,7 +40,8 @@ func (r *Repository) Save(_ context.Context, link *share.ShareLink) error {
 	return nil
 }
 
-func (r *Repository) FindByToken(_ context.Context, token string) (*share.ShareLink, error) {
+// FindByToken looks up a share link by its token.
+func (r *Repository) FindByToken(_ context.Context, token string) (*share.Link, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	link, ok := r.byToken[token]
@@ -45,7 +51,8 @@ func (r *Repository) FindByToken(_ context.Context, token string) (*share.ShareL
 	return link, nil
 }
 
-func (r *Repository) FindByID(_ context.Context, id string) (*share.ShareLink, error) {
+// FindByID looks up a share link by its ID.
+func (r *Repository) FindByID(_ context.Context, id string) (*share.Link, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	link, ok := r.byID[id]
@@ -55,7 +62,8 @@ func (r *Repository) FindByID(_ context.Context, id string) (*share.ShareLink, e
 	return link, nil
 }
 
-func (r *Repository) ListByUser(_ context.Context, userID string, limit, offset int) ([]*share.ShareLink, error) {
+// ListByUser returns share links created by the given user with pagination.
+func (r *Repository) ListByUser(_ context.Context, userID string, limit, offset int) ([]*share.Link, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	all := r.byUser[userID]
@@ -69,6 +77,7 @@ func (r *Repository) ListByUser(_ context.Context, userID string, limit, offset 
 	return all[offset:end], nil
 }
 
+// IncrementUseCount atomically increments the use counter for a share link.
 func (r *Repository) IncrementUseCount(_ context.Context, id string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -80,6 +89,7 @@ func (r *Repository) IncrementUseCount(_ context.Context, id string) error {
 	return nil
 }
 
+// Revoke invalidates a share link by setting its expiration to the past.
 func (r *Repository) Revoke(_ context.Context, id string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -91,15 +101,18 @@ func (r *Repository) Revoke(_ context.Context, id string) error {
 	return nil
 }
 
+// Generator implements share.ShareGenerator using random hex tokens.
 type Generator struct{}
 
+// NewGenerator creates a new share link generator.
 func NewGenerator() *Generator { return &Generator{} }
 
-func (g *Generator) Generate(_ context.Context, req share.CreateShareRequest) (*share.ShareLink, error) {
+// Generate creates a new share link from the given request.
+func (g *Generator) Generate(_ context.Context, req share.CreateShareRequest) (*share.Link, error) {
 	id := generateHex(16)
 	token := generateHex(24)
 	now := time.Now().UTC()
-	return &share.ShareLink{
+	return &share.Link{
 		ID:           id,
 		Token:        token,
 		ResourceType: req.ResourceType,

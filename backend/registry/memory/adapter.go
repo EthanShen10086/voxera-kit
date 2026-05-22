@@ -39,6 +39,7 @@ func New() *Adapter {
 	}
 }
 
+// Register adds a service instance to the registry.
 func (a *Adapter) Register(_ context.Context, instance *registry.ServiceInstance) error {
 	if instance.ID == "" {
 		return fmt.Errorf("registry: instance ID is required")
@@ -57,6 +58,7 @@ func (a *Adapter) Register(_ context.Context, instance *registry.ServiceInstance
 	return nil
 }
 
+// Deregister removes a service instance from the registry.
 func (a *Adapter) Deregister(_ context.Context, instanceID string) error {
 	a.mu.Lock()
 	instance, exists := a.instances[instanceID]
@@ -73,6 +75,7 @@ func (a *Adapter) Deregister(_ context.Context, instanceID string) error {
 	return nil
 }
 
+// Discover returns all healthy instances of the named service.
 func (a *Adapter) Discover(_ context.Context, serviceName string) ([]*registry.ServiceInstance, error) {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
@@ -86,6 +89,7 @@ func (a *Adapter) Discover(_ context.Context, serviceName string) ([]*registry.S
 	return result, nil
 }
 
+// Watch registers a callback that fires when instances change.
 func (a *Adapter) Watch(_ context.Context, serviceName string, callback func([]*registry.ServiceInstance)) error {
 	a.mu.Lock()
 	defer a.mu.Unlock()
@@ -94,6 +98,7 @@ func (a *Adapter) Watch(_ context.Context, serviceName string, callback func([]*
 	return nil
 }
 
+// Heartbeat renews the registration TTL for the given instance.
 func (a *Adapter) Heartbeat(_ context.Context, instanceID string) error {
 	a.mu.Lock()
 	defer a.mu.Unlock()
@@ -106,6 +111,7 @@ func (a *Adapter) Heartbeat(_ context.Context, instanceID string) error {
 	return nil
 }
 
+// Get retrieves a configuration value by key.
 func (a *Adapter) Get(_ context.Context, key string) (*registry.ConfigValue, error) {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
@@ -117,6 +123,7 @@ func (a *Adapter) Get(_ context.Context, key string) (*registry.ConfigValue, err
 	return cv, nil
 }
 
+// Set creates or updates a configuration key-value pair.
 func (a *Adapter) Set(_ context.Context, key, value string) error {
 	a.mu.Lock()
 	cv, exists := a.configs[key]
@@ -143,6 +150,7 @@ func (a *Adapter) Set(_ context.Context, key, value string) error {
 	return nil
 }
 
+// Delete removes a configuration entry by key.
 func (a *Adapter) Delete(_ context.Context, key string) error {
 	a.mu.Lock()
 	defer a.mu.Unlock()
@@ -154,7 +162,7 @@ func (a *Adapter) Delete(_ context.Context, key string) error {
 	return nil
 }
 
-// Watch on ConfigCenter registers a callback for changes to the given configuration key.
+// WatchConfig registers a callback for changes to the given configuration key.
 func (a *Adapter) WatchConfig(_ context.Context, key string, callback func(*registry.ConfigValue)) error {
 	a.mu.Lock()
 	defer a.mu.Unlock()
@@ -163,6 +171,7 @@ func (a *Adapter) WatchConfig(_ context.Context, key string, callback func(*regi
 	return nil
 }
 
+// List returns all configuration entries matching the given key prefix.
 func (a *Adapter) List(_ context.Context, prefix string) ([]*registry.ConfigValue, error) {
 	a.mu.RLock()
 	defer a.mu.RUnlock()

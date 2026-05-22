@@ -15,11 +15,11 @@ import (
 // Intended dependency: github.com/aws/aws-sdk-go-v2/service/s3
 type Adapter struct {
 	// client *s3.Client // TODO: uncomment when aws-sdk-go-v2 dependency is added
-	cfg storage.StorageConfig
+	cfg storage.Config
 }
 
 // New creates a new S3 Adapter with the provided configuration.
-func New(cfg storage.StorageConfig) *Adapter {
+func New(cfg storage.Config) *Adapter {
 	return &Adapter{cfg: cfg}
 }
 

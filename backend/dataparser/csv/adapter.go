@@ -16,19 +16,22 @@ var datePattern = regexp.MustCompile(
 	`^\d{4}[-/]\d{1,2}[-/]\d{1,2}$|^\d{1,2}[-/]\d{1,2}[-/]\d{2,4}$`,
 )
 
-type CSVAdapter struct {
+// Adapter parses CSV files into tabular data.
+type Adapter struct {
 	Config dataparser.ParserConfig
 }
 
-func New(cfg ...dataparser.ParserConfig) *CSVAdapter {
-	a := &CSVAdapter{}
+// New creates a new CSV Adapter with optional configuration.
+func New(cfg ...dataparser.ParserConfig) *Adapter {
+	a := &Adapter{}
 	if len(cfg) > 0 {
 		a.Config = cfg[0]
 	}
 	return a
 }
 
-func (a *CSVAdapter) Parse(
+// Parse reads CSV data from input and returns a ParsedDocument.
+func (a *Adapter) Parse(
 	ctx context.Context,
 	input io.Reader,
 	format dataparser.Format,
@@ -77,7 +80,8 @@ func (a *CSVAdapter) Parse(
 	}, nil
 }
 
-func (a *CSVAdapter) ExtractTables(
+// ExtractTables parses CSV input and returns the extracted tables.
+func (a *Adapter) ExtractTables(
 	ctx context.Context,
 	input io.Reader,
 	format dataparser.Format,
@@ -89,7 +93,8 @@ func (a *CSVAdapter) ExtractTables(
 	return doc.Tables, nil
 }
 
-func (a *CSVAdapter) SupportedFormats() []dataparser.Format {
+// SupportedFormats returns the formats supported by the CSV adapter.
+func (a *Adapter) SupportedFormats() []dataparser.Format {
 	return []dataparser.Format{dataparser.FormatCSV}
 }
 

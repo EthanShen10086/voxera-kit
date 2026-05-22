@@ -79,9 +79,9 @@ func ResolveOptions(opts []GenerateOption) GenerateParams {
 	}
 }
 
-// ShortURLGenerator is the interface for short URL operations.
+// Generator is the interface for short URL operations.
 // Implementations must be safe for concurrent use.
-type ShortURLGenerator interface {
+type Generator interface {
 	// Generate creates a new short URL for the given original URL.
 	Generate(ctx context.Context, originalURL string, opts ...GenerateOption) (*ShortURL, error)
 	// Resolve looks up the original URL by its short code.
@@ -94,8 +94,8 @@ type ShortURLGenerator interface {
 	ListByCreator(ctx context.Context, creatorID string, offset, limit int) ([]*ShortURL, error)
 }
 
-// ShortURLConfig holds configuration parameters for a short URL backend.
-type ShortURLConfig struct {
+// Config holds configuration parameters for a short URL backend.
+type Config struct {
 	// BaseURL is the public-facing base URL prefix (e.g., "https://s.example.com").
 	BaseURL string
 	// CodeLength is the number of characters in the generated short code.

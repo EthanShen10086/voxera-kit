@@ -45,8 +45,8 @@ type Subscriber interface {
 	Close() error
 }
 
-// MQConfig holds the connection parameters for a message queue broker.
-type MQConfig struct {
+// Config holds the connection parameters for a message queue broker.
+type Config struct {
 	// Brokers is the list of broker addresses to connect to.
 	Brokers []string
 	// Username is the authentication username.

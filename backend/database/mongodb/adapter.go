@@ -21,7 +21,7 @@ func New() *Adapter {
 }
 
 // Connect establishes a connection to the MongoDB cluster.
-func (a *Adapter) Connect(ctx context.Context, cfg database.DatabaseConfig) error {
+func (a *Adapter) Connect(ctx context.Context, cfg database.Config) error {
 	// TODO: implement using mongo-driver
 	return nil
 }

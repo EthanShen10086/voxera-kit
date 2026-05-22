@@ -24,7 +24,7 @@ type Adapter struct {
 }
 
 // New creates a new in-memory token bucket rate limiter.
-func New(cfg ratelimiter.RateLimiterConfig) *Adapter {
+func New(cfg ratelimiter.Config) *Adapter {
 	return &Adapter{
 		buckets: make(map[string]*bucket),
 		rate:    cfg.Rate,

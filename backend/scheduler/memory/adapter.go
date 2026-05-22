@@ -25,13 +25,13 @@ type Adapter struct {
 	mu        sync.RWMutex
 	jobs      map[string]*jobEntry
 	running   atomic.Bool
-	config    scheduler.SchedulerConfig
+	config    scheduler.Config
 	cancel    context.CancelFunc
 	semaphore chan struct{}
 }
 
 // New creates a new in-memory scheduler with the given configuration.
-func New(config scheduler.SchedulerConfig) *Adapter {
+func New(config scheduler.Config) *Adapter {
 	maxConcurrent := config.MaxConcurrent
 	if maxConcurrent <= 0 {
 		maxConcurrent = 10
@@ -43,6 +43,7 @@ func New(config scheduler.SchedulerConfig) *Adapter {
 	}
 }
 
+// Register adds a job with the given cron expression.
 func (a *Adapter) Register(name string, cronExpr string, job scheduler.Job) error {
 	a.mu.Lock()
 	defer a.mu.Unlock()
@@ -65,6 +66,7 @@ func (a *Adapter) Register(name string, cronExpr string, job scheduler.Job) erro
 	return nil
 }
 
+// Unregister removes a previously registered job by name.
 func (a *Adapter) Unregister(name string) error {
 	a.mu.Lock()
 	defer a.mu.Unlock()
@@ -84,6 +86,7 @@ func (a *Adapter) Unregister(name string) error {
 	return nil
 }
 
+// Start begins the scheduler's event loop.
 func (a *Adapter) Start(ctx context.Context) error {
 	if a.running.Load() {
 		return fmt.Errorf("scheduler: already running")
@@ -102,6 +105,7 @@ func (a *Adapter) Start(ctx context.Context) error {
 	return nil
 }
 
+// Stop gracefully shuts down the scheduler.
 func (a *Adapter) Stop(_ context.Context) error {
 	if !a.running.Load() {
 		return fmt.Errorf("scheduler: not running")
@@ -121,6 +125,7 @@ func (a *Adapter) Stop(_ context.Context) error {
 	return nil
 }
 
+// RunNow triggers immediate execution of the named job.
 func (a *Adapter) RunNow(name string) error {
 	a.mu.RLock()
 	entry, exists := a.jobs[name]
@@ -134,6 +139,7 @@ func (a *Adapter) RunNow(name string) error {
 	return nil
 }
 
+// List returns information about all registered jobs.
 func (a *Adapter) List() []scheduler.JobInfo {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
@@ -145,6 +151,7 @@ func (a *Adapter) List() []scheduler.JobInfo {
 	return infos
 }
 
+// IsRunning reports whether the scheduler is currently active.
 func (a *Adapter) IsRunning() bool {
 	return a.running.Load()
 }

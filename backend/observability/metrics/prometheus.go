@@ -17,18 +17,22 @@ func NewPrometheusRecorder() *PrometheusRecorder {
 	return &PrometheusRecorder{}
 }
 
+// Counter increments a counter metric by the given value.
 func (p *PrometheusRecorder) Counter(name string, value float64, tags map[string]string) {
 	// TODO: get-or-create CounterVec, .With(tags).Add(value)
 }
 
+// Gauge sets a gauge metric to the given value.
 func (p *PrometheusRecorder) Gauge(name string, value float64, tags map[string]string) {
 	// TODO: get-or-create GaugeVec, .With(tags).Set(value)
 }
 
+// Histogram records a single observation in a distribution.
 func (p *PrometheusRecorder) Histogram(name string, value float64, tags map[string]string) {
 	// TODO: get-or-create HistogramVec, .With(tags).Observe(value)
 }
 
+// Timer starts a timer and returns a stop function that records the elapsed duration.
 func (p *PrometheusRecorder) Timer(name string) func() {
 	start := time.Now()
 	return func() {
@@ -37,4 +41,4 @@ func (p *PrometheusRecorder) Timer(name string) func() {
 	}
 }
 
-var _ MetricsRecorder = (*PrometheusRecorder)(nil)
+var _ Recorder = (*PrometheusRecorder)(nil)

@@ -30,8 +30,8 @@ const (
 	DeadlineExceeded ErrorCode = 9
 	// ResourceExhausted means a resource quota or limit was reached.
 	ResourceExhausted ErrorCode = 10
-	// Cancelled means the operation was cancelled by the caller.
-	Cancelled ErrorCode = 11
+	// Canceled means the operation was canceled by the caller.
+	Canceled ErrorCode = 11
 	// Unimplemented means the operation is not implemented or supported.
 	Unimplemented ErrorCode = 12
 )
@@ -111,8 +111,8 @@ func IsUnavailable(err error) bool { return Code(err) == Unavailable }
 // IsDeadlineExceeded reports whether err has code [DeadlineExceeded].
 func IsDeadlineExceeded(err error) bool { return Code(err) == DeadlineExceeded }
 
-// IsCancelled reports whether err has code [Cancelled].
-func IsCancelled(err error) bool { return Code(err) == Cancelled }
+// IsCanceled reports whether err has code [Canceled].
+func IsCanceled(err error) bool { return Code(err) == Canceled }
 
 // IsUnimplemented reports whether err has code [Unimplemented].
 func IsUnimplemented(err error) bool { return Code(err) == Unimplemented }

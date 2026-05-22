@@ -19,11 +19,11 @@ const base62Alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrst
 type Adapter struct {
 	mu     sync.RWMutex
 	urls   map[string]*shorturl.ShortURL
-	config shorturl.ShortURLConfig
+	config shorturl.Config
 }
 
 // New creates a new in-memory short URL adapter with the given configuration.
-func New(config shorturl.ShortURLConfig) *Adapter {
+func New(config shorturl.Config) *Adapter {
 	codeLen := config.CodeLength
 	if codeLen <= 0 {
 		codeLen = 6
@@ -35,6 +35,7 @@ func New(config shorturl.ShortURLConfig) *Adapter {
 	}
 }
 
+// Generate creates a new short URL for the given original URL.
 func (a *Adapter) Generate(_ context.Context, originalURL string, opts ...shorturl.GenerateOption) (*shorturl.ShortURL, error) {
 	params := shorturl.ResolveOptions(opts)
 
@@ -77,6 +78,7 @@ func (a *Adapter) Generate(_ context.Context, originalURL string, opts ...shortu
 	return su, nil
 }
 
+// Resolve looks up the original URL by its short code.
 func (a *Adapter) Resolve(_ context.Context, code string) (*shorturl.ShortURL, error) {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
@@ -93,6 +95,7 @@ func (a *Adapter) Resolve(_ context.Context, code string) (*shorturl.ShortURL, e
 	return su, nil
 }
 
+// Delete removes a short URL by its code.
 func (a *Adapter) Delete(_ context.Context, code string) error {
 	a.mu.Lock()
 	defer a.mu.Unlock()
@@ -104,6 +107,7 @@ func (a *Adapter) Delete(_ context.Context, code string) error {
 	return nil
 }
 
+// IncrementClick atomically increments the click counter for the given code.
 func (a *Adapter) IncrementClick(_ context.Context, code string) error {
 	a.mu.Lock()
 	defer a.mu.Unlock()
@@ -116,6 +120,7 @@ func (a *Adapter) IncrementClick(_ context.Context, code string) error {
 	return nil
 }
 
+// ListByCreator returns short URLs created by the given user with pagination.
 func (a *Adapter) ListByCreator(_ context.Context, creatorID string, offset, limit int) ([]*shorturl.ShortURL, error) {
 	a.mu.RLock()
 	defer a.mu.RUnlock()

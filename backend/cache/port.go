@@ -8,8 +8,8 @@ import (
 	"time"
 )
 
-// CacheConfig holds the connection parameters for a cache backend.
-type CacheConfig struct {
+// Config holds the connection parameters for a cache backend.
+type Config struct {
 	// Address is the cache server address (e.g., "localhost:6379").
 	Address string
 	// Password is the authentication password for the cache server.

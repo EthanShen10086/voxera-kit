@@ -1,4 +1,4 @@
-// Package wechat provides a WeChat Pay implementation of the payment.PaymentGateway interface.
+// Package wechat provides a WeChat Pay implementation of the payment.Gateway interface.
 // It is intended to use github.com/wechatpay-apiv3/wechatpay-go as the underlying SDK.
 package wechat
 
@@ -8,16 +8,16 @@ import (
 	"github.com/EthanShen10086/voxera-kit/payment"
 )
 
-// Adapter implements the payment.PaymentGateway interface using WeChat Pay.
+// Adapter implements the payment.Gateway interface using WeChat Pay.
 //
 // Intended dependency: github.com/wechatpay-apiv3/wechatpay-go
 type Adapter struct {
 	// client *core.Client // TODO: uncomment when wechatpay-go dependency is added
-	cfg payment.PaymentConfig
+	cfg payment.Config
 }
 
 // New creates a new WeChat Pay Adapter with the provided configuration.
-func New(cfg payment.PaymentConfig) *Adapter {
+func New(cfg payment.Config) *Adapter {
 	return &Adapter{cfg: cfg}
 }
 

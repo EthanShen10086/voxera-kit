@@ -2,8 +2,8 @@
 // (counters, gauges, histograms, and timers).
 package metrics
 
-// MetricsRecorder is the interface every metrics backend must implement.
-type MetricsRecorder interface {
+// Recorder is the interface every metrics backend must implement.
+type Recorder interface {
 	// Counter increments a counter metric by the given value.
 	Counter(name string, value float64, tags map[string]string)
 

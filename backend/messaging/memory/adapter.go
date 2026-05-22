@@ -37,6 +37,7 @@ func New() *Adapter {
 	}
 }
 
+// CreateChannel creates a new messaging channel with the given type, members, and name.
 func (a *Adapter) CreateChannel(_ context.Context, channelType messaging.ChannelType, members []string, name string) (*messaging.Channel, error) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
@@ -53,6 +54,7 @@ func (a *Adapter) CreateChannel(_ context.Context, channelType messaging.Channel
 	return ch, nil
 }
 
+// SendMessage sends a message to the specified channel.
 func (a *Adapter) SendMessage(_ context.Context, channelID string, msg *messaging.Message) error {
 	a.mu.Lock()
 
@@ -81,6 +83,7 @@ func (a *Adapter) SendMessage(_ context.Context, channelID string, msg *messagin
 	return nil
 }
 
+// Subscribe registers a handler for messages on the specified channel.
 func (a *Adapter) Subscribe(channelID string, handler messaging.MessageHandler) (func(), error) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
@@ -105,6 +108,7 @@ func (a *Adapter) Subscribe(channelID string, handler messaging.MessageHandler) 
 	return unsubscribe, nil
 }
 
+// GetHistory retrieves messages from a channel before the given timestamp.
 func (a *Adapter) GetHistory(_ context.Context, channelID string, before time.Time, limit int) ([]*messaging.Message, error) {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
@@ -119,6 +123,7 @@ func (a *Adapter) GetHistory(_ context.Context, channelID string, before time.Ti
 	return result, nil
 }
 
+// GetChannels returns all channels the given user is a member of.
 func (a *Adapter) GetChannels(_ context.Context, userID string) ([]*messaging.Channel, error) {
 	a.mu.RLock()
 	defer a.mu.RUnlock()

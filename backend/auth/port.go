@@ -25,8 +25,8 @@ type Claims struct {
 	Metadata    map[string]any
 }
 
-// AuthConfig carries the settings required to issue and validate tokens.
-type AuthConfig struct {
+// Config carries the settings required to issue and validate tokens.
+type Config struct {
 	// Secret is the signing key or secret used for token generation.
 	Secret string
 

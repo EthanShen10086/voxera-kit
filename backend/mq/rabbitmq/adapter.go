@@ -14,11 +14,11 @@ import (
 type Publisher struct {
 	// conn *amqp091.Connection // TODO: uncomment when amqp091-go dependency is added
 	// ch   *amqp091.Channel
-	cfg mq.MQConfig
+	cfg mq.Config
 }
 
 // NewPublisher creates a new RabbitMQ Publisher with the provided configuration.
-func NewPublisher(cfg mq.MQConfig) *Publisher {
+func NewPublisher(cfg mq.Config) *Publisher {
 	return &Publisher{cfg: cfg}
 }
 
@@ -40,11 +40,11 @@ func (p *Publisher) Close() error {
 type Subscriber struct {
 	// conn *amqp091.Connection // TODO: uncomment when amqp091-go dependency is added
 	// ch   *amqp091.Channel
-	cfg mq.MQConfig
+	cfg mq.Config
 }
 
 // NewSubscriber creates a new RabbitMQ Subscriber with the provided configuration.
-func NewSubscriber(cfg mq.MQConfig) *Subscriber {
+func NewSubscriber(cfg mq.Config) *Subscriber {
 	return &Subscriber{cfg: cfg}
 }
 

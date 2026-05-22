@@ -14,11 +14,11 @@ import (
 // Intended dependency: github.com/Microsoft/cognitive-services-speech-sdk-go
 type Adapter struct {
 	// speechConfig *speech.SpeechConfig // TODO: uncomment when Azure SDK dependency is added
-	cfg asr.ASRConfig
+	cfg asr.Config
 }
 
 // New creates a new Azure Speech Services Adapter with the provided configuration.
-func New(cfg asr.ASRConfig) *Adapter {
+func New(cfg asr.Config) *Adapter {
 	return &Adapter{cfg: cfg}
 }
 

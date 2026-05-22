@@ -17,11 +17,13 @@ func NewOTelTracer() *OTelTracer {
 	return &OTelTracer{}
 }
 
+// Start begins a new span, returning a child context and the span handle.
 func (o *OTelTracer) Start(ctx context.Context, name string, opts ...SpanOption) (context.Context, Span) {
 	// TODO: delegate to o.tracer.Start, wrap the OTel span
 	return ctx, &otelSpan{}
 }
 
+// Shutdown flushes pending spans and releases resources.
 func (o *OTelTracer) Shutdown(ctx context.Context) error {
 	// TODO: flush and shut down the TracerProvider
 	return nil

@@ -15,12 +15,12 @@ import (
 // enabling on-premise or air-gapped deployments.
 type Adapter struct {
 	// httpClient *http.Client // standard library http client
-	cfg asr.ASRConfig
+	cfg asr.Config
 }
 
 // New creates a new self-hosted Whisper Adapter with the provided configuration.
 // The cfg.Endpoint should point to the self-hosted Whisper HTTP API base URL.
-func New(cfg asr.ASRConfig) *Adapter {
+func New(cfg asr.Config) *Adapter {
 	return &Adapter{cfg: cfg}
 }
 

@@ -22,8 +22,8 @@ const (
 	FixedWindow
 )
 
-// RateLimiterConfig holds the parameters for constructing a rate limiter.
-type RateLimiterConfig struct {
+// Config holds the parameters for constructing a rate limiter.
+type Config struct {
 	// Enabled controls whether rate limiting is active.
 	Enabled bool
 	// Strategy selects the rate limiting algorithm.
@@ -49,8 +49,8 @@ type RateLimiter interface {
 	Close() error
 }
 
-// RateLimiterFactory creates RateLimiter instances from configuration.
-type RateLimiterFactory interface {
+// Factory creates RateLimiter instances from configuration.
+type Factory interface {
 	// Create returns a new RateLimiter configured according to cfg.
-	Create(cfg RateLimiterConfig) (RateLimiter, error)
+	Create(cfg Config) (RateLimiter, error)
 }

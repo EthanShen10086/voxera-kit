@@ -14,11 +14,11 @@ import (
 // Intended dependency: github.com/aliyun/alibaba-cloud-sdk-go
 type Adapter struct {
 	// client *nls.SpeechTranscriber // TODO: uncomment when Alibaba SDK dependency is added
-	cfg asr.ASRConfig
+	cfg asr.Config
 }
 
 // New creates a new Alibaba Cloud Speech Adapter with the provided configuration.
-func New(cfg asr.ASRConfig) *Adapter {
+func New(cfg asr.Config) *Adapter {
 	return &Adapter{cfg: cfg}
 }
 

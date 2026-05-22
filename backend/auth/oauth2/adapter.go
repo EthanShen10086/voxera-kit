@@ -12,29 +12,33 @@ import (
 
 // Adapter implements [auth.Authenticator] via OAuth 2.0 token introspection.
 type Adapter struct {
-	cfg auth.AuthConfig
+	cfg auth.Config
 }
 
 // New creates an OAuth 2.0 [Adapter] with the supplied configuration.
-func New(cfg auth.AuthConfig) *Adapter {
+func New(cfg auth.Config) *Adapter {
 	return &Adapter{cfg: cfg}
 }
 
+// Authenticate introspects a token at the authorization server.
 func (a *Adapter) Authenticate(ctx context.Context, token string) (*auth.Claims, error) {
 	// TODO: introspect token at authorization server
 	return nil, nil
 }
 
+// GenerateToken exchanges credentials for a token via the OAuth 2.0 flow.
 func (a *Adapter) GenerateToken(ctx context.Context, claims *auth.Claims) (*auth.TokenPair, error) {
 	// TODO: exchange credentials for token via OAuth 2.0 flow
 	return nil, nil
 }
 
+// RefreshToken uses the refresh_token grant to obtain new tokens.
 func (a *Adapter) RefreshToken(ctx context.Context, refreshToken string) (*auth.TokenPair, error) {
 	// TODO: use refresh_token grant to obtain new tokens
 	return nil, nil
 }
 
+// RevokeToken calls the revocation endpoint.
 func (a *Adapter) RevokeToken(ctx context.Context, token string) error {
 	// TODO: call revocation endpoint
 	return nil

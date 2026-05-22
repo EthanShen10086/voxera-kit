@@ -14,11 +14,11 @@ import (
 // Intended dependency: github.com/bradfitz/gomemcache/memcache
 type Adapter struct {
 	// client *memcache.Client // TODO: uncomment when gomemcache dependency is added
-	cfg cache.CacheConfig
+	cfg cache.Config
 }
 
 // New creates a new Memcached Adapter with the provided configuration.
-func New(cfg cache.CacheConfig) *Adapter {
+func New(cfg cache.Config) *Adapter {
 	return &Adapter{cfg: cfg}
 }
 

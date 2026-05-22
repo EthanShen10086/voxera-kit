@@ -20,8 +20,8 @@ const (
 	Completed
 	// Failed indicates the job finished with an error.
 	Failed
-	// Cancelled indicates the job was cancelled before completion.
-	Cancelled
+	// Canceled indicates the job was canceled before completion.
+	Canceled
 )
 
 // JobInfo holds runtime metadata about a scheduled job.
@@ -62,8 +62,8 @@ type Scheduler interface {
 	IsRunning() bool
 }
 
-// SchedulerConfig holds configuration parameters for a scheduler backend.
-type SchedulerConfig struct {
+// Config holds configuration parameters for a scheduler backend.
+type Config struct {
 	// MaxConcurrent is the maximum number of jobs that can run simultaneously.
 	MaxConcurrent int
 	// Location is the time zone used for cron expression evaluation.

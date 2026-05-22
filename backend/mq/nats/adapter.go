@@ -13,11 +13,11 @@ import (
 // Intended dependency: github.com/nats-io/nats.go
 type Publisher struct {
 	// conn *nats.Conn // TODO: uncomment when nats.go dependency is added
-	cfg mq.MQConfig
+	cfg mq.Config
 }
 
 // NewPublisher creates a new NATS Publisher with the provided configuration.
-func NewPublisher(cfg mq.MQConfig) *Publisher {
+func NewPublisher(cfg mq.Config) *Publisher {
 	return &Publisher{cfg: cfg}
 }
 
@@ -38,11 +38,11 @@ func (p *Publisher) Close() error {
 // Intended dependency: github.com/nats-io/nats.go
 type Subscriber struct {
 	// conn *nats.Conn // TODO: uncomment when nats.go dependency is added
-	cfg mq.MQConfig
+	cfg mq.Config
 }
 
 // NewSubscriber creates a new NATS Subscriber with the provided configuration.
-func NewSubscriber(cfg mq.MQConfig) *Subscriber {
+func NewSubscriber(cfg mq.Config) *Subscriber {
 	return &Subscriber{cfg: cfg}
 }
 

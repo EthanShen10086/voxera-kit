@@ -8,8 +8,8 @@ import (
 	"time"
 )
 
-// DatabaseConfig holds the connection parameters for a relational database.
-type DatabaseConfig struct {
+// Config holds the connection parameters for a relational database.
+type Config struct {
 	// Host is the database server hostname or IP address.
 	Host string
 	// Port is the database server port number.
@@ -62,7 +62,7 @@ type Transaction interface {
 // Database is the top-level interface for managing a database connection lifecycle.
 type Database interface {
 	// Connect establishes a connection to the database using the provided config.
-	Connect(ctx context.Context, cfg DatabaseConfig) error
+	Connect(ctx context.Context, cfg Config) error
 	// Close terminates the database connection and releases resources.
 	Close() error
 	// Ping verifies that the database connection is still alive.
@@ -82,7 +82,9 @@ type QueryCondition struct {
 type SortOrder int
 
 const (
+	// Asc sorts in ascending order.
 	Asc SortOrder = iota
+	// Desc sorts in descending order.
 	Desc
 )
 

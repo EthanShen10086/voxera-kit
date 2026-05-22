@@ -20,8 +20,8 @@ const (
 	None
 )
 
-// CompressionConfig holds general compression parameters.
-type CompressionConfig struct {
+// Config holds general compression parameters.
+type Config struct {
 	// Enabled controls whether compression is active.
 	Enabled bool
 	// Algorithm is the compression algorithm to use.

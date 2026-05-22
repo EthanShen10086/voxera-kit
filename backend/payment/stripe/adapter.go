@@ -1,4 +1,4 @@
-// Package stripe provides a Stripe implementation of the payment.PaymentGateway interface.
+// Package stripe provides a Stripe implementation of the payment.Gateway interface.
 // It is intended to use github.com/stripe/stripe-go/v78 as the underlying SDK.
 package stripe
 
@@ -8,16 +8,16 @@ import (
 	"github.com/EthanShen10086/voxera-kit/payment"
 )
 
-// Adapter implements the payment.PaymentGateway interface using Stripe.
+// Adapter implements the payment.Gateway interface using Stripe.
 //
 // Intended dependency: github.com/stripe/stripe-go/v78
 type Adapter struct {
 	// No external client field; Stripe SDK uses package-level configuration.
-	cfg payment.PaymentConfig
+	cfg payment.Config
 }
 
 // New creates a new Stripe Adapter with the provided configuration.
-func New(cfg payment.PaymentConfig) *Adapter {
+func New(cfg payment.Config) *Adapter {
 	return &Adapter{cfg: cfg}
 }
 

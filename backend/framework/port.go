@@ -37,7 +37,7 @@ type ServerConfig struct {
 // Server is the minimal lifecycle interface every server adapter must satisfy.
 type Server interface {
 	// Start binds the server and begins accepting connections.
-	// It blocks until ctx is cancelled or an unrecoverable error occurs.
+	// It blocks until ctx is canceled or an unrecoverable error occurs.
 	Start(ctx context.Context) error
 
 	// Stop performs a graceful shutdown, waiting for in-flight requests to finish.

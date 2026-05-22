@@ -16,11 +16,11 @@ import (
 type Adapter struct {
 	// client *oss.Client // TODO: uncomment when aliyun-oss-go-sdk dependency is added
 	// bucket *oss.Bucket
-	cfg storage.StorageConfig
+	cfg storage.Config
 }
 
 // New creates a new Alibaba Cloud OSS Adapter with the provided configuration.
-func New(cfg storage.StorageConfig) *Adapter {
+func New(cfg storage.Config) *Adapter {
 	return &Adapter{cfg: cfg}
 }
 

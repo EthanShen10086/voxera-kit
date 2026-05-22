@@ -7,13 +7,16 @@ import (
 	"github.com/EthanShen10086/voxera-kit/dataparser"
 )
 
-type StubAdapter struct{}
+// Adapter is a stub document parser that returns hard-coded financial data.
+type Adapter struct{}
 
-func New() *StubAdapter {
-	return &StubAdapter{}
+// New creates a new stub Adapter.
+func New() *Adapter {
+	return &Adapter{}
 }
 
-func (a *StubAdapter) Parse(
+// Parse returns a stub parsed document with sample financial tables.
+func (a *Adapter) Parse(
 	ctx context.Context,
 	input io.Reader,
 	format dataparser.Format,
@@ -32,7 +35,8 @@ func (a *StubAdapter) Parse(
 	}, nil
 }
 
-func (a *StubAdapter) ExtractTables(
+// ExtractTables returns stub financial tables.
+func (a *Adapter) ExtractTables(
 	ctx context.Context,
 	input io.Reader,
 	format dataparser.Format,
@@ -40,7 +44,8 @@ func (a *StubAdapter) ExtractTables(
 	return financialTables(), nil
 }
 
-func (a *StubAdapter) SupportedFormats() []dataparser.Format {
+// SupportedFormats returns all formats the stub adapter claims to support.
+func (a *Adapter) SupportedFormats() []dataparser.Format {
 	return []dataparser.Format{
 		dataparser.FormatPDF,
 		dataparser.FormatCSV,

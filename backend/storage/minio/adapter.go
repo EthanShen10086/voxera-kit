@@ -15,11 +15,11 @@ import (
 // Intended dependency: github.com/minio/minio-go/v7
 type Adapter struct {
 	// client *minio.Client // TODO: uncomment when minio-go dependency is added
-	cfg storage.StorageConfig
+	cfg storage.Config
 }
 
 // New creates a new MinIO Adapter with the provided configuration.
-func New(cfg storage.StorageConfig) *Adapter {
+func New(cfg storage.Config) *Adapter {
 	return &Adapter{cfg: cfg}
 }
 

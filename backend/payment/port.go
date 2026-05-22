@@ -20,8 +20,8 @@ const (
 	OrderStatusRefunded OrderStatus = "refunded"
 	// OrderStatusFailed indicates the payment attempt failed.
 	OrderStatusFailed OrderStatus = "failed"
-	// OrderStatusCancelled indicates the order was cancelled before payment.
-	OrderStatusCancelled OrderStatus = "cancelled"
+	// OrderStatusCanceled indicates the order was canceled before payment.
+	OrderStatusCanceled OrderStatus = "canceled"
 )
 
 // Order represents a payment order with its full lifecycle metadata.
@@ -63,8 +63,8 @@ type CallbackPayload struct {
 	Headers map[string]string
 }
 
-// PaymentGateway is the interface for interacting with payment providers.
-type PaymentGateway interface {
+// Gateway is the interface for interacting with payment providers.
+type Gateway interface {
 	// CreateOrder initiates a new payment order with the provider.
 	CreateOrder(ctx context.Context, order *Order) (*Order, error)
 	// QueryOrder retrieves the current status of an order from the provider.
@@ -77,8 +77,8 @@ type PaymentGateway interface {
 	Close() error
 }
 
-// PaymentConfig holds the configuration parameters for a payment gateway.
-type PaymentConfig struct {
+// Config holds the configuration parameters for a payment gateway.
+type Config struct {
 	// AppID is the application identifier assigned by the payment provider.
 	AppID string
 	// MerchantID is the merchant account identifier.

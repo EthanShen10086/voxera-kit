@@ -59,9 +59,9 @@ type Channel struct {
 // MessageHandler is a callback invoked when a message is received.
 type MessageHandler func(msg *Message)
 
-// MessagingService is the interface for channel and message operations.
+// Service is the interface for channel and message operations.
 // Implementations must be safe for concurrent use.
-type MessagingService interface {
+type Service interface {
 	// CreateChannel creates a new messaging channel with the given type, members, and name.
 	CreateChannel(ctx context.Context, channelType ChannelType, members []string, name string) (*Channel, error)
 	// SendMessage sends a message to the specified channel.
@@ -88,8 +88,8 @@ type PresenceService interface {
 	GetOnlineUsers(ctx context.Context, channelID string) ([]string, error)
 }
 
-// MessagingConfig holds configuration parameters for a messaging backend.
-type MessagingConfig struct {
+// Config holds configuration parameters for a messaging backend.
+type Config struct {
 	// MaxMessageSize is the maximum allowed message size in bytes.
 	MaxMessageSize int
 	// MaxChannelMembers is the maximum number of members per channel.

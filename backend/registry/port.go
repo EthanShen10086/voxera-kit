@@ -72,8 +72,8 @@ type ConfigCenter interface {
 	List(ctx context.Context, prefix string) ([]*ConfigValue, error)
 }
 
-// RegistryConfig holds configuration parameters for a registry/config center backend.
-type RegistryConfig struct {
+// Config holds configuration parameters for a registry/config center backend.
+type Config struct {
 	// Endpoints is the list of backend server addresses.
 	Endpoints []string
 	// Namespace is the logical grouping prefix for all entries.

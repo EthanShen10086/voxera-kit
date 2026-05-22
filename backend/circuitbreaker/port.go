@@ -28,8 +28,8 @@ var ErrCircuitOpen = errors.New("circuit breaker is open")
 // circuit has reached its maximum number of probe calls.
 var ErrTooManyCalls = errors.New("too many calls in half-open state")
 
-// CircuitBreakerConfig holds the parameters for constructing a circuit breaker.
-type CircuitBreakerConfig struct {
+// Config holds the parameters for constructing a circuit breaker.
+type Config struct {
 	// MaxFailures is the number of consecutive failures before the circuit opens.
 	MaxFailures int
 	// Timeout is how long the circuit stays open before transitioning to half-open.

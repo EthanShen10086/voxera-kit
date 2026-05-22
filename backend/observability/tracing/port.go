@@ -20,7 +20,7 @@ const (
 	SpanKindConsumer
 )
 
-// SpanOption configures optional span behaviour at creation time.
+// SpanOption configures optional span behavior at creation time.
 type SpanOption struct {
 	Kind       SpanKind
 	Attributes map[string]any

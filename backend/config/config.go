@@ -16,7 +16,7 @@ const (
 	SourceRemote Source = "remote"
 )
 
-// Options controls how the config provider is initialised.
+// Options controls how the config provider is initialized.
 type Options struct {
 	Source   Source
 	Path     string

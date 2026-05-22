@@ -58,8 +58,8 @@ type Translator interface {
 	Close() error
 }
 
-// TranslationConfig carries the credentials and tuning knobs shared by all adapters.
-type TranslationConfig struct {
+// Config carries the credentials and tuning knobs shared by all adapters.
+type Config struct {
 	// APIKey is the provider credential.
 	APIKey string
 

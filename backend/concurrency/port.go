@@ -11,7 +11,7 @@ import (
 // Semaphore controls concurrent access to a finite number of resources.
 // Implementations must be safe for concurrent use.
 type Semaphore interface {
-	// Acquire blocks until a resource slot is available or the context is cancelled.
+	// Acquire blocks until a resource slot is available or the context is canceled.
 	Acquire(ctx context.Context) error
 	// TryAcquire attempts to acquire a slot without blocking, returning true on success.
 	TryAcquire() bool
@@ -38,14 +38,14 @@ type WorkerPool interface {
 	// Submit enqueues a task for asynchronous execution.
 	// Returns an error if the pool is shut down or the queue is full.
 	Submit(task Task) error
-	// SubmitWait enqueues a task and blocks until it completes or the context is cancelled.
+	// SubmitWait enqueues a task and blocks until it completes or the context is canceled.
 	SubmitWait(ctx context.Context, task Task) (TaskResult, error)
 	// Running returns the number of tasks currently being executed.
 	Running() int
 	// Pending returns the number of tasks waiting in the queue.
 	Pending() int
 	// Shutdown gracefully stops the pool, waiting for in-flight tasks to finish
-	// or the context to be cancelled.
+	// or the context to be canceled.
 	Shutdown(ctx context.Context) error
 }
 

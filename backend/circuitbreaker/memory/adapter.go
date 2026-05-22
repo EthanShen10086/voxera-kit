@@ -13,7 +13,7 @@ import (
 // Adapter implements circuitbreaker.CircuitBreaker with counter-based state management.
 type Adapter struct {
 	mu            sync.Mutex
-	cfg           circuitbreaker.CircuitBreakerConfig
+	cfg           circuitbreaker.Config
 	state         circuitbreaker.State
 	successes     int
 	failures      int
@@ -22,7 +22,7 @@ type Adapter struct {
 }
 
 // New creates a new in-memory circuit breaker from the given configuration.
-func New(cfg circuitbreaker.CircuitBreakerConfig) *Adapter {
+func New(cfg circuitbreaker.Config) *Adapter {
 	return &Adapter{
 		cfg:   cfg,
 		state: circuitbreaker.Closed,

@@ -26,6 +26,7 @@ func New(level int) (*Adapter, error) {
 	return &Adapter{level: level}, nil
 }
 
+// Compress compresses data using gzip.
 func (a *Adapter) Compress(data []byte) ([]byte, error) {
 	var buf bytes.Buffer
 	w, err := gzip.NewWriterLevel(&buf, a.level)
@@ -44,6 +45,7 @@ func (a *Adapter) Compress(data []byte) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+// Decompress decompresses gzip data.
 func (a *Adapter) Decompress(data []byte) ([]byte, error) {
 	r, err := gzip.NewReader(bytes.NewReader(data))
 	if err != nil {

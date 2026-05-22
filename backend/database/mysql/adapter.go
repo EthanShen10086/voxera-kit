@@ -21,7 +21,7 @@ func New() *Adapter {
 }
 
 // Connect establishes a connection pool to the MySQL database.
-func (a *Adapter) Connect(ctx context.Context, cfg database.DatabaseConfig) error {
+func (a *Adapter) Connect(ctx context.Context, cfg database.Config) error {
 	// TODO: implement using database/sql with MySQL driver
 	return nil
 }

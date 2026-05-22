@@ -26,13 +26,13 @@ linters-settings:
     severity: error
     rules:
       - name: exported
-        disabled: true
+        severity: error
       - name: unexported-return
-        disabled: true
+        severity: error
   gofmt:
     simplify: true
   misspell:
-    locale: ""
+    locale: US
 
 issues:
   max-issues-per-linter: 0

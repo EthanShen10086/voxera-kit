@@ -13,29 +13,33 @@ import (
 // Adapter implements [auth.Authenticator] using OpenID Connect discovery and
 // ID token validation.
 type Adapter struct {
-	cfg auth.AuthConfig
+	cfg auth.Config
 }
 
 // New creates an OIDC [Adapter] with the supplied configuration.
-func New(cfg auth.AuthConfig) *Adapter {
+func New(cfg auth.Config) *Adapter {
 	return &Adapter{cfg: cfg}
 }
 
+// Authenticate validates an ID token using OIDC discovery and JWKS.
 func (a *Adapter) Authenticate(ctx context.Context, token string) (*auth.Claims, error) {
 	// TODO: validate ID token using OIDC discovery and JWKS
 	return nil, nil
 }
 
+// GenerateToken initiates the OIDC authorization code flow.
 func (a *Adapter) GenerateToken(ctx context.Context, claims *auth.Claims) (*auth.TokenPair, error) {
 	// TODO: initiate OIDC authorization code flow
 	return nil, nil
 }
 
+// RefreshToken refreshes tokens via the OIDC token endpoint.
 func (a *Adapter) RefreshToken(ctx context.Context, refreshToken string) (*auth.TokenPair, error) {
 	// TODO: refresh tokens via OIDC token endpoint
 	return nil, nil
 }
 
+// RevokeToken revokes a token at the OIDC provider.
 func (a *Adapter) RevokeToken(ctx context.Context, token string) error {
 	// TODO: revoke token at OIDC provider
 	return nil

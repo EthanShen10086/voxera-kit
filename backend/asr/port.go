@@ -46,8 +46,8 @@ type Recognizer interface {
 	Close() error
 }
 
-// ASRConfig holds the configuration parameters for an ASR provider.
-type ASRConfig struct {
+// Config holds the configuration parameters for an ASR provider.
+type Config struct {
 	// Endpoint is the API endpoint URL for the ASR service.
 	Endpoint string
 	// APIKey is the authentication key for the ASR service.

@@ -14,11 +14,11 @@ import (
 // Intended dependency: github.com/redis/go-redis/v9
 type Adapter struct {
 	// client *redis.Client // TODO: uncomment when go-redis dependency is added
-	cfg cache.CacheConfig
+	cfg cache.Config
 }
 
 // New creates a new Redis Adapter with the provided configuration.
-func New(cfg cache.CacheConfig) *Adapter {
+func New(cfg cache.Config) *Adapter {
 	return &Adapter{cfg: cfg}
 }
 

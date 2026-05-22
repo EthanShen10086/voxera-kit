@@ -14,11 +14,11 @@ import (
 // Intended dependency: github.com/dgraph-io/ristretto
 type Adapter struct {
 	// cache *ristretto.Cache[string, []byte] // TODO: uncomment when ristretto dependency is added
-	cfg cache.CacheConfig
+	cfg cache.Config
 }
 
 // New creates a new local in-process cache Adapter.
-func New(cfg cache.CacheConfig) *Adapter {
+func New(cfg cache.Config) *Adapter {
 	return &Adapter{cfg: cfg}
 }
 

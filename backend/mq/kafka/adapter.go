@@ -13,11 +13,11 @@ import (
 // Intended dependency: github.com/segmentio/kafka-go
 type Publisher struct {
 	// writer *kafka.Writer // TODO: uncomment when kafka-go dependency is added
-	cfg mq.MQConfig
+	cfg mq.Config
 }
 
 // NewPublisher creates a new Kafka Publisher with the provided configuration.
-func NewPublisher(cfg mq.MQConfig) *Publisher {
+func NewPublisher(cfg mq.Config) *Publisher {
 	return &Publisher{cfg: cfg}
 }
 
@@ -38,11 +38,11 @@ func (p *Publisher) Close() error {
 // Intended dependency: github.com/segmentio/kafka-go
 type Subscriber struct {
 	// reader *kafka.Reader // TODO: uncomment when kafka-go dependency is added
-	cfg mq.MQConfig
+	cfg mq.Config
 }
 
 // NewSubscriber creates a new Kafka Subscriber with the provided configuration.
-func NewSubscriber(cfg mq.MQConfig) *Subscriber {
+func NewSubscriber(cfg mq.Config) *Subscriber {
 	return &Subscriber{cfg: cfg}
 }
 

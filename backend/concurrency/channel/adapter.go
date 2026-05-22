@@ -21,7 +21,7 @@ func NewSemaphore(n int) *Semaphore {
 	return &Semaphore{ch: make(chan struct{}, n)}
 }
 
-// Acquire blocks until a resource slot is available or the context is cancelled.
+// Acquire blocks until a resource slot is available or the context is canceled.
 func (s *Semaphore) Acquire(ctx context.Context) error {
 	select {
 	case s.ch <- struct{}{}:
@@ -110,7 +110,7 @@ func (p *WorkerPool) Submit(task concurrency.Task) error {
 	}
 }
 
-// SubmitWait enqueues a task and blocks until it completes or the context is cancelled.
+// SubmitWait enqueues a task and blocks until it completes or the context is canceled.
 func (p *WorkerPool) SubmitWait(ctx context.Context, task concurrency.Task) (concurrency.TaskResult, error) {
 	done := make(chan concurrency.TaskResult, 1)
 	wrapped := func(taskCtx context.Context) error {
@@ -141,7 +141,7 @@ func (p *WorkerPool) Pending() int {
 }
 
 // Shutdown gracefully stops the pool, waiting for in-flight tasks to finish
-// or the context to be cancelled.
+// or the context to be canceled.
 func (p *WorkerPool) Shutdown(ctx context.Context) error {
 	p.shutdown.Store(true)
 	p.once.Do(func() { close(p.quit) })
