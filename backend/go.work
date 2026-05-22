@@ -1,31 +1,40 @@
-go 1.22.0
+go 1.25.0
 
 use (
-	./database
-	./cache
-	./mq
-	./storage
-	./payment
 	./asr
-	./translation
 	./auth
-	./observability
-	./framework
-	./config
-	./errors
-	./ratelimiter
-	./security
-	./concurrency
+	./bulkhead
+	./cache
 	./circuitbreaker
-	./crypto
 	./compression
-	./messaging
-	./registry
-	./scheduler
-	./shorturl
-	./share
-	./dataprovider
+	./concurrency
+	./config
+	./crypto
+	./database
 	./dataparser
-	./scraper
+	./dataprovider
+	./errors
+	./framework
+	./loadshed
+	./messaging
+	./middleware
+	./mq
 	./notification
+	./observability
+	./payment
+	./ratelimiter
+	./registry
+	./retry
+	./scheduler
+	./scraper
+	./security
+	./share
+	./shorturl
+	./singleflight
+	./storage
+	./translation
+	./audit
+	./secret
+	./pii
+	./featureflag
 )

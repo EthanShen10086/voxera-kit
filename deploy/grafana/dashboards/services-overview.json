@@ -1,0 +1,135 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "links": [],
+  "panels": [
+    {
+      "title": "Request Rate (by service, method, status)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": { "drawStyle": "line", "fillOpacity": 10 }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "sum by (job, method, status) (rate(http_requests_total[5m]))",
+          "legendFormat": "{{ job }} {{ method }} {{ status }}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Error Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "custom": { "drawStyle": "line", "fillOpacity": 10 },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 0.05 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "sum by (job) (rate(http_requests_total{status=~\"5..\"}[5m])) / sum by (job) (rate(http_requests_total[5m]))",
+          "legendFormat": "{{ job }}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Latency P50 / P95 / P99",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": { "drawStyle": "line", "fillOpacity": 5 }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum by (job, le) (rate(http_request_duration_seconds_bucket[5m])))",
+          "legendFormat": "{{ job }} p50",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum by (job, le) (rate(http_request_duration_seconds_bucket[5m])))",
+          "legendFormat": "{{ job }} p95",
+          "refId": "B"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum by (job, le) (rate(http_request_duration_seconds_bucket[5m])))",
+          "legendFormat": "{{ job }} p99",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "title": "Active Connections / In-Flight Requests",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": { "drawStyle": "line", "fillOpacity": 10 }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "sum by (job) (http_requests_in_flight)",
+          "legendFormat": "{{ job }} in-flight",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Circuit Breaker State",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "CLOSED", "color": "green" } } },
+            { "type": "value", "options": { "1": { "text": "HALF-OPEN", "color": "yellow" } } },
+            { "type": "value", "options": { "2": { "text": "OPEN", "color": "red" } } }
+          ]
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "expr": "circuit_breaker_state",
+          "legendFormat": "{{ job }} / {{ name }}",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["observability", "services"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "title": "Services Overview",
+  "uid": "services-overview"
+}

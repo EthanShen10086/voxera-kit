@@ -9,22 +9,92 @@ function generateId(length: number): string {
   return id;
 }
 
+/** Configuration for exporting spans to an OTLP-compatible collector. */
+export interface ExportConfig {
+  /** Full URL of the OTLP/HTTP collector (e.g. `https://otel.example.com/v1/traces`). */
+  collectorUrl: string;
+  /** Number of completed spans to buffer before flushing. Defaults to 20. */
+  batchSize?: number;
+  /** Interval in ms between automatic flushes. Defaults to 5000. */
+  flushInterval?: number;
+  /** Additional HTTP headers sent with every export request. */
+  headers?: Record<string, string>;
+}
+
+/** OTLP JSON attribute value representation. */
+interface OtlpAttributeValue {
+  stringValue?: string;
+  intValue?: number;
+  boolValue?: boolean;
+}
+
+/** OTLP JSON attribute key/value pair. */
+interface OtlpAttribute {
+  key: string;
+  value: OtlpAttributeValue;
+}
+
+/** OTLP JSON span representation. */
+interface OtlpSpan {
+  traceId: string;
+  spanId: string;
+  parentSpanId?: string;
+  name: string;
+  kind: number;
+  startTimeUnixNano: string;
+  endTimeUnixNano: string;
+  attributes: OtlpAttribute[];
+}
+
+/**
+ * Distributed tracing client that generates W3C Trace Context headers and
+ * optionally exports completed spans to an OTLP/HTTP collector in batched
+ * JSON format.
+ */
 export class TracingClient {
   private readonly config: TracingConfig;
   private readonly activeSpans = new Map<string, SpanContext>();
 
-  constructor(config: TracingConfig) {
+  private readonly exportConfig?: ExportConfig;
+  private readonly spanBuffer: SpanContext[] = [];
+  private flushTimer: ReturnType<typeof setInterval> | null = null;
+
+  constructor(config: TracingConfig, exportConfig?: ExportConfig) {
     this.config = {
       sampleRate: 1.0,
       propagateContextHeaders: true,
       ...config,
     };
+
+    if (exportConfig) {
+      this.exportConfig = {
+        batchSize: 20,
+        flushInterval: 5000,
+        ...exportConfig,
+      };
+
+      if (this.exportConfig.flushInterval! > 0) {
+        this.flushTimer = setInterval(() => {
+          void this.flush();
+        }, this.exportConfig.flushInterval);
+      }
+    }
   }
 
-  startSpan(name: string, options?: { parentSpanId?: string; attributes?: Record<string, string | number | boolean> }): SpanContext {
+  /**
+   * Start a new span. Optionally link it to a parent span by providing
+   * {@link options.parentSpanId}.
+   */
+  startSpan(
+    name: string,
+    options?: {
+      parentSpanId?: string;
+      attributes?: Record<string, string | number | boolean>;
+    },
+  ): SpanContext {
     const span: SpanContext = {
       traceId: options?.parentSpanId
-        ? this.activeSpans.get(options.parentSpanId)?.traceId ?? generateId(32)
+        ? (this.activeSpans.get(options.parentSpanId)?.traceId ?? generateId(32))
         : generateId(32),
       spanId: generateId(16),
       parentSpanId: options?.parentSpanId,
@@ -37,6 +107,10 @@ export class TracingClient {
     return span;
   }
 
+  /**
+   * End the span identified by {@link spanId} and enqueue it for export.
+   * Returns the finalized span or `undefined` if it was not found.
+   */
   endSpan(spanId: string): SpanContext | undefined {
     const span = this.activeSpans.get(spanId);
     if (!span) return undefined;
@@ -51,7 +125,11 @@ export class TracingClient {
     return span;
   }
 
-  setAttributes(spanId: string, attributes: Record<string, string | number | boolean>): void {
+  /** Merge additional attributes into an active span. */
+  setAttributes(
+    spanId: string,
+    attributes: Record<string, string | number | boolean>,
+  ): void {
     const span = this.activeSpans.get(spanId);
     if (span) {
       Object.assign(span.attributes, attributes);
@@ -71,10 +149,7 @@ export class TracingClient {
     };
   }
 
-  private shouldSample(): boolean {
-    return Math.random() < (this.config.sampleRate ?? 1.0);
-  }
-
+  /** Return the most recently started active span, or `null`. */
   activeSpan(): SpanContext | null {
     let latest: SpanContext | null = null;
     for (const span of this.activeSpans.values()) {
@@ -85,8 +160,126 @@ export class TracingClient {
     return latest;
   }
 
-  /** Stub – in production this would send spans to the configured endpoint. */
-  private exportSpan(_span: SpanContext): void {
-    // No-op: integrate with an OTLP exporter in production.
+  /** Flush all buffered spans to the collector immediately. */
+  async flush(): Promise<void> {
+    if (this.spanBuffer.length === 0 || !this.exportConfig) return;
+
+    const batch = this.spanBuffer.splice(0, this.spanBuffer.length);
+    await this.sendBatch(batch);
+  }
+
+  /** Stop the periodic flush timer and flush remaining spans. */
+  async dispose(): Promise<void> {
+    if (this.flushTimer !== null) {
+      clearInterval(this.flushTimer);
+      this.flushTimer = null;
+    }
+    await this.flush();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Private
+  // ---------------------------------------------------------------------------
+
+  private shouldSample(): boolean {
+    return Math.random() < (this.config.sampleRate ?? 1.0);
+  }
+
+  private exportSpan(span: SpanContext): void {
+    if (!this.exportConfig) return;
+
+    this.spanBuffer.push(span);
+
+    if (this.spanBuffer.length >= (this.exportConfig.batchSize ?? 20)) {
+      void this.flush();
+    }
+  }
+
+  private async sendBatch(spans: SpanContext[]): Promise<void> {
+    if (!this.exportConfig) return;
+
+    const otlpSpans: OtlpSpan[] = spans.map((s) => this.toOtlpSpan(s));
+
+    const payload = {
+      resourceSpans: [
+        {
+          resource: {
+            attributes: [
+              {
+                key: "service.name",
+                value: { stringValue: this.config.serviceName },
+              },
+            ],
+          },
+          scopeSpans: [
+            {
+              spans: otlpSpans,
+            },
+          ],
+        },
+      ],
+    };
+
+    try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        ...this.exportConfig.headers,
+      };
+
+      await fetch(this.exportConfig.collectorUrl, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload),
+        keepalive: true,
+      });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.warn(`[TracingClient] Export failed: ${message}`);
+    }
+  }
+
+  private toOtlpSpan(span: SpanContext): OtlpSpan {
+    const durationMs =
+      typeof span.attributes["duration_ms"] === "number"
+        ? span.attributes["duration_ms"]
+        : 0;
+
+    const startNano = BigInt(span.startTime) * BigInt(1_000_000);
+    const endNano = startNano + BigInt(Math.round(durationMs)) * BigInt(1_000_000);
+
+    const attributes: OtlpAttribute[] = [];
+    for (const [key, val] of Object.entries(span.attributes)) {
+      if (key === "duration_ms") continue;
+      attributes.push(this.toOtlpAttribute(key, val));
+    }
+
+    const result: OtlpSpan = {
+      traceId: span.traceId,
+      spanId: span.spanId,
+      name: span.name,
+      kind: 1, // SPAN_KIND_INTERNAL
+      startTimeUnixNano: startNano.toString(),
+      endTimeUnixNano: endNano.toString(),
+      attributes,
+    };
+
+    if (span.parentSpanId) {
+      result.parentSpanId = span.parentSpanId;
+    }
+
+    return result;
+  }
+
+  private toOtlpAttribute(
+    key: string,
+    value: string | number | boolean,
+  ): OtlpAttribute {
+    if (typeof value === "string") {
+      return { key, value: { stringValue: value } };
+    }
+    if (typeof value === "boolean") {
+      return { key, value: { boolValue: value } };
+    }
+    return { key, value: { intValue: value } };
   }
 }
