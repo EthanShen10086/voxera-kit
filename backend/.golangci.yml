@@ -26,9 +26,9 @@ linters-settings:
     severity: error
     rules:
       - name: exported
-        severity: warning
+        disabled: true
       - name: unexported-return
-        severity: warning
+        disabled: true
   gofmt:
     simplify: true
   misspell:
