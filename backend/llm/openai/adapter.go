@@ -17,10 +17,10 @@ import (
 )
 
 const (
-	defaultEndpoint   = "https://api.openai.com/v1"
-	defaultModel      = "gpt-4o"
-	defaultMaxTokens  = 4096
-	defaultTimeout    = 60 * time.Second
+	defaultEndpoint  = "https://api.openai.com/v1"
+	defaultModel     = "gpt-4o"
+	defaultMaxTokens = 4096
+	defaultTimeout   = 60 * time.Second
 )
 
 // Adapter implements llm.Provider for the OpenAI API.
@@ -154,7 +154,7 @@ func (a *Adapter) ChatStream(ctx context.Context, req llm.Request) (<-chan llm.S
 	}
 	a.setHeaders(httpReq)
 
-	httpResp, err := a.client.Do(httpReq)
+	httpResp, err := a.client.Do(httpReq) //nolint:bodyclose // closed in streaming goroutine below
 	if err != nil {
 		return nil, fmt.Errorf("openai: send request: %w", err)
 	}

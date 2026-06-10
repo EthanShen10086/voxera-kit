@@ -17,9 +17,9 @@ import (
 )
 
 const (
-	defaultEndpoint  = "https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation"
-	defaultModel     = "qwen-turbo"
-	defaultTimeout   = 60 * time.Second
+	defaultEndpoint = "https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation"
+	defaultModel    = "qwen-turbo"
+	defaultTimeout  = 60 * time.Second
 )
 
 // Adapter implements llm.Provider for the Alibaba DashScope (Qwen) API.
@@ -131,10 +131,10 @@ func (a *Adapter) ChatStream(ctx context.Context, req llm.Request) (<-chan llm.S
 			Messages: toMessages(req.Messages),
 		},
 		Parameters: dashScopeParams{
-			MaxTokens:        req.MaxTokens,
-			Temperature:      req.Temperature,
-			TopP:             req.TopP,
-			Stop:             req.Stop,
+			MaxTokens:         req.MaxTokens,
+			Temperature:       req.Temperature,
+			TopP:              req.TopP,
+			Stop:              req.Stop,
 			IncrementalOutput: true,
 		},
 	}
@@ -150,7 +150,7 @@ func (a *Adapter) ChatStream(ctx context.Context, req llm.Request) (<-chan llm.S
 	}
 	a.setHeaders(httpReq, true)
 
-	httpResp, err := a.client.Do(httpReq)
+	httpResp, err := a.client.Do(httpReq) //nolint:bodyclose // closed in streaming goroutine below
 	if err != nil {
 		return nil, fmt.Errorf("qwen: send request: %w", err)
 	}
@@ -265,11 +265,11 @@ type dashScopeInput struct {
 }
 
 type dashScopeParams struct {
-	MaxTokens        int      `json:"max_tokens,omitempty"`
-	Temperature      float64  `json:"temperature,omitempty"`
-	TopP             float64  `json:"top_p,omitempty"`
-	Stop             []string `json:"stop,omitempty"`
-	IncrementalOutput bool    `json:"incremental_output,omitempty"`
+	MaxTokens         int      `json:"max_tokens,omitempty"`
+	Temperature       float64  `json:"temperature,omitempty"`
+	TopP              float64  `json:"top_p,omitempty"`
+	Stop              []string `json:"stop,omitempty"`
+	IncrementalOutput bool     `json:"incremental_output,omitempty"`
 }
 
 type dashScopeRequest struct {

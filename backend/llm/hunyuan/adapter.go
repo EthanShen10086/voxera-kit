@@ -150,7 +150,7 @@ func (a *Adapter) ChatStream(ctx context.Context, req llm.Request) (<-chan llm.S
 	}
 	a.setHeaders(httpReq)
 
-	httpResp, err := a.client.Do(httpReq)
+	httpResp, err := a.client.Do(httpReq) //nolint:bodyclose // closed in streaming goroutine below
 	if err != nil {
 		return nil, fmt.Errorf("hunyuan: send request: %w", err)
 	}

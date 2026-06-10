@@ -17,10 +17,10 @@ import (
 )
 
 const (
-	defaultEndpoint  = "https://api.anthropic.com/v1"
-	defaultModel     = "claude-sonnet-4-20250514"
-	defaultVersion   = "2023-06-01"
-	defaultTimeout   = 120 * time.Second
+	defaultEndpoint = "https://api.anthropic.com/v1"
+	defaultModel    = "claude-sonnet-4-20250514"
+	defaultVersion  = "2023-06-01"
+	defaultTimeout  = 120 * time.Second
 )
 
 // Adapter implements llm.Provider for the Anthropic Claude API.
@@ -173,7 +173,7 @@ func (a *Adapter) ChatStream(ctx context.Context, req llm.Request) (<-chan llm.S
 	}
 	a.setHeaders(httpReq)
 
-	httpResp, err := a.client.Do(httpReq)
+	httpResp, err := a.client.Do(httpReq) //nolint:bodyclose // closed in streaming goroutine below
 	if err != nil {
 		return nil, fmt.Errorf("claude: send request: %w", err)
 	}

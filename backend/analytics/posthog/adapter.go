@@ -126,13 +126,13 @@ func (a *Adapter) QueryFunnel(ctx context.Context, q analytics.FunnelQuery) (*an
 // QueryRetention queries PostHog's retention insight API.
 func (a *Adapter) QueryRetention(ctx context.Context, q analytics.RetentionQuery) (*analytics.RetentionResult, error) {
 	body := map[string]any{
-		"insight":        "RETENTION",
-		"target_entity":  map[string]any{"id": q.CohortEvent, "type": "events"},
-		"return_entity":  map[string]any{"id": q.ReturnEvent, "type": "events"},
-		"date_from":      q.From.Format("2006-01-02"),
-		"date_to":        q.To.Format("2006-01-02"),
-		"retention_type": "retention_first_time",
-		"period":         string(q.Granularity),
+		"insight":         "RETENTION",
+		"target_entity":   map[string]any{"id": q.CohortEvent, "type": "events"},
+		"return_entity":   map[string]any{"id": q.ReturnEvent, "type": "events"},
+		"date_from":       q.From.Format("2006-01-02"),
+		"date_to":         q.To.Format("2006-01-02"),
+		"retention_type":  "retention_first_time",
+		"period":          string(q.Granularity),
 		"total_intervals": q.Periods,
 	}
 

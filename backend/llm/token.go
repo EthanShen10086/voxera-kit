@@ -6,11 +6,11 @@ import "unicode"
 // Updated as of 2025 public pricing pages.
 var pricingTable = map[string][2]int64{
 	// OpenAI
-	"gpt-4o":         {250, 1000},
-	"gpt-4o-mini":    {15, 60},
-	"gpt-4-turbo":    {1000, 3000},
-	"gpt-4":          {3000, 6000},
-	"gpt-3.5-turbo":  {50, 150},
+	"gpt-4o":        {250, 1000},
+	"gpt-4o-mini":   {15, 60},
+	"gpt-4-turbo":   {1000, 3000},
+	"gpt-4":         {3000, 6000},
+	"gpt-3.5-turbo": {50, 150},
 	// DeepSeek
 	"deepseek-chat":     {14, 28},
 	"deepseek-coder":    {14, 28},
@@ -20,8 +20,8 @@ var pricingTable = map[string][2]int64{
 	"qwen-plus":  {80, 200},
 	"qwen-max":   {200, 600},
 	// Claude
-	"claude-sonnet-4-20250514":    {300, 1500},
-	"claude-3-5-haiku-20241022":   {80, 400},
+	"claude-sonnet-4-20250514":  {300, 1500},
+	"claude-3-5-haiku-20241022": {80, 400},
 	// Hunyuan
 	"hunyuan-pro":      {300, 900},
 	"hunyuan-standard": {45, 80},

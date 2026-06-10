@@ -16,7 +16,7 @@ import (
 )
 
 // Engine is an in-memory analytics store that computes funnels, retention,
-// and path analyses on-the-fly over its stored events.
+// and path analysis on-the-fly over its stored events.
 type Engine struct {
 	mu       sync.RWMutex
 	events   []analytics.Event
@@ -256,11 +256,6 @@ func (e *Engine) QueryRetention(_ context.Context, q analytics.RetentionQuery) (
 	filtered := e.filterEvents(q.TenantID, q.From, q.To)
 
 	// Find users who performed the cohort event, grouped by period.
-	type cohortEntry struct {
-		userID string
-		period string
-		ts     time.Time
-	}
 	cohortUsers := make(map[string]map[string]time.Time) // period -> userID -> first ts
 
 	for _, ev := range filtered {

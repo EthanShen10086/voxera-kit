@@ -17,9 +17,9 @@ import (
 )
 
 const (
-	defaultEndpoint  = "https://api.deepseek.com/v1"
-	defaultModel     = "deepseek-chat"
-	defaultTimeout   = 60 * time.Second
+	defaultEndpoint = "https://api.deepseek.com/v1"
+	defaultModel    = "deepseek-chat"
+	defaultTimeout  = 60 * time.Second
 )
 
 // Adapter implements llm.Provider for the DeepSeek API.
@@ -151,7 +151,7 @@ func (a *Adapter) ChatStream(ctx context.Context, req llm.Request) (<-chan llm.S
 	}
 	a.setHeaders(httpReq)
 
-	httpResp, err := a.client.Do(httpReq)
+	httpResp, err := a.client.Do(httpReq) //nolint:bodyclose // closed in streaming goroutine below
 	if err != nil {
 		return nil, fmt.Errorf("deepseek: send request: %w", err)
 	}

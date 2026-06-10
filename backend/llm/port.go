@@ -88,7 +88,7 @@ type ModelInfo struct {
 	InputPrice        float64 `json:"input_price"`
 	OutputPrice       float64 `json:"output_price"`
 	SupportsVision    bool    `json:"supports_vision"`
-	SupportsStreaming  bool    `json:"supports_streaming"`
+	SupportsStreaming bool    `json:"supports_streaming"`
 	SupportsEmbedding bool    `json:"supports_embedding"`
 }
 
