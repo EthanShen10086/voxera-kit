@@ -38,8 +38,8 @@ func NewAdapter(apiKey, endpoint, projectID string) *Adapter {
 // Create registers a new experiment via the PostHog Experiments API.
 func (a *Adapter) Create(ctx context.Context, cfg experiment.Config) error {
 	payload := map[string]any{
-		"name":        cfg.Name,
-		"description": cfg.Description,
+		"name":             cfg.Name,
+		"description":      cfg.Description,
 		"feature_flag_key": cfg.Key,
 		"parameters": map[string]any{
 			"feature_flag_variants": buildVariants(cfg.Variants),
@@ -148,7 +148,7 @@ func (a *Adapter) Assign(ctx context.Context, key string, userID string) (*exper
 	if err != nil {
 		return nil, fmt.Errorf("PostHog decide request: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -253,7 +253,7 @@ func (a *Adapter) doPost(ctx context.Context, url string, payload any) error {
 	if err != nil {
 		return fmt.Errorf("PostHog API request: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode >= http.StatusBadRequest {
 		body, _ := io.ReadAll(resp.Body)
@@ -274,7 +274,7 @@ func (a *Adapter) doGet(ctx context.Context, url string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("PostHog API request: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -292,8 +292,8 @@ func buildVariants(variants []experiment.Variant) []map[string]any {
 	result := make([]map[string]any, 0, len(variants))
 	for _, v := range variants {
 		result = append(result, map[string]any{
-			"key":        v.Key,
-			"name":       v.Name,
+			"key":                v.Key,
+			"name":               v.Name,
 			"rollout_percentage": v.Weight,
 		})
 	}
