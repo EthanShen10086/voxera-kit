@@ -103,7 +103,7 @@ func (a *Adapter) downloadAudio(ctx context.Context, url string) ([]byte, error)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected status %d downloading audio", resp.StatusCode)
@@ -149,7 +149,7 @@ func (a *Adapter) transcribe(ctx context.Context, audio io.Reader, opts *asr.Rec
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		respBody, _ := io.ReadAll(resp.Body)

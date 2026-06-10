@@ -143,10 +143,10 @@ export function parseUnreleasedBlock(content) {
 export function buildUnreleasedBlock(subjects) {
   const header = '## [Unreleased]';
   if (subjects.length === 0) {
-    return `${header}\n\n**变更摘要**（自动生成）\n- （相对上一版本无有效提交，或均为工程类提交）\n`;
+    return `${header}\n\n**变更摘要**（自动生成）\n\n- （相对上一版本无有效提交，或均为工程类提交）\n`;
   }
   const bullets = subjects.map(s => `- ${s}`).join('\n');
-  return `${header}\n\n**变更摘要**（自动生成，发版前可删减无关项并改写）\n${bullets}\n`;
+  return `${header}\n\n**变更摘要**（自动生成，发版前可删减无关项并改写）\n\n${bullets}\n`;
 }
 
 export function replaceUnreleasedSection(content, unreleasedBlock) {
