@@ -1,7 +1,10 @@
 {
   "private": true,
   "scripts": {
-    "prepare": "husky"
+    "prepare": "husky",
+    "changelog:refresh": "node scripts/changelog-append.mjs --refresh --mode=semver",
+    "release": "node scripts/changelog-release.mjs",
+    "release:dry-run": "node scripts/changelog-release.mjs --dry-run"
   },
   "devDependencies": {
     "husky": "^9.0.0",

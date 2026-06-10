@@ -3,3 +3,6 @@
 
 cd frontend && npx lint-staged
 cd ../backend && gofmt -l . | grep -q . && echo "Go files need formatting" && exit 1 || true
+
+node scripts/changelog-append.mjs --refresh --mode=semver
+git add CHANGELOG.md 2>/dev/null || true
