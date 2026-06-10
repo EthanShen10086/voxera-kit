@@ -377,8 +377,7 @@ func pickVariant(variants []experiment.Variant, expKey, userID string) string {
 	h.Write([]byte(expKey + ":" + userID))
 	sum := h.Sum(nil)
 	val := binary.BigEndian.Uint32(sum[:4])
-	tw := uint32(totalWeight) //nolint:gosec // totalWeight is sum of non-negative variant weights
-	bucket := int(val % tw)
+	bucket := int(int64(val) % int64(totalWeight))
 
 	cumulative := 0
 	for _, v := range variants {

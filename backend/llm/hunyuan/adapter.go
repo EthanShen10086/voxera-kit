@@ -92,7 +92,7 @@ func (a *Adapter) Chat(ctx context.Context, req llm.Request) (*llm.Response, err
 	if err != nil {
 		return nil, fmt.Errorf("hunyuan: send request: %w", err)
 	}
-	defer httpResp.Body.Close() //nolint:errcheck
+	defer func() { _ = httpResp.Body.Close() }()
 
 	if httpResp.StatusCode != http.StatusOK {
 		return nil, a.readError(httpResp)
@@ -150,21 +150,23 @@ func (a *Adapter) ChatStream(ctx context.Context, req llm.Request) (<-chan llm.S
 	}
 	a.setHeaders(httpReq)
 
-	httpResp, err := a.client.Do(httpReq) //nolint:bodyclose // closed in streaming goroutine below
+	httpResp, err := a.client.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("hunyuan: send request: %w", err)
 	}
 
 	if httpResp.StatusCode != http.StatusOK {
-		defer httpResp.Body.Close() //nolint:errcheck
+		defer func() { _ = httpResp.Body.Close() }()
 		return nil, a.readError(httpResp)
 	}
 
+	respBody := httpResp.Body
+	httpResp.Body = http.NoBody
 	ch := make(chan llm.StreamChunk)
 	go func() {
 		defer close(ch)
-		defer httpResp.Body.Close() //nolint:errcheck
-		a.readSSE(httpResp.Body, ch)
+		defer func() { _ = respBody.Close() }()
+		a.readSSE(respBody, ch)
 	}()
 	return ch, nil
 }
@@ -205,7 +207,7 @@ func (a *Adapter) Available(ctx context.Context) bool {
 	if err != nil {
 		return false
 	}
-	defer resp.Body.Close() //nolint:errcheck
+	defer func() { _ = resp.Body.Close() }()
 	return resp.StatusCode == http.StatusOK
 }
 
@@ -218,7 +220,10 @@ func (a *Adapter) setHeaders(req *http.Request) {
 }
 
 func (a *Adapter) readError(resp *http.Response) error {
-	body, _ := io.ReadAll(resp.Body) //nolint:errcheck
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("hunyuan: API error %d: read body: %w", resp.StatusCode, err)
+	}
 	return fmt.Errorf("hunyuan: API error %d: %s", resp.StatusCode, string(body))
 }
 
