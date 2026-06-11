@@ -1,8 +1,15 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+# Pre-commit：仅质量门禁；CHANGELOG 由 post-commit 维护
+echo "Running pre-commit checks..."
+
 cd frontend && npx lint-staged
+if [ $? -ne 0 ]; then
+  echo "Pre-commit failed: lint-staged. Push 时仍会复检。"
+  exit 1
+fi
+
 cd ../backend && gofmt -l . | grep -q . && echo "Go files need formatting" && exit 1 || true
 
-node scripts/changelog-append.mjs --refresh --mode=semver
-git add CHANGELOG.md 2>/dev/null || true
+echo "Pre-commit checks passed."

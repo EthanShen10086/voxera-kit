@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 /**
- * semver：维护 CHANGELOG.md 中 ## [Unreleased] 块（--refresh 用于 pre-commit）
+ * semver：维护 CHANGELOG.md 中 ## [Unreleased] 块（--refresh）。
+ * - 主路径：`.husky/post-commit` 在 commit 落盘后 refresh（git log 已含 HEAD），再 amend 并入同一 commit。
+ * - 手动：pnpm run changelog:refresh
  */
 import {
   CHANGELOG,

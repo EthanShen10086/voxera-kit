@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# Pre-push：第二道防线（commit --no-verify 后仍会在 push 时复检）
+if [ "$SKIP_PUSH_CHECK" = "1" ]; then
+  echo "Pre-push checks skipped via SKIP_PUSH_CHECK=1"
+  exit 0
+fi
+
+echo "Running pre-push checks..."
+
+cd frontend && pnpm run lint && pnpm run typecheck
+if [ $? -ne 0 ]; then
+  echo "Pre-push failed: frontend lint/typecheck. Fix or use SKIP_PUSH_CHECK=1 git push"
+  exit 1
+fi
+
+cd ../backend && go vet ./...
+if [ $? -ne 0 ]; then
+  echo "Pre-push failed: go vet. Fix or use SKIP_PUSH_CHECK=1 git push"
+  exit 1
+fi
+
+echo "Pre-push checks passed."
