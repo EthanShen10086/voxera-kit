@@ -4,6 +4,7 @@
 
 | voxera-kit commit / tag | Go | MsgGuard | voxera | finera | pulsera |
 |-------------------------|-----|----------|--------|--------|---------|
+| `58be0db` / **v0.1.0** (2026-06-17) | 1.22+ | **v0.1.0** | master | master | master |
 | `c037520` (2026-06) | 1.22+ | ≥ `v0.1.0` | master | master | master |
 | _future `v0.2.0`_ | 1.22+ | TBD | TBD | TBD | TBD |
 
