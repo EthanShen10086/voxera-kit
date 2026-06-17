@@ -6,7 +6,7 @@ describe("experiment types", () => {
   it("accepts variant metadata", () => {
     const variant: ExperimentVariant = {
       key: "control",
-      weight: 50,
+      name: "Control",
       payload: { color: "blue" },
     };
     expect(variant.key).toBe("control");
