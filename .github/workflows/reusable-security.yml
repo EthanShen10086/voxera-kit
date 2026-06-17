@@ -1,0 +1,33 @@
+name: Reusable Security Scan
+on:
+  workflow_call:
+    inputs:
+      go-working-directory:
+        type: string
+        default: "."
+      run-npm-audit:
+        type: boolean
+        default: false
+      npm-directory:
+        type: string
+        default: "."
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+      - name: Install gosec
+        run: go install github.com/securego/gosec/v2/cmd/gosec@latest
+      - name: gosec
+        working-directory: ${{ inputs.go-working-directory }}
+        run: gosec -fmt sarif -out gosec.sarif ./... 2>/dev/null || gosec ./...
+      - name: npm audit
+        if: inputs.run-npm-audit
+        working-directory: ${{ inputs.npm-directory }}
+        run: |
+          npm ci 2>/dev/null || npm install
+          npm audit --audit-level=high

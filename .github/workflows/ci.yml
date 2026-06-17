@@ -67,14 +67,69 @@ jobs:
         with:
           go-version: "1.22"
           cache-dependency-path: backend/**/go.sum
-      - name: Test all modules
+      - name: Test all modules (race + coverage)
         working-directory: backend
         run: |
+          echo "mode: atomic" > coverage.out
           for dir in $(awk '/\.\//{gsub(/[[:space:]]/, ""); gsub(/\)/, ""); if(/^\.\//) print}' go.work); do
             module="${dir#./}"
             echo "=== test $module ==="
-            (cd "$module" && go test ./... -race -count=1)
+            (cd "$module" && go test ./... -race -count=1 -coverprofile=cover.tmp -covermode=atomic)
+            if [ -f "$module/cover.tmp" ]; then
+              tail -n +2 "$module/cover.tmp" >> coverage.out
+              rm -f "$module/cover.tmp"
+            fi
           done
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: backend/coverage.out
+          flags: go
+          fail_ci_if_error: false
+
+  ts-test:
+    name: TypeScript Vitest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+        working-directory: frontend
+      - run: pnpm test
+        working-directory: frontend
+
+  consumer-smoke:
+    name: Downstream MsgGuard build
+    runs-on: ubuntu-latest
+    needs: go-build
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: voxera-kit
+      - uses: actions/checkout@v4
+        with:
+          repository: EthanShen10086/MsgGuard
+          path: MsgGuard
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+      - name: Build MsgGuard gateway against workspace kit
+        run: |
+          export GOPRIVATE=github.com/EthanShen10086/*
+          KIT="$GITHUB_WORKSPACE/voxera-kit/backend"
+          cd "$GITHUB_WORKSPACE/MsgGuard/services/gateway"
+          for mod in aiquota audit auth circuitbreaker featureflag loadshed middleware observability pii security; do
+            go mod edit -replace "github.com/EthanShen10086/voxera-kit/${mod}=${KIT}/${mod}"
+          done
+          go mod tidy
+          go build -o /dev/null ./cmd/server
 
   ts-lint:
     name: TypeScript Lint & Typecheck
