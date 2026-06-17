@@ -29,7 +29,7 @@ jobs:
           path: sbom.spdx.json
 
   cosign:
-    if: inputs.image != '' && secrets.COSIGN_PRIVATE_KEY != ''
+    if: inputs.image != ''
     runs-on: ubuntu-latest
     needs: sbom
     steps:
@@ -41,4 +41,8 @@ jobs:
         env:
           COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
         run: |
+          if [ -z "$COSIGN_PRIVATE_KEY" ]; then
+            echo "::notice::Cosign skipped — set COSIGN_PRIVATE_KEY secret."
+            exit 0
+          fi
           echo "Sign ${{ inputs.image }}:${{ inputs.tag }} when image is built in caller workflow"
