@@ -65,27 +65,16 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.22"
+          go-version: "1.25"
           cache-dependency-path: backend/**/go.sum
-      - name: Test all modules (race + coverage)
+      - name: Test all modules (race)
         working-directory: backend
         run: |
-          echo "mode: atomic" > coverage.out
           for dir in $(awk '/\.\//{gsub(/[[:space:]]/, ""); gsub(/\)/, ""); if(/^\.\//) print}' go.work); do
             module="${dir#./}"
             echo "=== test $module ==="
-            (cd "$module" && go test ./... -race -count=1 -coverprofile=cover.tmp -covermode=atomic)
-            if [ -f "$module/cover.tmp" ]; then
-              tail -n +2 "$module/cover.tmp" >> coverage.out
-              rm -f "$module/cover.tmp"
-            fi
+            (cd "$module" && go test ./... -race -count=1)
           done
-      - name: Upload coverage
-        uses: codecov/codecov-action@v4
-        with:
-          files: backend/coverage.out
-          flags: go
-          fail_ci_if_error: false
 
   ts-test:
     name: TypeScript Vitest
@@ -122,13 +111,9 @@ jobs:
           go-version: "1.25"
       - name: Build MsgGuard gateway against workspace kit
         run: |
-          export GOPRIVATE=github.com/EthanShen10086/*
-          KIT="$GITHUB_WORKSPACE/voxera-kit/backend"
-          cd "$GITHUB_WORKSPACE/MsgGuard/services/gateway"
-          for mod in aiquota audit auth circuitbreaker featureflag loadshed middleware observability pii security; do
-            go mod edit -replace "github.com/EthanShen10086/voxera-kit/${mod}=${KIT}/${mod}"
-          done
-          go mod tidy
+          cd "$GITHUB_WORKSPACE/MsgGuard"
+          export GOWORK="$GITHUB_WORKSPACE/MsgGuard/go.work"
+          cd services/gateway
           go build -o /dev/null ./cmd/server
 
   ts-lint:
