@@ -12,7 +12,7 @@ Wave T 集成测试基建：testcontainers 封装 + 数据平面 contract smoke 
 | `integration/` | CI 集成测试入口 |
 | `assert/` | 共享断言（`ErrorIs` 等） |
 
-相关：`backend/fixture`（Wave T3 造数）、`frontend/packages/fixture`（前端 JSON 工厂）。
+相关：`backend/fixture`（Wave T3 造数）、`frontend/packages/fixture`（前端 JSON 工厂）、`frontend/packages/testing`（Wave T4 Vitest/MSW/React 测试基建）。
 
 ## containers
 

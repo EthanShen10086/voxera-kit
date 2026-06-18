@@ -1,0 +1,9 @@
+{
+  "extends": "@voxera-kit/config/tsconfig",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "jsx": "react-jsx"
+  },
+  "include": ["src"]
+}
