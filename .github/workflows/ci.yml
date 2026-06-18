@@ -38,6 +38,20 @@ jobs:
             (cd "$module" && go vet ./...)
           done
 
+  go-contract:
+    name: Go Contract Tests
+    runs-on: ubuntu-latest
+    needs: go-lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache-dependency-path: backend/**/go.sum
+      - name: Port contract tests (no Docker)
+        working-directory: backend
+        run: bash scripts/contract-test.sh
+
   go-build:
     name: Go Build
     runs-on: ubuntu-latest
@@ -76,8 +90,34 @@ jobs:
             (cd "$module" && go test ./... -race -count=1)
           done
 
+  go-coverage:
+    name: Go Coverage
+    runs-on: ubuntu-latest
+    needs: go-test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache-dependency-path: backend/**/go.sum
+      - name: Merge module coverage profiles
+        working-directory: backend
+        run: bash scripts/coverage.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: go-coverage
+          path: backend/coverage/merged.out
+          retention-days: 7
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: backend/coverage/merged.out
+          flags: backend
+          fail_ci_if_error: false
+
   go-integration:
     name: Go Integration (testkit)
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     needs: go-lint
     steps:
@@ -89,6 +129,23 @@ jobs:
       - name: Data plane integration tests (testcontainers)
         working-directory: backend/testkit
         run: go test -tags=integration -race -count=1 -timeout=15m ./...
+
+  e2e-smoke:
+    name: E2E Smoke (Playwright template)
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run Playwright template smoke
+        working-directory: templates/e2e-playwright
+        run: |
+          npm install
+          npm run install:browsers
+          npm test
 
   ts-test:
     name: TypeScript Vitest

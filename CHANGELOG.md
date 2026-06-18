@@ -13,15 +13,19 @@
 - **storage 高级能力**：分片上传、版本控制、生命周期、桶通知（port + memory/minio/s3 等）
 - **契约测试**：`storage/contract`、`cache/contract`、`mq/contract`
 - **文档**：`backend/storage/README.md`、数据层 README 状态诚实化（🟡）
-- **测试基建计划**：`docs/TESTING_INFRA_PLAN.md`（Wave T：testkit、MSW、E2E 模板）
+- **testing (Wave T4)**：`@voxera-kit/testing`（Vitest setup、MSW handlers、renderWithProviders）
+- **fixture (Wave T3)**：`backend/fixture`、`@voxera-kit/fixture`
+- **E2E 模板 (Wave T5)**：`templates/e2e-playwright`（Playwright 登录 smoke + CI 片段）
+- **CI (Wave T6)**：PR 跑契约测试；main 跑 integration + E2E smoke；合并 Go coverage + Codecov
 
 ### Changed
 - `cache/local.New` 现返回 `(*Adapter, error)`（ristretto 初始化）
 
 ### Planned (Wave T)
 - [x] `backend/testkit/containers` + MinIO/Redis/NATS/Postgres 集成 CI（T1）
-- [ ] `frontend/packages/testing`（MSW + Vitest setup）（T4）
-- [ ] E2E Playwright 模板（T5）
+- [x] `frontend/packages/testing`（MSW + Vitest setup）（T4）
+- [x] E2E Playwright 模板（T5）
+- [x] CI 质量门禁：PR 契约 / main 集成 + coverage（T6）
 
 ---
 

@@ -1,0 +1,64 @@
+name: Nightly
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: nightly-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integration:
+    name: Go Integration (testkit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache-dependency-path: backend/testkit/go.sum
+      - name: Data plane integration tests
+        working-directory: backend/testkit
+        run: go test -tags=integration -race -count=1 -timeout=15m ./...
+
+  e2e-smoke:
+    name: E2E Smoke (Playwright template)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install and run Playwright template
+        working-directory: templates/e2e-playwright
+        run: |
+          npm install
+          npm run install:browsers
+          npm test
+
+  coverage:
+    name: Go Coverage Report
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache-dependency-path: backend/**/go.sum
+      - name: Merge module coverage
+        working-directory: backend
+        run: bash scripts/coverage.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: go-coverage-nightly
+          path: backend/coverage/merged.out
+          retention-days: 14
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: backend/coverage/merged.out
+          flags: backend
+          fail_ci_if_error: false
