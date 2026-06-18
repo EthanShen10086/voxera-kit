@@ -4,7 +4,7 @@
 
 | voxera-kit commit / tag | Go | MsgGuard | voxera | finera | pulsera |
 |-------------------------|-----|----------|--------|--------|---------|
-| _see tag **v0.2.0**_ / **v0.2.0** (2026-06-13) | 1.22+ | pin updated | pin updated | pin updated | pin updated |
+| **`132286e`** / **v0.2.0** (2026-06-13) | 1.22+ | pin updated | pin updated | pin updated | pin updated |
 | `58be0db` / **v0.1.0** (2026-06-17) | 1.22+ | **v0.1.0** | superseded | superseded | superseded |
 | `c037520` (2026-06) | 1.22+ | historical | historical | historical | historical |
 

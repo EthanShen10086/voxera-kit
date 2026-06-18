@@ -41,8 +41,8 @@ kit 自身 CI 参考：`.github/workflows/ci.yml`、`nightly.yml`。
 产品 CI 通过 sibling checkout + pin 文件锁定 kit：
 
 ```bash
-# .github/voxera-kit-pin — 与 voxera-kit tag 对应 commit（见 COMPATIBILITY.md）
-<kit-release-sha>
+# .github/voxera-kit-pin — v0.2.0
+132286ea38c3a3300c43c72c140c8cc2dc34e984
 ```
 
 CI 步骤（与 voxera/finera/pulsera 现有一致）：
