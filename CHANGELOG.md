@@ -5,6 +5,26 @@
 
 ---
 
+## [Unreleased]
+
+### Added
+- **testkit (Wave T1)**：`backend/testkit/containers`（Redis/NATS/Postgres/MinIO testcontainers）+ `integration` smoke tests
+- **CI**：`go-integration` job 运行 testkit 集成测试`storage`（minio/s3/oss/cos/memory/fs）、`cache`（redis/local/memcached）、`mq`（nats/kafka/rabbitmq/memory）、`database`（postgres/mysql/mongodb）、`task`（memory/redis）、`secret`（vault/aws/gcp）
+- **storage 高级能力**：分片上传、版本控制、生命周期、桶通知（port + memory/minio/s3 等）
+- **契约测试**：`storage/contract`、`cache/contract`、`mq/contract`
+- **文档**：`backend/storage/README.md`、数据层 README 状态诚实化（🟡）
+- **测试基建计划**：`docs/TESTING_INFRA_PLAN.md`（Wave T：testkit、MSW、E2E 模板）
+
+### Changed
+- `cache/local.New` 现返回 `(*Adapter, error)`（ristretto 初始化）
+
+### Planned (Wave T)
+- [x] `backend/testkit/containers` + MinIO/Redis/NATS/Postgres 集成 CI（T1）
+- [ ] `frontend/packages/testing`（MSW + Vitest setup）（T4）
+- [ ] E2E Playwright 模板（T5）
+
+---
+
 ## [1.0.0] - 2026-05-22
 
 ### Added

@@ -20,6 +20,8 @@
 - **应用层（Voxera / Finera / Pulsera）专注业务逻辑**，通过 Kit 接口组装能力
 - **渐进式采用** — 每个模块独立 `go.mod`，可单独 `go get`
 
+相关文档：[测试基建计划 (Wave T)](docs/TESTING_INFRA_PLAN.md) · [storage 模块说明](backend/storage/README.md)
+
 ---
 
 ## 架构设计
@@ -76,7 +78,7 @@ graph TB
 | **指数退避重试** | `retry/` — Exponential backoff + jitter + context | AWS SDK Retry, Google API Client | ✅ 生产可用 |
 | **审计日志** | `audit/` — Writer/Reader 接口, 结构化 Entry | Google Cloud Audit Logs, AWS CloudTrail | ✅ 生产可用 |
 | **PII 脱敏** | `pii/` — Regex 规则引擎 (email/phone/CC/SSN/IP) | Google DLP, AWS Macie | ✅ 生产可用 |
-| **密钥管理** | `secret/` — Manager 接口, Env adapter | HashiCorp Vault, AWS Secrets Manager, GCP KMS | ✅ 接口就绪 |
+| 密钥管理 | `secret/` — Manager 接口, env/vault/aws/gcp adapters | Tencent 🔶 stub | 🟡 |
 | **特性开关 (Feature Flag)** | `featureflag/` — 确定性百分比分桶 (SHA-256) | LaunchDarkly, Google Experimentation, Unleash | ✅ 生产可用 |
 | **mTLS** | `crypto/tls/` — Server + Client 双向 TLS | Istio mTLS, Google ALTS | ✅ 生产可用 |
 | **安全响应头** | `security/headers/` — HSTS/CSP/X-Frame 预设 | Cloudflare, AWS WAF Headers | ✅ 生产可用 |
@@ -117,7 +119,9 @@ voxera-kit 提供三种开箱即用的变现路径：
 
 ## 后端模块索引
 
-共 **42** 个 Go 模块（含子模块），均遵循 Port + Adapter 模式。
+共 **43** 个 Go 模块（含子模块），均遵循 Port + Adapter 模式。
+
+**状态图例**：`✅` 生产可用 · `🟡` Port + Adapter 已实现（含契约测试） · `🔶` 部分实现 · `❌` 缺失
 
 ### 可观测性
 
@@ -138,7 +142,7 @@ voxera-kit 提供三种开箱即用的变现路径：
 | `loadshed` | ✅ | `Shedder`, `Token` | adaptive | AIMD 自适应过载保护 |
 | `ratelimiter` | ✅ | `Limiter` | memory | 速率限制 |
 | `circuitbreaker` | ✅ | `CircuitBreaker` | memory | 熔断器 |
-| `cache` | ✅ | `Cache` | Redis, Memcached, Local (ristretto) | 多级缓存 |
+| `cache` | 🟡 | `Cache` | Redis, Memcached, Local (ristretto) | 多级缓存；见 `backend/cache/` |
 | `compression` | ✅ | `Compressor` | gzip | 数据压缩 |
 | `concurrency` | ✅ | `Pool` | channel | 并发任务池 |
 
@@ -148,7 +152,8 @@ voxera-kit 提供三种开箱即用的变现路径：
 |------|------|-------------|--------|------|
 | `auth` | ✅ | `Authenticator`, `Authorizer` | JWT, OAuth2, OIDC | 认证授权 |
 | `audit` | ✅ | `Writer`, `Reader` | memory, noop | 审计日志 |
-| `secret` | ✅ | `Manager` | env | 密钥管理（环境变量前缀） |
+| `secret` | 🟡 | `Manager` | env, vault, aws, gcp; tencent 🔶 | 密钥管理 |
+| `task` | 🟡 | `TaskQueue` | memory, redis | 延迟任务（对标 Cloud Tasks） |
 | `pii` | ✅ | `Redactor`, `Rule` | regex | PII 脱敏（email/phone/CC/SSN/IP） |
 | `featureflag` | ✅ | `Store`, `Flag` | memory | 特性开关（SHA-256 确定性百分比） |
 | `security` | ✅ | `Config` | headers, memory | HSTS / CSP / X-Frame 安全头 |
@@ -165,9 +170,9 @@ voxera-kit 提供三种开箱即用的变现路径：
 
 | 模块 | 状态 | 端口（接口） | 适配器 | 说明 |
 |------|------|-------------|--------|------|
-| `database` | ✅ | `Repository[T]`, `Transaction`, `Database` | PostgreSQL, MongoDB, MySQL | 通用数据库抽象 |
-| `mq` | ✅ | `Publisher`, `Subscriber` | NATS, Kafka, RabbitMQ | 消息队列 |
-| `storage` | ✅ | `ObjectStore` | S3, MinIO, 阿里云 OSS | 对象存储 |
+| `database` | 🟡 | `Repository[T]`, `Transaction`, `Database` | PostgreSQL, MongoDB, MySQL | 通用数据库抽象 |
+| `mq` | 🟡 | `Publisher`, `Subscriber` | NATS, Kafka, RabbitMQ, memory | 消息队列 |
+| `storage` | 🟡 | `ObjectStore`, `StorageAdmin` | S3, MinIO, OSS, COS, memory, fs | 见 [backend/storage/README.md](backend/storage/README.md) |
 | `config` | ✅ | 配置加载接口 | Viper-based | 配置管理 |
 | `errors` | ✅ | `AppError`, `ErrorCode` | — | 统一错误类型 |
 | `dataprovider` | ✅ | `DataProvider`, `FinancialProvider` | stub | 通用 / 金融数据源 |

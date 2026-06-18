@@ -1,18 +1,19 @@
 // Package mysql provides a MySQL implementation of the database.Database interface.
-// It uses database/sql with a MySQL driver such as github.com/go-sql-driver/mysql.
+// It uses database/sql with github.com/go-sql-driver/mysql.
 package mysql
 
 import (
 	"context"
+	"database/sql"
+	"fmt"
 
 	"github.com/EthanShen10086/voxera-kit/database"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 // Adapter implements the database.Database interface using MySQL.
-//
-// Intended dependency: database/sql with github.com/go-sql-driver/mysql
 type Adapter struct {
-	// db *sql.DB // TODO: uncomment when MySQL driver dependency is added
+	db *sql.DB
 }
 
 // New creates a new MySQL Adapter instance.
@@ -22,24 +23,68 @@ func New() *Adapter {
 
 // Connect establishes a connection pool to the MySQL database.
 func (a *Adapter) Connect(ctx context.Context, cfg database.Config) error {
-	// TODO: implement using database/sql with MySQL driver
+	db, err := sql.Open("mysql", dsn(cfg))
+	if err != nil {
+		return fmt.Errorf("mysql: open: %w", err)
+	}
+
+	if cfg.MaxOpenConns > 0 {
+		db.SetMaxOpenConns(cfg.MaxOpenConns)
+	}
+	if cfg.MaxIdleConns > 0 {
+		db.SetMaxIdleConns(cfg.MaxIdleConns)
+	}
+	if cfg.ConnMaxLifetime > 0 {
+		db.SetConnMaxLifetime(cfg.ConnMaxLifetime)
+	}
+
+	if err := db.PingContext(ctx); err != nil {
+		_ = db.Close()
+		return fmt.Errorf("mysql: ping: %w", err)
+	}
+
+	if a.db != nil {
+		_ = a.db.Close()
+	}
+	a.db = db
 	return nil
 }
 
 // Close shuts down the MySQL connection pool.
 func (a *Adapter) Close() error {
-	// TODO: implement using database/sql with MySQL driver
-	return nil
+	if a.db == nil {
+		return nil
+	}
+	err := a.db.Close()
+	a.db = nil
+	return err
 }
 
 // Ping verifies the MySQL connection is alive.
 func (a *Adapter) Ping(ctx context.Context) error {
-	// TODO: implement using database/sql with MySQL driver
-	return nil
+	if a.db == nil {
+		return fmt.Errorf("mysql: not connected")
+	}
+	return a.db.PingContext(ctx)
 }
 
 // Transaction returns a new Transaction backed by a sql.Tx.
 func (a *Adapter) Transaction() database.Transaction {
-	// TODO: implement using database/sql with MySQL driver
-	return nil
+	return &Transaction{db: a.db}
+}
+
+func dsn(cfg database.Config) string {
+	port := cfg.Port
+	if port == 0 {
+		port = 3306
+	}
+
+	tls := "false"
+	switch cfg.SSLMode {
+	case "require", "verify-ca", "verify-full", "true", "preferred":
+		tls = "true"
+	}
+
+	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true&tls=%s",
+		cfg.User, cfg.Password, cfg.Host, port, cfg.Database, tls)
 }

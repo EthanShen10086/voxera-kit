@@ -5,8 +5,12 @@ package cache
 
 import (
 	"context"
+	"errors"
 	"time"
 )
+
+// ErrNotFound is returned when a requested cache key does not exist.
+var ErrNotFound = errors.New("cache: key not found")
 
 // Config holds the connection parameters for a cache backend.
 type Config struct {

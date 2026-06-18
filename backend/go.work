@@ -2,7 +2,10 @@ go 1.25.0
 
 use (
 	./ad
+	./aiquota
+	./analytics
 	./asr
+	./audit
 	./auth
 	./bulkhead
 	./cache
@@ -19,6 +22,7 @@ use (
 	./featureflag
 	./framework
 	./license
+	./llm
 	./loadshed
 	./messaging
 	./middleware
@@ -38,9 +42,7 @@ use (
 	./shorturl
 	./singleflight
 	./storage
+	./task
+	./testkit
 	./translation
-	./audit
-	./analytics
-	./aiquota
-	./llm
 )

@@ -1,6 +1,6 @@
 // Package storage defines the port interface for object storage operations.
 // It abstracts file/object upload, download, and management across different
-// storage backends (S3, MinIO, Alibaba Cloud OSS).
+// storage backends (S3, MinIO, Alibaba Cloud OSS, Tencent COS).
 package storage
 
 import (
@@ -11,60 +11,134 @@ import (
 
 // ObjectMeta contains metadata about a stored object.
 type ObjectMeta struct {
-	// Key is the unique path/identifier of the object in the store.
-	Key string
-	// Size is the object size in bytes.
-	Size int64
-	// ContentType is the MIME type of the object.
-	ContentType string
-	// ETag is the entity tag for cache validation.
-	ETag string
-	// LastModified is the timestamp of the last modification.
+	Key          string
+	Size         int64
+	ContentType  string
+	ETag         string
 	LastModified time.Time
 }
 
 // UploadOptions specifies optional parameters for object uploads.
 type UploadOptions struct {
-	// ContentType overrides the auto-detected MIME type.
 	ContentType string
-	// Metadata contains user-defined key-value pairs stored with the object.
-	Metadata map[string]string
-	// ACL sets the access control policy (e.g., "private", "public-read").
-	ACL string
+	Metadata    map[string]string
+	ACL         string
+}
+
+// CompletedPart identifies a finished multipart upload part.
+type CompletedPart struct {
+	PartNumber int
+	ETag       string
+}
+
+// ObjectVersion describes a single object version or delete marker.
+type ObjectVersion struct {
+	VersionID      string
+	Key            string
+	Size           int64
+	IsLatest       bool
+	IsDeleteMarker bool
+	LastModified   time.Time
+}
+
+// LifecycleRule describes bucket lifecycle configuration (minimal cross-cloud subset).
+type LifecycleRule struct {
+	ID                              string
+	Prefix                          string
+	Status                          string // Enabled / Disabled
+	ExpirationDays                  int
+	NoncurrentVersionExpirationDays int
+	TransitionToIADays              int
+}
+
+// NotificationEvent identifies object storage events.
+type NotificationEvent string
+
+const (
+	EventObjectCreated NotificationEvent = "ObjectCreated"
+	EventObjectRemoved NotificationEvent = "ObjectRemoved"
+)
+
+// NotificationDestination routes bucket events to a downstream target.
+type NotificationDestination struct {
+	Type   string // mq, webhook, sqs, sns
+	Target string
+	Events []NotificationEvent
 }
 
 // ObjectStore is the interface for object storage operations.
 // Implementations must be safe for concurrent use.
 type ObjectStore interface {
-	// Upload stores an object read from reader under the given key.
 	Upload(ctx context.Context, key string, reader io.Reader, opts *UploadOptions) error
-	// Download retrieves the object content as a readable stream.
-	// The caller is responsible for closing the returned ReadCloser.
 	Download(ctx context.Context, key string) (io.ReadCloser, error)
-	// Delete removes the object identified by key.
 	Delete(ctx context.Context, key string) error
-	// GetURL generates a pre-signed URL for temporary access to the object.
 	GetURL(ctx context.Context, key string, expiry time.Duration) (string, error)
-	// List returns metadata for all objects matching the given prefix.
 	List(ctx context.Context, prefix string) ([]*ObjectMeta, error)
-	// Exists checks whether an object with the given key exists.
 	Exists(ctx context.Context, key string) (bool, error)
-	// Close releases all resources held by the storage client.
 	Close() error
+}
+
+// MultipartUploader provides explicit multipart upload APIs.
+type MultipartUploader interface {
+	InitiateMultipartUpload(ctx context.Context, key string, opts *UploadOptions) (uploadID string, err error)
+	UploadPart(ctx context.Context, key, uploadID string, partNumber int, reader io.Reader, size int64) (etag string, err error)
+	CompleteMultipartUpload(ctx context.Context, key, uploadID string, parts []CompletedPart) error
+	AbortMultipartUpload(ctx context.Context, key, uploadID string) error
+}
+
+// LargeObjectStore combines ObjectStore with convenience large-file upload.
+type LargeObjectStore interface {
+	ObjectStore
+	UploadLarge(ctx context.Context, key string, reader io.ReaderAt, size int64, opts *UploadOptions) error
+}
+
+// VersionedObjectStore supports object versioning operations.
+type VersionedObjectStore interface {
+	ListVersions(ctx context.Context, key string) ([]*ObjectVersion, error)
+	DownloadVersion(ctx context.Context, key, versionID string) (io.ReadCloser, error)
+	DeleteVersion(ctx context.Context, key, versionID string) error
+	RestoreVersion(ctx context.Context, key, versionID string) error
+}
+
+// LifecycleManager manages bucket lifecycle rules.
+type LifecycleManager interface {
+	PutLifecycleRules(ctx context.Context, rules []LifecycleRule) error
+	GetLifecycleRules(ctx context.Context) ([]LifecycleRule, error)
+	DeleteLifecycleRules(ctx context.Context) error
+}
+
+// NotificationManager configures bucket event notifications.
+type NotificationManager interface {
+	PutBucketNotification(ctx context.Context, cfg NotificationDestination) error
+	GetBucketNotification(ctx context.Context) (*NotificationDestination, error)
+	DeleteBucketNotification(ctx context.Context) error
+}
+
+// StorageAdmin provides bucket-level administration.
+type StorageAdmin interface {
+	EnableVersioning(ctx context.Context, enabled bool) error
+	GetVersioning(ctx context.Context) (bool, error)
+	LifecycleManager
+	NotificationManager
 }
 
 // Config holds the connection parameters for an object storage backend.
 type Config struct {
-	// Endpoint is the storage service endpoint URL.
-	Endpoint string
-	// AccessKey is the access key ID for authentication.
-	AccessKey string
-	// SecretKey is the secret access key for authentication.
-	SecretKey string
-	// Bucket is the target bucket/container name.
-	Bucket string
-	// Region is the storage service region.
-	Region string
-	// UseSSL enables HTTPS for the connection when true.
-	UseSSL bool
+	Endpoint             string
+	AccessKey            string
+	SecretKey            string
+	Bucket               string
+	Region               string
+	UseSSL               bool
+	PathStyle            bool
+	SessionToken         string
+	DisableSSLVerify     bool
+	PartSize             int64
+	MultipartThreshold   int64
 }
+
+// DefaultPartSize is the default multipart part size (8 MiB).
+const DefaultPartSize = 8 << 20
+
+// DefaultMultipartThreshold is the size above which UploadLarge uses multipart (100 MiB).
+const DefaultMultipartThreshold = 100 << 20
