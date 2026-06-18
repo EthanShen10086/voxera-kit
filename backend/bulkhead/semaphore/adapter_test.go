@@ -63,3 +63,14 @@ func TestExecuteContextCancel(t *testing.T) {
 		t.Fatalf("Execute() = %v", err)
 	}
 }
+
+func TestActiveCountAndMaxWaitTime(t *testing.T) {
+	wait := 50 * time.Millisecond
+	a := semaphore.New(bulkhead.Config{MaxConcurrent: 2, MaxWaitTime: wait})
+	if a.MaxWaitTime() != wait {
+		t.Fatalf("MaxWaitTime = %v", a.MaxWaitTime())
+	}
+	if a.ActiveCount() != 0 {
+		t.Fatalf("ActiveCount = %d", a.ActiveCount())
+	}
+}

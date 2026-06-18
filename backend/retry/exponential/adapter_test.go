@@ -87,3 +87,20 @@ func TestExecute_ContextCanceled(t *testing.T) {
 		t.Fatalf("err=%v", err)
 	}
 }
+
+func TestExecute_WithJitterAndMaxBackoff(t *testing.T) {
+	fail := errors.New("fail")
+	a := exponential.New(retry.Policy{
+		MaxAttempts:    3,
+		InitialBackoff: 2 * time.Millisecond,
+		Multiplier:     10,
+		MaxBackoff:     3 * time.Millisecond,
+		JitterFraction: 0.5,
+	}, nil)
+	err := a.Execute(context.Background(), func(context.Context) error {
+		return fail
+	})
+	if !errors.Is(err, fail) {
+		t.Fatalf("err=%v", err)
+	}
+}

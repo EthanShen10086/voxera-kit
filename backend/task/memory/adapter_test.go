@@ -3,6 +3,7 @@ package memory_test
 
 import (
 	"context"
+	"errors"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -51,14 +52,47 @@ func TestAdapterScheduleCancel(t *testing.T) {
 	if err := q.Schedule(ctx, task.Task{ID: "t2"}, runAt); err != nil {
 		t.Fatalf("Schedule() = %v", err)
 	}
+	if q.Pending() == 0 {
+		t.Fatal("expected pending scheduled task")
+	}
 	if err := q.Cancel(ctx, "t2"); err != nil {
 		t.Fatalf("Cancel() = %v", err)
+	}
+	if q.Pending() != 0 {
+		t.Fatal("expected no pending after cancel")
 	}
 
 	time.Sleep(700 * time.Millisecond)
 	if ran.Load() {
 		t.Fatal("canceled task should not run")
 	}
+}
+
+func TestAdapterStopAndDeadLetter(t *testing.T) {
+	q := memory.New(memory.Config{
+		Handler: func(_ context.Context, _ task.Task) error {
+			return errors.New("fail")
+		},
+	})
+	ctx := context.Background()
+	if err := q.Enqueue(ctx, task.Task{
+		ID: "dlq1", Name: "job",
+		Retry: task.RetryPolicy{MaxAttempts: 1, Backoff: time.Millisecond},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	deadline := time.Now().Add(2 * time.Second)
+	for q.DeadLetterLen() == 0 && time.Now().Before(deadline) {
+		time.Sleep(20 * time.Millisecond)
+	}
+	if q.DeadLetterLen() == 0 {
+		t.Fatal("expected dead letter task")
+	}
+	tasks := q.DeadLetterTasks()
+	if len(tasks) != 1 || tasks[0].ID != "dlq1" {
+		t.Fatalf("DeadLetterTasks() = %#v", tasks)
+	}
+	q.Stop()
 }
 
 func TestTaskContract_Memory(t *testing.T) {

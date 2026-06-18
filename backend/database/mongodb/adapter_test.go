@@ -22,6 +22,12 @@ func TestAdapterNotConnected(t *testing.T) {
 	if _, err := tx.Begin(ctx); err == nil {
 		t.Fatal("expected begin error")
 	}
+	if err := tx.Commit(); err == nil {
+		t.Fatal("expected commit error")
+	}
+	if err := tx.Rollback(); err == nil {
+		t.Fatal("expected rollback error")
+	}
 }
 
 func TestConnectUnreachable(t *testing.T) {

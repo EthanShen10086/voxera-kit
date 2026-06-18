@@ -12,6 +12,15 @@
 - `secret/gcp`：`secretIDFromName` 正确解析含 `/` 的 secret 路径
 
 ### Added
+- **Go 单元/契约测试（Phase 4 Sprint 4.7 → ~80%）**:
+  - `storage/minio`：gofakes3 单测（版本/多段上传/UploadLarge/GetURL/RestoreVersion）
+  - `storage/internal/testfixture`：COS/OSS handler 内部路径单测
+  - `secret/tencent`：X-TC-Action httptest mock + 契约测试
+  - `storage/s3`：`mapError`/`safeInt32` internal + 版本/Exists/List 扩展
+  - 快赢：`notification/router`、`dataparser/factory`、`framework/kratos|cloudwego`、`observability/tracing|profiling`、`crypto/tls` 证书、`cache/memcached`
+  - `mq/kafka|rabbitmq` 离线深化；`database/*/dsn|uri` internal；`payment/*` QueryOrder/Refund；`task/memory` DLQ/Stop
+  - partial：`experiment/posthog|memory`、`circuitbreaker/memory`、`bulkhead/semaphore`、`security/memory`、`llm/noop`
+- **`MIN_COVERAGE`**: 50% → **80%**（CI `go-coverage`、`coverage.sh` 默认、nightly merge job）
 - **Go 单元/契约测试（Phase 4 Sprint 4.6 → ~70%）**:
   - `secret/vault`：httptest KV v2 mock + 契约测试
   - `secret/gcp`：bufconn gRPC fake + 契约测试；修复 `secretIDFromName` 斜杠路径

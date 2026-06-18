@@ -14,6 +14,13 @@ func TestAlipayGatewayStub(t *testing.T) {
 	if err != nil || order.ID != "a1" {
 		t.Fatalf("CreateOrder: %+v err=%v", order, err)
 	}
+	if err := a.Refund(context.Background(), &payment.RefundRequest{OrderID: "a1"}); err != nil {
+		t.Fatal(err)
+	}
+	got, err := a.QueryOrder(context.Background(), "a1")
+	if err != nil || got != nil {
+		t.Fatalf("QueryOrder: %+v err=%v", got, err)
+	}
 	if err := a.Close(); err != nil {
 		t.Fatal(err)
 	}

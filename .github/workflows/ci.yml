@@ -103,7 +103,7 @@ jobs:
       - name: Merge module coverage profiles
         working-directory: backend
         env:
-          MIN_COVERAGE: "50"
+          MIN_COVERAGE: "80"
           COVERAGE_ENFORCE: "true"
           COVERAGE_SKIP: testkit
         run: bash scripts/coverage.sh

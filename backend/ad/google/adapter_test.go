@@ -22,4 +22,7 @@ func TestGoogleAdapter(t *testing.T) {
 	if err := a.ReportImpression(context.Background(), "ad", "u"); err != nil {
 		t.Fatal(err)
 	}
+	if err := a.ReportClick(context.Background(), "ad", "u"); err != nil {
+		t.Fatal(err)
+	}
 }

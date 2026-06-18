@@ -26,4 +26,16 @@ func TestNoopProviderContract(t *testing.T) {
 	if _, open := <-ch; open {
 		t.Fatal("stream should close immediately")
 	}
+
+	emb, err := p.Embed(context.Background(), llm.EmbeddingRequest{})
+	if err != nil || emb == nil {
+		t.Fatalf("Embed: %v", err)
+	}
+	models, err := p.ListModels(context.Background())
+	if err != nil {
+		t.Fatalf("ListModels: %v", err)
+	}
+	if models != nil {
+		t.Fatalf("expected nil models, got %#v", models)
+	}
 }

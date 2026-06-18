@@ -64,3 +64,41 @@ func TestCreateListAssign(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestListAndGetResults(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/experiments/1/results"):
+			_ = json.NewEncoder(w).Encode(map[string]any{"insight": []any{}})
+		case r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/experiments"):
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"results": []map[string]any{{
+					"id": 1, "name": "Checkout", "description": "btn",
+					"start_date": "2024-01-01",
+					"feature_flag": map[string]string{"key": "checkout-exp"},
+				}},
+			})
+		default:
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer srv.Close()
+
+	a := posthog.NewAdapter("ph-key", srv.URL, "proj-1")
+	ctx := context.Background()
+
+	list, err := a.List(ctx, experiment.StatusRunning)
+	if err != nil || len(list) != 1 {
+		t.Fatalf("List: %#v err=%v", list, err)
+	}
+
+	result, err := a.GetResults(ctx, "checkout-exp")
+	if err != nil || result == nil || result.ExperimentKey != "checkout-exp" {
+		t.Fatalf("GetResults: %#v err=%v", result, err)
+	}
+
+	got, err := a.Get(ctx, "missing")
+	if err == nil || got != nil {
+		t.Fatalf("Get missing: %#v err=%v", got, err)
+	}
+}

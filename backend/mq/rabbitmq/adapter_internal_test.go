@@ -87,3 +87,45 @@ func TestPublisherPublishValidation(t *testing.T) {
 		t.Fatal("expected nil message error")
 	}
 }
+
+func TestPublisherCloseNil(t *testing.T) {
+	p := &Publisher{}
+	if err := p.Close(); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestSubscriberAckInvalidPending(t *testing.T) {
+	s := &Subscriber{}
+	s.pending.Store("bad", "not-delivery")
+	err := s.Ack(context.Background(), &mq.Message{ID: "bad"})
+	if err == nil {
+		t.Fatal("expected invalid pending error")
+	}
+}
+
+func TestSubscriberUnsubscribeMissing(t *testing.T) {
+	s := &Subscriber{}
+	if err := s.Unsubscribe("missing"); err != nil {
+		t.Fatalf("Unsubscribe() = %v", err)
+	}
+}
+
+func TestSubscriberCloseEmpty(t *testing.T) {
+	s := &Subscriber{}
+	if err := s.Close(); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestSubscribeValidation(t *testing.T) {
+	s := &Subscriber{}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if err := s.Subscribe(ctx, "q", func(context.Context, *mq.Message) error { return nil }); err == nil {
+		t.Fatal("expected context error")
+	}
+	if err := s.Subscribe(context.Background(), "q", nil); err == nil {
+		t.Fatal("expected nil handler error")
+	}
+}

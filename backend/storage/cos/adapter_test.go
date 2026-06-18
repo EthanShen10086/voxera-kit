@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"testing"
+	"time"
 
 	"github.com/EthanShen10086/voxera-kit/storage"
 	"github.com/EthanShen10086/voxera-kit/storage/contract"
@@ -98,4 +99,33 @@ func TestCOSAdminStubs(t *testing.T) {
 	if err != storage.ErrVersioningDisabled {
 		t.Fatalf("ListVersions: %v", err)
 	}
+}
+
+func TestCOSExistsAndList(t *testing.T) {
+	ctx := context.Background()
+	a := newCOSAdapter(t)
+	defer func() { _ = a.Close() }()
+
+	ok, err := a.Exists(ctx, "nope")
+	if err != nil || ok {
+		t.Fatalf("Exists() = %v, %v", ok, err)
+	}
+	if err := a.Upload(ctx, "dir/file.txt", bytes.NewReader([]byte("x")), nil); err != nil {
+		t.Fatal(err)
+	}
+	items, err := a.List(ctx, "dir/")
+	if err != nil || len(items) == 0 {
+		t.Fatalf("List() = %#v, %v", items, err)
+	}
+
+	url, err := a.GetURL(ctx, "dir/file.txt", time.Minute)
+	if err != nil || url == "" {
+		t.Fatalf("GetURL: %q err=%v", url, err)
+	}
+
+	rc, err := a.Download(ctx, "dir/file.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_ = rc.Close()
 }

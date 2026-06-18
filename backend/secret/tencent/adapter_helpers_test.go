@@ -21,4 +21,8 @@ func TestIsNotFound(t *testing.T) {
 	if !isNotFound(errors.New("secret not found in region")) {
 		t.Fatal("expected message match")
 	}
+	sdkErr2 := &tcerr.TencentCloudSDKError{Code: "FailedOperation.ResourceNotFound"}
+	if !isNotFound(sdkErr2) {
+		t.Fatal("expected FailedOperation not found")
+	}
 }

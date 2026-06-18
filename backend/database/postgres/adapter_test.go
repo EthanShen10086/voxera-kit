@@ -38,12 +38,15 @@ func TestConnectUnreachable(t *testing.T) {
 	defer cancel()
 
 	err := a.Connect(ctx, database.Config{
-		Host:     "127.0.0.1",
-		Port:     1,
-		User:     "voxera",
-		Password: "voxera",
-		Database: "voxera_test",
-		SSLMode:  "disable",
+		Host:            "127.0.0.1",
+		Port:            1,
+		User:            "voxera",
+		Password:        "voxera",
+		Database:        "voxera_test",
+		SSLMode:         "disable",
+		MaxOpenConns:    5,
+		MaxIdleConns:    2,
+		ConnMaxLifetime: time.Minute,
 	})
 	if err == nil {
 		_ = a.Close()

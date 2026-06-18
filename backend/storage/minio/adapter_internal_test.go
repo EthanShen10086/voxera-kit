@@ -1,6 +1,7 @@
 package minio
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -37,5 +38,28 @@ func TestNewClient(t *testing.T) {
 	}
 	if a.cfg.Bucket != "b" {
 		t.Fatalf("bucket = %q", a.cfg.Bucket)
+	}
+}
+
+func TestMinioNotificationStubs(t *testing.T) {
+	a, err := New(storage.Config{
+		Endpoint: "localhost:9000", Bucket: "b", AccessKey: "ak", SecretKey: "sk",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+	if err := a.PutBucketNotification(ctx, storage.NotificationDestination{Type: "webhook"}); err == nil {
+		t.Fatal("expected PutBucketNotification error")
+	}
+	dest, err := a.GetBucketNotification(ctx)
+	if err != nil || dest != nil {
+		t.Fatalf("GetBucketNotification: %#v, %v", dest, err)
+	}
+	if err := a.DeleteBucketNotification(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if err := a.Close(); err != nil {
+		t.Fatal(err)
 	}
 }

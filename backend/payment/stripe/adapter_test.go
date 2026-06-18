@@ -19,6 +19,14 @@ func TestStripeGatewayStub(t *testing.T) {
 	if err := a.Refund(ctx, &payment.RefundRequest{OrderID: "o1"}); err != nil {
 		t.Fatal(err)
 	}
+	q, err := a.QueryOrder(ctx, "o1")
+	if err != nil || q != nil {
+		t.Fatalf("QueryOrder: %+v err=%v", q, err)
+	}
+	cb, err := a.HandleCallback(ctx, &payment.CallbackPayload{Raw: []byte("{}")})
+	if err != nil || cb != nil {
+		t.Fatalf("HandleCallback: %+v err=%v", cb, err)
+	}
 	if err := a.Close(); err != nil {
 		t.Fatal(err)
 	}

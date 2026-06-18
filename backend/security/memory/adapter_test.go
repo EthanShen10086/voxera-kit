@@ -33,6 +33,14 @@ func TestIPFilterModes(t *testing.T) {
 
 	both.AddToBlacklist("3.3.3.3")
 	both.RemoveFromWhitelist("1.1.1.1")
+	both.AddToWhitelist("4.4.4.4")
+	if !both.IsAllowed("4.4.4.4") {
+		t.Fatal("AddToWhitelist")
+	}
+	both.RemoveFromBlacklist("3.3.3.3")
+	if !both.IsAllowed("3.3.3.3") {
+		t.Fatal("expected allowed after RemoveFromBlacklist in both mode")
+	}
 	both.Reload(security.IPFilterConfig{Mode: security.Whitelist, WhitelistIPs: []string{"9.9.9.9"}})
 	if !both.IsAllowed("9.9.9.9") {
 		t.Fatal("reload")

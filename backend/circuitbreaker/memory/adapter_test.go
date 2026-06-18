@@ -33,3 +33,17 @@ func TestCircuitBreakerClosesOnSuccessFromHalfOpen(t *testing.T) {
 		t.Fatalf("state %v", cb.State())
 	}
 }
+
+func TestCircuitBreakerResetAndCounts(t *testing.T) {
+	cb := New(circuitbreaker.Config{MaxFailures: 5})
+	ctx := context.Background()
+	_ = cb.Execute(ctx, func() error { return errors.New("x") })
+	_, failures := cb.Counts()
+	if failures == 0 {
+		t.Fatal("expected failure count")
+	}
+	cb.Reset()
+	if cb.State() != circuitbreaker.Closed {
+		t.Fatalf("state after reset = %v", cb.State())
+	}
+}

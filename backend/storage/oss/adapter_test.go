@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"testing"
+	"time"
 
 	"github.com/EthanShen10086/voxera-kit/storage"
 	"github.com/EthanShen10086/voxera-kit/storage/contract"
@@ -95,4 +96,33 @@ func TestOSSAdminStubs(t *testing.T) {
 	if err != storage.ErrVersioningDisabled {
 		t.Fatalf("ListVersions: %v", err)
 	}
+}
+
+func TestOSSExistsAndList(t *testing.T) {
+	ctx := context.Background()
+	a := newOSSAdapter(t)
+	defer func() { _ = a.Close() }()
+
+	ok, err := a.Exists(ctx, "missing")
+	if err != nil || ok {
+		t.Fatalf("Exists() = %v, %v", ok, err)
+	}
+	if err := a.Upload(ctx, "prefix/obj.bin", bytes.NewReader([]byte("data")), nil); err != nil {
+		t.Fatal(err)
+	}
+	items, err := a.List(ctx, "prefix/")
+	if err != nil || len(items) == 0 {
+		t.Fatalf("List() = %#v, %v", items, err)
+	}
+
+	url, err := a.GetURL(ctx, "prefix/obj.bin", time.Minute)
+	if err != nil || url == "" {
+		t.Fatalf("GetURL: %q err=%v", url, err)
+	}
+
+	rc, err := a.Download(ctx, "prefix/obj.bin")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_ = rc.Close()
 }

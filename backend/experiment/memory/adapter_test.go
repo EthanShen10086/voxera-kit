@@ -99,3 +99,37 @@ func TestExperimentErrors(t *testing.T) {
 		t.Fatal("expected not found")
 	}
 }
+
+func TestStatisticalConfidence(t *testing.T) {
+	ctx := context.Background()
+	s := memory.NewStore()
+	cfg := experiment.Config{
+		Key: "stats",
+		Variants: []experiment.Variant{
+			{Key: "control", Weight: 1, IsControl: true},
+			{Key: "variant-a", Weight: 1},
+		},
+		Metrics: []experiment.MetricDef{
+			{Key: "conversion", Type: experiment.MetricConversion},
+			{Key: "revenue", Type: experiment.MetricRevenue},
+		},
+	}
+	_ = s.Create(ctx, cfg)
+	_ = s.Start(ctx, "stats")
+
+	users := []string{"u1", "u2", "u3", "u4", "u5", "u6"}
+	for _, u := range users {
+		assign, err := s.Assign(ctx, "stats", u)
+		if err != nil {
+			t.Fatal(err)
+		}
+		_ = s.RecordMetric(ctx, "stats", u, "conversion", 1)
+		_ = s.RecordMetric(ctx, "stats", u, "revenue", 10+float64(len(u)))
+		_ = assign
+	}
+
+	result, err := s.GetResults(ctx, "stats")
+	if err != nil || len(result.Metrics) == 0 {
+		t.Fatalf("GetResults: %+v err=%v", result, err)
+	}
+}
