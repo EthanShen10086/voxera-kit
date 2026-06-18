@@ -8,6 +8,10 @@
 ## [Unreleased]
 
 ### Added
+- **Go 单元/契约测试（Phase 4 Sprint 4.3）**:
+  - `storage/cos`、`storage/oss`：httptest vendor mock（`testfixture/cosmock`、`ossmock`）
+  - `mq/kafka`、`mq/rabbitmq`：离线校验 + testcontainers 集成契约
+  - partial：`storage/fs`（UploadLarge/invalid key）、`middleware`（Audit/LoadShed/PII/Tracing）、`llm/openai|deepseek|hunyuan` 增量
 - **Go 单元/契约测试（Phase 4 Sprint 4.2）**:
   - `database/postgres`：离线单测 + testcontainers 集成契约（`-tags=integration`）
   - `storage/minio`：testcontainers 契约（ObjectStore / Multipart / Versioning）

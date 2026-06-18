@@ -6,11 +6,19 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/EthanShen10086/voxera-kit/audit"
+	auditmemory "github.com/EthanShen10086/voxera-kit/audit/memory"
+	loadshedadaptive "github.com/EthanShen10086/voxera-kit/loadshed/adaptive"
+	"github.com/EthanShen10086/voxera-kit/loadshed"
 	"github.com/EthanShen10086/voxera-kit/observability/logger"
 	"github.com/EthanShen10086/voxera-kit/observability/metrics"
+	"github.com/EthanShen10086/voxera-kit/observability/tracing"
+	piiregex "github.com/EthanShen10086/voxera-kit/pii/regex"
+	"github.com/EthanShen10086/voxera-kit/pii"
 	"github.com/EthanShen10086/voxera-kit/security/headers"
 )
 
@@ -197,4 +205,74 @@ func TestMetricsMiddleware(t *testing.T) {
 		t.Fatalf("status = %d", rec.Code)
 	}
 	var _ metrics.Recorder = stubRecorder{}
+}
+
+type stubTracer struct{}
+
+func (stubTracer) Start(ctx context.Context, name string, _ ...tracing.SpanOption) (context.Context, tracing.Span) {
+	_ = name
+	return ctx, stubSpan{}
+}
+
+func (stubTracer) Shutdown(context.Context) error { return nil }
+
+type stubSpan struct{}
+
+func (stubSpan) End()                                      {}
+func (stubSpan) SetAttributes(string, any)                 {}
+func (stubSpan) RecordError(error)                         {}
+func (stubSpan) SpanContext() tracing.SpanContext          { return tracing.SpanContext{TraceID: "trace-abc"} }
+
+func TestTracingMiddleware(t *testing.T) {
+	h := Chain(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if TraceIDFromContext(r.Context()) != "trace-abc" {
+			t.Fatal("trace id not in context")
+		}
+	}), Tracing(stubTracer{}))
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/api", nil))
+	if rec.Header().Get("X-Trace-ID") != "trace-abc" {
+		t.Fatalf("trace header = %q", rec.Header().Get("X-Trace-ID"))
+	}
+}
+
+func TestAuditMiddleware(t *testing.T) {
+	writer := auditmemory.NewAdapter()
+	h := Chain(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusCreated)
+	}), Audit(writer, stubLogger{}))
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/items", strings.NewReader(`{"x":1}`))
+	h.ServeHTTP(rec, req)
+	entries, err := writer.Query(context.Background(), audit.Filter{})
+	if err != nil || len(entries) != 1 || entries[0].ResponseStatus != http.StatusCreated {
+		t.Fatalf("audit entries: %+v err=%v", entries, err)
+	}
+}
+
+func TestLoadShedMiddleware(t *testing.T) {
+	shedder := loadshedadaptive.New(loadshed.Config{MaxLoad: 0})
+	h := Chain(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}), LoadShed(shedder))
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/", nil))
+	if rec.Code != http.StatusServiceUnavailable {
+		t.Fatalf("status = %d", rec.Code)
+	}
+}
+
+func TestPIIRedactMiddleware(t *testing.T) {
+	redactor := piiregex.NewRedactor(pii.Config{Rules: piiregex.DefaultRules(), DefaultMask: "[REDACTED]"})
+	h := Chain(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		http.Error(w, "contact user@example.com", http.StatusBadRequest)
+	}), PIIRedact(redactor))
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/", nil))
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d", rec.Code)
+	}
+	if strings.Contains(rec.Body.String(), "user@example.com") {
+		t.Fatalf("body not redacted: %q", rec.Body.String())
+	}
 }

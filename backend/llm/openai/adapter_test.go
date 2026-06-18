@@ -66,6 +66,47 @@ func TestAvailableAndListModels(t *testing.T) {
 	}
 }
 
+func TestChatStreamAndEmbed(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case strings.HasSuffix(r.URL.Path, "/embeddings"):
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"model": "text-embedding-3-small",
+				"data":  []map[string]any{{"embedding": []float64{0.1, 0.2}}},
+				"usage": map[string]int{"prompt_tokens": 2, "total_tokens": 2},
+			})
+		default:
+			w.Header().Set("Content-Type", "text/event-stream")
+			_, _ = w.Write([]byte("data: {\"choices\":[{\"delta\":{\"content\":\"hi\"}}]}\n\n"))
+			_, _ = w.Write([]byte("data: [DONE]\n\n"))
+		}
+	}))
+	defer srv.Close()
+
+	a := openai.New(llm.Config{Endpoint: srv.URL, APIKey: "sk-test"})
+	ch, err := a.ChatStream(context.Background(), llm.Request{
+		Messages: []llm.Message{{Role: llm.RoleUser, Content: "ping"}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var content string
+	for chunk := range ch {
+		if chunk.Err != nil {
+			t.Fatal(chunk.Err)
+		}
+		content += chunk.Content
+	}
+	if content != "hi" {
+		t.Fatalf("stream content = %q", content)
+	}
+
+	emb, err := a.Embed(context.Background(), llm.EmbeddingRequest{Texts: []string{"hello"}})
+	if err != nil || len(emb.Embeddings) != 1 {
+		t.Fatalf("Embed: %+v err=%v", emb, err)
+	}
+}
+
 func TestChat_APIError(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)

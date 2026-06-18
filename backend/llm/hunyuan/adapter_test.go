@@ -38,6 +38,25 @@ func TestChatWithAPIKey(t *testing.T) {
 	}
 }
 
+func TestEmbedNotSupported(t *testing.T) {
+	a := hunyuan.New(llm.Config{APIKey: "k"})
+	_, err := a.Embed(context.Background(), llm.EmbeddingRequest{Texts: []string{"x"}})
+	if err == nil {
+		t.Fatal("expected embed error")
+	}
+}
+
+func TestAvailable(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+	a := hunyuan.New(llm.Config{Endpoint: srv.URL, APIKey: "k"})
+	if !a.Available(context.Background()) {
+		t.Fatal("expected available")
+	}
+}
+
 func TestListModels(t *testing.T) {
 	a := hunyuan.New(llm.Config{APIKey: "k"})
 	models, err := a.ListModels(context.Background())

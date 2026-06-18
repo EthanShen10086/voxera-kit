@@ -51,6 +51,24 @@ func TestChatAndEmbed(t *testing.T) {
 	}
 }
 
+func TestDeepseekChatStream(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/event-stream")
+		_, _ = w.Write([]byte("data: {\"choices\":[{\"delta\":{\"content\":\"s\"}}]}\n\n"))
+		_, _ = w.Write([]byte("data: [DONE]\n\n"))
+	}))
+	defer srv.Close()
+	a := deepseek.New(llm.Config{Endpoint: srv.URL, APIKey: "k"})
+	ch, err := a.ChatStream(context.Background(), llm.Request{
+		Messages: []llm.Message{{Role: llm.RoleUser, Content: "x"}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for range ch {
+	}
+}
+
 func TestListModelsAndAvailable(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasSuffix(r.URL.Path, "/models") {
