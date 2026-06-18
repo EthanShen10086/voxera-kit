@@ -3,10 +3,13 @@ module github.com/EthanShen10086/voxera-kit/database
 go 1.25.0
 
 require (
+	github.com/EthanShen10086/voxera-kit/testkit v0.0.0
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/jackc/pgx/v5 v5.7.2
 	go.mongodb.org/mongo-driver v1.17.2
 )
+
+replace github.com/EthanShen10086/voxera-kit/testkit => ../testkit
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect

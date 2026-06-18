@@ -8,6 +8,9 @@
 ## [Unreleased]
 
 ### Added
+- **Go 单元/契约测试（Phase 4 Sprint 4.2）**:
+  - `database/postgres`：离线单测 + testcontainers 集成契约（`-tags=integration`）
+  - `storage/minio`：testcontainers 契约（ObjectStore / Multipart / Versioning）
 - **Go 单元/契约测试（Phase 4 Sprint 4.1 → ~53%）**:
   - `storage/s3`：gofakes3 httptest fixture（`storage/internal/testfixture`）
   - `mq/nats`：embedded `nats-server` 契约 + JetStream 单测
@@ -20,6 +23,9 @@
   - `middleware` 增量（Logging、Metrics、Context）
 
 ### Changed
+- `coverage.sh`：支持 `COVERAGE_TAGS=integration` 合并 testcontainers 适配器覆盖率
+- CI / nightly `go-integration`：扩展至 `database/postgres`、`storage/minio`
+- `testkit`：testcontainers 统一至 v0.42.0
 - **`MIN_COVERAGE`**: 30% → **50%**（merged ~50%）
 - `storage/s3`：自定义 endpoint 时禁用默认 checksum；`uploadlarge` 使用可 seek 的 `SectionReader`
 - `mq/nats`：JetStream subscribe 后 flush

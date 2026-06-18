@@ -3,6 +3,7 @@ module github.com/EthanShen10086/voxera-kit/storage
 go 1.25.0
 
 require (
+	github.com/EthanShen10086/voxera-kit/testkit v0.0.0
 	github.com/aliyun/aliyun-oss-go-sdk v3.0.2+incompatible
 	github.com/aws/aws-sdk-go-v2 v1.36.3
 	github.com/aws/aws-sdk-go-v2/config v1.29.14
@@ -55,3 +56,5 @@ require (
 	golang.org/x/tools v0.42.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
+
+replace github.com/EthanShen10086/voxera-kit/testkit => ../testkit

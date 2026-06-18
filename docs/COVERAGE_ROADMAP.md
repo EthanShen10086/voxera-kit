@@ -14,8 +14,8 @@ Stepped enforcement for `backend/scripts/coverage.sh` / CI `go-coverage` job.
 
 | Sprint | Scope | Test strategy |
 |--------|-------|---------------|
-| **4.1** | `storage/s3`, `mq/nats` | gofakes3 httptest fixture; embedded `nats-server` |
-| **4.2** | `storage/minio`, `database/postgres` | testcontainers (integration job); optional embedded postgres |
+| **4.1** | `storage/s3`, `mq/nats` | gofakes3 httptest fixture; embedded `nats-server` | done (~53%) |
+| **4.2** | `storage/minio`, `database/postgres` | testcontainers (`-tags=integration`) | in progress |
 | **4.3** | `mq/kafka`, `mq/rabbitmq`, `storage/cos/oss` | testcontainers / broker fixtures |
 | **4.4** | partial modules (`storage/fs`, `llm/hunyuan`, `middleware`, …) | unit + httptest |
 
@@ -35,4 +35,5 @@ Bump `MIN_COVERAGE` to **80** only when merged coverage is stable ≥80%.
 cd backend
 MIN_COVERAGE=50 bash scripts/coverage.sh
 MIN_COVERAGE=80 COVERAGE_ENFORCE=false bash scripts/coverage.sh  # probe next gate
+COVERAGE_TAGS=integration MIN_COVERAGE=80 COVERAGE_ENFORCE=false bash scripts/coverage.sh  # + testcontainers adapters
 ```

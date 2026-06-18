@@ -11,17 +11,22 @@ concurrency:
 
 jobs:
   integration:
-    name: Go Integration (testkit)
+    name: Go Integration (testcontainers)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version: "1.25"
-          cache-dependency-path: backend/testkit/go.sum
-      - name: Data plane integration tests
+          cache-dependency-path: backend/**/go.sum
+      - name: testkit contract smoke
         working-directory: backend/testkit
         run: go test -tags=integration -race -count=1 -timeout=15m ./...
+      - name: adapter integration (postgres, minio)
+        working-directory: backend
+        run: |
+          (cd database && go test -tags=integration -race -count=1 -timeout=15m ./postgres/...)
+          (cd storage && go test -tags=integration -race -count=1 -timeout=15m ./minio/...)
 
   e2e-smoke:
     name: E2E Smoke (Playwright template)
@@ -54,6 +59,14 @@ jobs:
           MIN_COVERAGE: "50"
           COVERAGE_ENFORCE: "true"
           COVERAGE_SKIP: testkit
+        run: bash scripts/coverage.sh
+      - name: Integration coverage probe (requires Docker)
+        working-directory: backend
+        env:
+          MIN_COVERAGE: "80"
+          COVERAGE_ENFORCE: "false"
+          COVERAGE_SKIP: testkit
+          COVERAGE_TAGS: integration
         run: bash scripts/coverage.sh
       - uses: actions/upload-artifact@v4
         with:
