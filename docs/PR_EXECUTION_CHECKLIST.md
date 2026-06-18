@@ -32,5 +32,5 @@ Track merge order for the org-wide standards rollout. Check off as PRs land.
 - [x] `docs/COMPATIBILITY.md` in voxera-kit
 - [x] **v0.2.0** tag + consumer pin bump (2026-06-13)
 - [x] `docs/RELEASE_TRAIN.md` operational release process
-- [ ] **v0.3.0** tag + consumer pin bump (in progress)
+- [x] **v0.3.0** tag + consumer pin bump (2026-06-13)
 - [ ] Monthly kit tag → bump consumer pins (operational cadence)
