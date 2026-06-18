@@ -93,17 +93,17 @@ func (p *Publisher) Close() error {
 }
 
 type rabbitSubscription struct {
-	tag     string
-	cancel  context.CancelFunc
+	tag    string
+	cancel context.CancelFunc
 }
 
 // Subscriber implements the mq.Subscriber interface using RabbitMQ.
 type Subscriber struct {
-	conn     *amqp.Connection
-	ch       *amqp.Channel
-	mu       sync.Mutex
-	subs     map[string]*rabbitSubscription
-	pending  sync.Map // msg.ID -> amqp.Delivery
+	conn    *amqp.Connection
+	ch      *amqp.Channel
+	mu      sync.Mutex
+	subs    map[string]*rabbitSubscription
+	pending sync.Map // msg.ID -> amqp.Delivery
 }
 
 // NewSubscriber creates a new RabbitMQ Subscriber with the provided configuration.

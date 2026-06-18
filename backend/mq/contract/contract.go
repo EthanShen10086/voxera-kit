@@ -29,9 +29,9 @@ func RunMQContract(t *testing.T, factory Factory) {
 		topic := "contract-topic"
 		payload := []byte("hello-mq")
 		var (
-			mu      sync.Mutex
+			mu       sync.Mutex
 			received *mq.Message
-			done    = make(chan struct{})
+			done     = make(chan struct{})
 		)
 
 		err := sub.Subscribe(ctx, topic, func(_ context.Context, msg *mq.Message) error {
