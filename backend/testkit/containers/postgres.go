@@ -25,6 +25,7 @@ func StartPostgres(ctx context.Context) (*Postgres, error) {
 		postgres.WithDatabase("voxera_test"),
 		postgres.WithUsername("voxera"),
 		postgres.WithPassword("voxera"),
+		postgres.BasicWaitStrategies(),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("containers: start postgres: %w", err)
@@ -66,6 +67,9 @@ func parsePostgresDSN(dsn string) (database.Config, error) {
 		pass, _ = u.User.Password()
 	}
 	host := u.Hostname()
+	if host == "localhost" {
+		host = "127.0.0.1"
+	}
 	port := 5432
 	if p := u.Port(); p != "" {
 		if parsed, err := strconv.Atoi(p); err == nil {
