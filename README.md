@@ -20,7 +20,7 @@
 - **应用层（Voxera / Finera / Pulsera）专注业务逻辑**，通过 Kit 接口组装能力
 - **渐进式采用** — 每个模块独立 `go.mod`，可单独 `go get`
 
-相关文档：[测试基建计划 (Wave T)](docs/TESTING_INFRA_PLAN.md) · [storage 模块说明](backend/storage/README.md)
+相关文档：[数据平面路线图](docs/DATA_PLANE_ROADMAP.md) · [测试基建计划 (Wave T)](docs/TESTING_INFRA_PLAN.md) · [storage 模块说明](backend/storage/README.md)
 
 ---
 
@@ -142,7 +142,7 @@ voxera-kit 提供三种开箱即用的变现路径：
 | `loadshed` | ✅ | `Shedder`, `Token` | adaptive | AIMD 自适应过载保护 |
 | `ratelimiter` | ✅ | `Limiter` | memory | 速率限制 |
 | `circuitbreaker` | ✅ | `CircuitBreaker` | memory | 熔断器 |
-| `cache` | 🟡 | `Cache` | Redis, Memcached, Local (ristretto) | 多级缓存；见 `backend/cache/` |
+| `cache` | 🟡 | `Cache` | Redis, Memcached, Local (ristretto), **tiered** | 多级缓存见 `backend/cache/tiered` |
 | `compression` | ✅ | `Compressor` | gzip | 数据压缩 |
 | `concurrency` | ✅ | `Pool` | channel | 并发任务池 |
 
