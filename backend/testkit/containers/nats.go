@@ -3,6 +3,7 @@ package containers
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/testcontainers/testcontainers-go/modules/nats"
 )
@@ -24,6 +25,7 @@ func StartNATS(ctx context.Context) (*NATS, error) {
 		_ = c.Terminate(ctx)
 		return nil, fmt.Errorf("containers: nats connection string: %w", err)
 	}
+	url = strings.Replace(url, "nats://localhost:", "nats://127.0.0.1:", 1)
 	return &NATS{
 		URL:       url,
 		terminate: func(ctx context.Context) error { return c.Terminate(ctx) },

@@ -136,6 +136,10 @@ func (s *Subscriber) Subscribe(ctx context.Context, topic string, handler mq.Mes
 	s.mu.Lock()
 	s.subs[topic] = &natsSubscription{sub: sub}
 	s.mu.Unlock()
+
+	if err := s.conn.Flush(); err != nil {
+		return fmt.Errorf("nats: flush after subscribe: %w", err)
+	}
 	return nil
 }
 
