@@ -23,19 +23,29 @@ type Config struct {
 	Handler task.Handler
 }
 
-// Adapter is an in-memory delayed task queue.
+// Adapter is an in-memory delayed task queue with idempotency, retry, and DLQ.
 type Adapter struct {
-	mu      sync.Mutex
-	pending map[string]*pendingEntry
-	handler task.Handler
-	stopped bool
+	mu           sync.Mutex
+	pending      map[string]*pendingEntry
+	idempotency  map[string]string // key -> task ID
+	processed    map[string]struct{}
+	dlq          []task.Task
+	handler      task.Handler
+	stopped      bool
+	defaultRetry task.RetryPolicy
 }
 
 // New creates a new in-memory task queue.
 func New(cfg Config) *Adapter {
 	return &Adapter{
-		pending: make(map[string]*pendingEntry),
-		handler: cfg.Handler,
+		pending:     make(map[string]*pendingEntry),
+		idempotency: make(map[string]string),
+		processed:   make(map[string]struct{}),
+		handler:     cfg.Handler,
+		defaultRetry: task.RetryPolicy{
+			MaxAttempts: 3,
+			Backoff:     100 * time.Millisecond,
+		},
 	}
 }
 
@@ -56,6 +66,15 @@ func (a *Adapter) Schedule(_ context.Context, t task.Task, runAt time.Time) erro
 	if a.stopped {
 		return fmt.Errorf("task: queue stopped")
 	}
+	if t.IdempotencyKey != "" {
+		if _, ok := a.processed[t.IdempotencyKey]; ok {
+			return nil
+		}
+		if existing, ok := a.idempotency[t.IdempotencyKey]; ok && existing != t.ID {
+			return nil
+		}
+		a.idempotency[t.IdempotencyKey] = t.ID
+	}
 	if _, exists := a.pending[t.ID]; exists {
 		return fmt.Errorf("task: %q already scheduled", t.ID)
 	}
@@ -73,17 +92,55 @@ func (a *Adapter) Schedule(_ context.Context, t task.Task, runAt time.Time) erro
 
 	taskCopy := t
 	entry.timer = time.AfterFunc(delay, func() {
-		a.mu.Lock()
-		delete(a.pending, taskCopy.ID)
-		a.mu.Unlock()
-		cancel()
-
-		if a.handler != nil {
-			_ = a.handler(runCtx, taskCopy)
-		}
+		a.runTask(runCtx, taskCopy)
 	})
 	a.pending[t.ID] = entry
 	return nil
+}
+
+func (a *Adapter) runTask(ctx context.Context, t task.Task) {
+	a.mu.Lock()
+	delete(a.pending, t.ID)
+	handler := a.handler
+	retry := t.Retry
+	if retry.MaxAttempts == 0 {
+		retry = a.defaultRetry
+	}
+	if retry.Backoff == 0 {
+		retry.Backoff = a.defaultRetry.Backoff
+	}
+	a.mu.Unlock()
+
+	if handler == nil {
+		return
+	}
+
+	attempt := t.Attempt
+	if attempt == 0 {
+		attempt = 1
+	}
+	t.Attempt = attempt
+
+	err := handler(ctx, t)
+	if err == nil {
+		a.mu.Lock()
+		if t.IdempotencyKey != "" {
+			a.processed[t.IdempotencyKey] = struct{}{}
+		}
+		a.mu.Unlock()
+		return
+	}
+
+	if attempt >= retry.MaxAttempts {
+		a.mu.Lock()
+		a.dlq = append(a.dlq, t)
+		a.mu.Unlock()
+		return
+	}
+
+	next := t
+	next.Attempt = attempt + 1
+	_ = a.Schedule(context.Background(), next, time.Now().Add(retry.Backoff))
 }
 
 // Cancel removes a pending task by ID.
@@ -120,4 +177,20 @@ func (a *Adapter) Pending() int {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	return len(a.pending)
+}
+
+// DeadLetterLen returns the number of tasks in the dead-letter queue.
+func (a *Adapter) DeadLetterLen() int {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	return len(a.dlq)
+}
+
+// DeadLetterTasks returns a copy of dead-letter tasks (for tests).
+func (a *Adapter) DeadLetterTasks() []task.Task {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	out := make([]task.Task, len(a.dlq))
+	copy(out, a.dlq)
+	return out
 }

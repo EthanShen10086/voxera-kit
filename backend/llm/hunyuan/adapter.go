@@ -24,14 +24,18 @@ const (
 
 // Adapter implements llm.Provider for the Tencent Hunyuan API.
 //
-// TODO: Implement full TC3-HMAC-SHA256 signature authentication.
-// Currently uses a simplified API-key-in-header approach.
+// When SecretID and SecretKey are set, requests are signed with TC3-HMAC-SHA256.
+// Otherwise falls back to Bearer APIKey authentication.
 type Adapter struct {
 	apiKey   string
+	secretID string
+	secretKey string
+	region   string
 	endpoint string
 	model    string
 	client   *http.Client
 	headers  map[string]string
+	signer   *tc3Signer
 }
 
 // New creates a new Hunyuan adapter from the given configuration.
@@ -49,11 +53,15 @@ func New(cfg llm.Config) *Adapter {
 		timeout = defaultTimeout
 	}
 	return &Adapter{
-		apiKey:   cfg.APIKey,
-		endpoint: strings.TrimRight(endpoint, "/"),
-		model:    model,
-		headers:  cfg.Headers,
-		client:   &http.Client{Timeout: timeout},
+		apiKey:    cfg.APIKey,
+		secretID:  cfg.SecretID,
+		secretKey: cfg.SecretKey,
+		region:    cfg.Region,
+		endpoint:  strings.TrimRight(endpoint, "/"),
+		model:     model,
+		headers:   cfg.Headers,
+		client:    &http.Client{Timeout: timeout},
+		signer:    newTC3Signer(cfg.SecretID, cfg.SecretKey, cfg.Region),
 	}
 }
 
@@ -86,7 +94,7 @@ func (a *Adapter) Chat(ctx context.Context, req llm.Request) (*llm.Response, err
 	if err != nil {
 		return nil, fmt.Errorf("hunyuan: create request: %w", err)
 	}
-	a.setHeaders(httpReq)
+	a.setHeaders(httpReq, data)
 
 	httpResp, err := a.client.Do(httpReq)
 	if err != nil {
@@ -148,7 +156,7 @@ func (a *Adapter) ChatStream(ctx context.Context, req llm.Request) (<-chan llm.S
 	if err != nil {
 		return nil, fmt.Errorf("hunyuan: create request: %w", err)
 	}
-	a.setHeaders(httpReq)
+	a.setHeaders(httpReq, data)
 
 	httpResp, err := a.client.Do(httpReq)
 	if err != nil {
@@ -201,7 +209,7 @@ func (a *Adapter) Available(ctx context.Context) bool {
 	if err != nil {
 		return false
 	}
-	a.setHeaders(req)
+	a.setHeaders(req, data)
 
 	resp, err := a.client.Do(req)
 	if err != nil {
@@ -211,9 +219,14 @@ func (a *Adapter) Available(ctx context.Context) bool {
 	return resp.StatusCode == http.StatusOK
 }
 
-func (a *Adapter) setHeaders(req *http.Request) {
+func (a *Adapter) setHeaders(req *http.Request, payload []byte) {
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+a.apiKey)
+	if a.secretID != "" && a.secretKey != "" {
+		req.Header.Set("X-TC-Action", "ChatCompletions")
+		a.signer.sign(req, payload, time.Now().Unix())
+	} else {
+		req.Header.Set("Authorization", "Bearer "+a.apiKey)
+	}
 	for k, v := range a.headers {
 		req.Header.Set(k, v)
 	}

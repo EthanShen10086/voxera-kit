@@ -9,6 +9,27 @@
 
 ---
 
+## [0.3.0] - 2026-06-13
+
+基建深化：tencent secret、task 高级能力、NATS JetStream、translation/deepl+google、混元 TC3 签名、Vault 集成测、Release train 文档。
+
+### Added
+- **secret/tencent**: 腾讯云 SSM SDK 实现 + 契约测试（云测需 `TENCENT_SECRET_ID/KEY`）
+- **task**: `RetryPolicy`、`IdempotencyKey`、`DeadLetterQueue`；`redis.Worker` 消费循环
+- **task/contract**: `RunTaskAdvancedContract`（幂等、重试、DLQ）
+- **mq/nats**: JetStream 模式（`Config.JetStream`）+ integration 测试
+- **translation/google**, **translation/deepl**: REST adapter 实现
+- **llm/hunyuan**: TC3-HMAC-SHA256 签名（`SecretID`/`SecretKey`）
+- **secret/vault**: testcontainers integration 测试
+- **docs/RELEASE_TRAIN.md**, **backend/task/README.md**
+- **scripts/enable-private-vulnerability-reporting.sh**
+
+### Changed
+- **mq.Config**: 新增 `JetStream`、`Stream`、`Durable` 字段
+- **llm.Config**: 新增 `SecretID`、`SecretKey`、`Region`（腾讯 TC3）
+
+---
+
 ## [0.2.0] - 2026-06-13
 
 数据平面 W1–W7 与测试基建 Wave T1–T6 首版打包；产品仓可 pin 本 tag 获取 storage/cache/mq/database/task/secret 实现与 testkit。

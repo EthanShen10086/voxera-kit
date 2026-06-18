@@ -55,4 +55,10 @@ type Config struct {
 	Password string
 	// GroupID is the consumer group identifier for coordinated consumption.
 	GroupID string
+	// JetStream enables NATS JetStream (persistent, at-least-once) when true.
+	JetStream bool
+	// Stream is the JetStream stream name. Defaults to "VOXERA".
+	Stream string
+	// Durable is the JetStream durable consumer name.
+	Durable string
 }

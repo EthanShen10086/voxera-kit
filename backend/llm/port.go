@@ -95,6 +95,9 @@ type ModelInfo struct {
 // Config holds common configuration for all providers.
 type Config struct {
 	APIKey      string
+	SecretID    string // Tencent Cloud API SecretId (TC3 signing)
+	SecretKey   string // Tencent Cloud API SecretKey (TC3 signing)
+	Region      string // Tencent Cloud region for TC3
 	Endpoint    string
 	Model       string
 	MaxTokens   int
