@@ -526,3 +526,13 @@ func (a *Adapter) DeleteBucketNotification(ctx context.Context) error {
 	})
 	return mapError(err)
 }
+
+func safeInt32(v int) int32 {
+	if v > math.MaxInt32 {
+		return math.MaxInt32
+	}
+	if v < math.MinInt32 {
+		return math.MinInt32
+	}
+	return int32(v) // #nosec G115 -- clamped above
+}
