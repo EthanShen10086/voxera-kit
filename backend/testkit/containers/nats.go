@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"testing"
 
 	"github.com/testcontainers/testcontainers-go/modules/nats"
 )
@@ -38,4 +39,14 @@ func (n *NATS) Terminate(ctx context.Context) error {
 		return nil
 	}
 	return n.terminate(ctx)
+}
+
+// StartNATSForTest launches a NATS testcontainer and registers cleanup on t.
+func StartNATSForTest(ctx context.Context, t *testing.T) (string, func()) {
+	t.Helper()
+	c, err := StartNATS(ctx)
+	if err != nil {
+		t.Fatalf("StartNATS: %v", err)
+	}
+	return c.URL, func() { _ = c.Terminate(context.Background()) }
 }

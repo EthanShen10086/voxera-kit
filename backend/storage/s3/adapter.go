@@ -55,8 +55,10 @@ func New(cfg storage.Config) (*Adapter, error) {
 	client := s3.NewFromConfig(awsCfg, func(o *s3.Options) {
 		if cfg.Endpoint != "" {
 			o.BaseEndpoint = aws.String(cfg.Endpoint)
+			o.UsePathStyle = cfg.PathStyle
+			o.RequestChecksumCalculation = aws.RequestChecksumCalculationWhenRequired
+			o.ResponseChecksumValidation = aws.ResponseChecksumValidationWhenRequired
 		}
-		o.UsePathStyle = cfg.PathStyle
 		if cfg.Region != "" {
 			o.Region = cfg.Region
 		}

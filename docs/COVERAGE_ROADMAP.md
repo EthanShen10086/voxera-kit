@@ -7,12 +7,23 @@ Stepped enforcement for `backend/scripts/coverage.sh` / CI `go-coverage` job.
 | **0** | **8%** | v0.3.x | done (~9% merged) |
 | **1** | **15%** | v0.4.0 | done (~16% merged) |
 | **2** | **30%** | v0.5.0 | done (~32% merged) |
-| **3** | **50%** | v0.6.0 | enforce now (~50% merged) |
-| **4** | **80%** | v1.0.0 | planned |
+| **3** | **50%** | v0.6.0 | done (~50% merged) |
+| **4** | **80%** | v1.0.0 | in progress (~53% merged) |
+
+## Phase 4 sprints (50% → 80%)
+
+| Sprint | Scope | Test strategy |
+|--------|-------|---------------|
+| **4.1** | `storage/s3`, `mq/nats` | gofakes3 httptest fixture; embedded `nats-server` |
+| **4.2** | `storage/minio`, `database/postgres` | testcontainers (integration job); optional embedded postgres |
+| **4.3** | `mq/kafka`, `mq/rabbitmq`, `storage/cos/oss` | testcontainers / broker fixtures |
+| **4.4** | partial modules (`storage/fs`, `llm/hunyuan`, `middleware`, …) | unit + httptest |
+
+Bump `MIN_COVERAGE` to **80** only when merged coverage is stable ≥80%.
 
 ## CI
 
-`.github/workflows/ci.yml` sets `MIN_COVERAGE` on the `go-coverage` job. Bump when merged coverage consistently exceeds the next milestone.
+`.github/workflows/ci.yml` sets `MIN_COVERAGE` on the `go-coverage` job. Integration tests (`-tags=integration`) run in `go-integration` with Docker; they do not affect merged unit coverage unless promoted to default `go test`.
 
 ## Skipped modules
 
@@ -23,4 +34,5 @@ Stepped enforcement for `backend/scripts/coverage.sh` / CI `go-coverage` job.
 ```bash
 cd backend
 MIN_COVERAGE=50 bash scripts/coverage.sh
+MIN_COVERAGE=80 COVERAGE_ENFORCE=false bash scripts/coverage.sh  # probe next gate
 ```

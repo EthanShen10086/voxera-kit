@@ -8,6 +8,9 @@
 ## [Unreleased]
 
 ### Added
+- **Go 单元/契约测试（Phase 4 Sprint 4.1 → ~53%）**:
+  - `storage/s3`：gofakes3 httptest fixture（`storage/internal/testfixture`）
+  - `mq/nats`：embedded `nats-server` 契约 + JetStream 单测
 - **Go 单元/契约测试（Phase 3 → 50%）**:
   - 分析：`analytics/engine`、`analytics/posthog`
   - LLM：`claude`、`deepseek`、`qwen`（httptest）；`router`、`prompt`；`hunyuan` Chat
@@ -18,6 +21,8 @@
 
 ### Changed
 - **`MIN_COVERAGE`**: 30% → **50%**（merged ~50%）
+- `storage/s3`：自定义 endpoint 时禁用默认 checksum；`uploadlarge` 使用可 seek 的 `SectionReader`
+- `mq/nats`：JetStream subscribe 后 flush
 - `task/go.mod`：测试依赖 `miniredis/v2`
 
 ### Added (Phase 2, prior)

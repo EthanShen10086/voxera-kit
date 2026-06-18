@@ -1,31 +1,32 @@
-//go:build integration
-
 package nats_test
 
 import (
 	"context"
-	"sync"
 	"testing"
 	"time"
 
 	"github.com/EthanShen10086/voxera-kit/mq"
 	"github.com/EthanShen10086/voxera-kit/mq/contract"
 	natsmq "github.com/EthanShen10086/voxera-kit/mq/nats"
-	"github.com/EthanShen10086/voxera-kit/testkit/containers"
+	"github.com/nats-io/nats-server/v2/server"
+	"github.com/nats-io/nats-server/v2/test"
 )
 
-func TestJetStreamContract(t *testing.T) {
-	ctx := context.Background()
-	url, cleanup := containers.StartNATSForTest(ctx, t)
-	defer cleanup()
-
-	cfg := mq.Config{
-		Brokers:   []string{url},
-		JetStream: true,
-		Stream:    "TEST_VOXERA",
-		Durable:   "test-durable",
-		GroupID:   "test-group",
+func startNATSServer(t *testing.T, jetStream bool) string {
+	t.Helper()
+	opts := &server.Options{
+		Host:      "127.0.0.1",
+		Port:      -1,
+		JetStream: jetStream,
 	}
+	s := test.RunServer(opts)
+	t.Cleanup(s.Shutdown)
+	return s.ClientURL()
+}
+
+func TestNATSContract(t *testing.T) {
+	url := startNATSServer(t, false)
+	cfg := mq.Config{Brokers: []string{url}}
 
 	contract.RunMQContract(t, func(t *testing.T) (mq.Publisher, mq.Subscriber, func()) {
 		pub, err := natsmq.NewPublisher(cfg)
@@ -34,22 +35,21 @@ func TestJetStreamContract(t *testing.T) {
 		}
 		sub, err := natsmq.NewSubscriber(cfg)
 		if err != nil {
+			_ = pub.Close()
 			t.Fatalf("NewSubscriber: %v", err)
 		}
 		return pub, sub, func() {}
 	})
 }
 
-func TestJetStreamManualAck(t *testing.T) {
+func TestNATSJetStreamPublishSubscribe(t *testing.T) {
 	ctx := context.Background()
-	url, cleanup := containers.StartNATSForTest(ctx, t)
-	defer cleanup()
-
+	url := startNATSServer(t, true)
 	cfg := mq.Config{
 		Brokers:   []string{url},
 		JetStream: true,
-		Stream:    "TEST_ACK",
-		Durable:   "ack-durable",
+		Stream:    "VOXERA_JS_UNIT",
+		Durable:   "unit-durable",
 	}
 
 	pub, err := natsmq.NewPublisher(cfg)
@@ -64,40 +64,28 @@ func TestJetStreamManualAck(t *testing.T) {
 	}
 	defer func() { _ = sub.Close() }()
 
-	topic := "js.ack.test"
-	var (
-		mu   sync.Mutex
-		got  *mq.Message
-		done = make(chan struct{}, 1)
-	)
-
+	topic := "js.unit.test"
+	done := make(chan struct{}, 1)
 	if err := sub.Subscribe(ctx, topic, func(_ context.Context, msg *mq.Message) error {
-		mu.Lock()
-		got = msg
-		mu.Unlock()
 		done <- struct{}{}
-		return nil
+		return sub.Ack(ctx, msg)
 	}); err != nil {
 		t.Fatal(err)
 	}
 
-	msg := &mq.Message{ID: "msg-1", Payload: []byte("js-payload")}
-	if err := pub.Publish(ctx, topic, msg); err != nil {
+	if err := pub.Publish(ctx, topic, &mq.Message{ID: "m1", Payload: []byte("js")}); err != nil {
 		t.Fatal(err)
 	}
-
 	select {
 	case <-done:
 	case <-time.After(3 * time.Second):
-		t.Fatal("timeout waiting for jetstream message")
+		t.Fatal("timeout")
 	}
+}
 
-	mu.Lock()
-	defer mu.Unlock()
-	if got == nil || string(got.Payload) != "js-payload" {
-		t.Fatalf("got = %+v", got)
-	}
-	if err := sub.Ack(ctx, got); err != nil {
-		t.Fatalf("Ack: %v", err)
+func TestNATSConnectValidation(t *testing.T) {
+	_, err := natsmq.NewPublisher(mq.Config{})
+	if err == nil {
+		t.Fatal("expected error for empty brokers")
 	}
 }

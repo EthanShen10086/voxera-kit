@@ -23,8 +23,7 @@ func Upload(
 	key = opts.NormalizeKey(key)
 	threshold := opts.MultipartThreshold(cfg)
 	if size <= threshold {
-		rc := io.NopCloser(io.NewSectionReader(reader, 0, size))
-		return store.Upload(ctx, key, rc, uploadOpts)
+		return store.Upload(ctx, key, io.NewSectionReader(reader, 0, size), uploadOpts)
 	}
 
 	partSize := opts.PartSize(cfg)
