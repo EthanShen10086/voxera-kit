@@ -101,13 +101,16 @@ func RunMQContract(t *testing.T, factory Factory, opts ...MQContractOption) {
 	t.Run("PublishDoesNotNoOp", func(t *testing.T) {
 		ch := make(chan struct{}, 1)
 		topic := "noop-check"
-		_ = sub.Subscribe(ctx, topic, func(_ context.Context, _ *mq.Message) error {
+		err := sub.Subscribe(ctx, topic, func(_ context.Context, _ *mq.Message) error {
 			select {
 			case ch <- struct{}{}:
 			default:
 			}
 			return nil
 		})
+		if err != nil {
+			t.Fatalf("Subscribe: %v", err)
+		}
 		if cfg.PostSubscribeDelay > 0 {
 			time.Sleep(cfg.PostSubscribeDelay)
 		}

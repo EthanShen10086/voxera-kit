@@ -128,7 +128,7 @@ func (s *Subscriber) Subscribe(ctx context.Context, topic string, handler mq.Mes
 	reader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:  s.cfg.Brokers,
 		Topic:    topic,
-		GroupID:  s.cfg.GroupID,
+		GroupID:  fmt.Sprintf("%s-%s", s.cfg.GroupID, topic),
 		Dialer:   dialer(s.cfg),
 		MinBytes: 1,
 		MaxBytes: 10e6,
