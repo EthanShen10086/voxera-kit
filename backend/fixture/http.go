@@ -2,6 +2,7 @@ package fixture
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -15,7 +16,7 @@ type HTTPRequestBuilder struct {
 	target  string
 	header  http.Header
 	body    io.Reader
-	context map[string]string
+	ctx     context.Context
 }
 
 // NewHTTPRequest starts building an HTTP request for the given method and URL.
@@ -24,7 +25,16 @@ func NewHTTPRequest(method, target string) *HTTPRequestBuilder {
 		method: strings.ToUpper(method),
 		target: target,
 		header: make(http.Header),
+		ctx:    context.Background(),
 	}
+}
+
+// WithContext sets the request context.
+func (b *HTTPRequestBuilder) WithContext(ctx context.Context) *HTTPRequestBuilder {
+	if ctx != nil {
+		b.ctx = ctx
+	}
+	return b
 }
 
 // WithHeader sets a request header.
@@ -60,7 +70,7 @@ func (b *HTTPRequestBuilder) WithBody(body io.Reader, contentType string) *HTTPR
 
 // Build returns the constructed request.
 func (b *HTTPRequestBuilder) Build() (*http.Request, error) {
-	req, err := http.NewRequest(b.method, b.target, b.body)
+	req, err := http.NewRequestWithContext(b.ctx, b.method, b.target, b.body)
 	if err != nil {
 		return nil, fmt.Errorf("fixture: build request: %w", err)
 	}
