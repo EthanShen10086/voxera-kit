@@ -7,6 +7,7 @@ import (
 	"net"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/EthanShen10086/voxera-kit/mq"
 	"github.com/EthanShen10086/voxera-kit/mq/contract"
@@ -38,7 +39,7 @@ func TestKafkaMQContract(t *testing.T) {
 			t.Fatalf("NewSubscriber: %v", err)
 		}
 		return pub, sub, func() {}
-	})
+	}, contract.WithPostSubscribeDelay(2*time.Second), contract.WithReceiveTimeout(5*time.Second))
 }
 
 func ensureKafkaTopics(t *testing.T, brokers []string, topics ...string) {

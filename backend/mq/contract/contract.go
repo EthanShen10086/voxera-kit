@@ -13,9 +13,32 @@ import (
 // Factory creates a publisher, subscriber, and optional cleanup for contract tests.
 type Factory func(t *testing.T) (mq.Publisher, mq.Subscriber, func())
 
+// MQContractOptions tunes timing for adapters that need consumer warm-up (e.g. Kafka).
+type MQContractOptions struct {
+	PostSubscribeDelay time.Duration
+	ReceiveTimeout     time.Duration
+}
+
+// MQContractOption configures RunMQContract.
+type MQContractOption func(*MQContractOptions)
+
+// WithPostSubscribeDelay waits after Subscribe before Publish (Kafka consumer groups).
+func WithPostSubscribeDelay(d time.Duration) MQContractOption {
+	return func(o *MQContractOptions) { o.PostSubscribeDelay = d }
+}
+
+// WithReceiveTimeout overrides the default 1s wait for a delivered message.
+func WithReceiveTimeout(d time.Duration) MQContractOption {
+	return func(o *MQContractOptions) { o.ReceiveTimeout = d }
+}
+
 // RunMQContract exercises publish/subscribe behavior for mq adapters.
-func RunMQContract(t *testing.T, factory Factory) {
+func RunMQContract(t *testing.T, factory Factory, opts ...MQContractOption) {
 	t.Helper()
+	cfg := MQContractOptions{ReceiveTimeout: time.Second}
+	for _, opt := range opts {
+		opt(&cfg)
+	}
 	ctx := context.Background()
 
 	pub, sub, cleanup := factory(t)
@@ -44,6 +67,9 @@ func RunMQContract(t *testing.T, factory Factory) {
 		if err != nil {
 			t.Fatalf("Subscribe: %v", err)
 		}
+		if cfg.PostSubscribeDelay > 0 {
+			time.Sleep(cfg.PostSubscribeDelay)
+		}
 
 		msg := &mq.Message{Payload: payload, Headers: map[string]string{"k": "v"}}
 		if err := pub.Publish(ctx, topic, msg); err != nil {
@@ -52,7 +78,7 @@ func RunMQContract(t *testing.T, factory Factory) {
 
 		select {
 		case <-done:
-		case <-time.After(time.Second):
+		case <-time.After(cfg.ReceiveTimeout):
 			t.Fatal("timed out waiting for message")
 		}
 
@@ -82,6 +108,9 @@ func RunMQContract(t *testing.T, factory Factory) {
 			}
 			return nil
 		})
+		if cfg.PostSubscribeDelay > 0 {
+			time.Sleep(cfg.PostSubscribeDelay)
+		}
 
 		if err := pub.Publish(ctx, topic, &mq.Message{Payload: []byte("ping")}); err != nil {
 			t.Fatalf("Publish: %v", err)
@@ -89,7 +118,7 @@ func RunMQContract(t *testing.T, factory Factory) {
 
 		select {
 		case <-ch:
-		case <-time.After(time.Second):
+		case <-time.After(cfg.ReceiveTimeout):
 			t.Fatal("Publish appears to be a no-op; subscriber received nothing")
 		}
 	})
