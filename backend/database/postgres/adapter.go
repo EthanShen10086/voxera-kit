@@ -5,6 +5,7 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"math"
 	"net/url"
 
 	"github.com/EthanShen10086/voxera-kit/database"
@@ -29,10 +30,10 @@ func (a *Adapter) Connect(ctx context.Context, cfg database.Config) error {
 	}
 
 	if cfg.MaxOpenConns > 0 {
-		poolConfig.MaxConns = int32(cfg.MaxOpenConns)
+		poolConfig.MaxConns = int32(min(cfg.MaxOpenConns, math.MaxInt32)) // #nosec G115 -- clamped
 	}
 	if cfg.MaxIdleConns > 0 {
-		poolConfig.MinConns = int32(cfg.MaxIdleConns)
+		poolConfig.MinConns = int32(min(cfg.MaxIdleConns, math.MaxInt32)) // #nosec G115 -- clamped
 	}
 	if cfg.ConnMaxLifetime > 0 {
 		poolConfig.MaxConnLifetime = cfg.ConnMaxLifetime
