@@ -3,7 +3,7 @@ module github.com/EthanShen10086/voxera-kit/task
 go 1.25.0
 
 require (
-	github.com/alicebob/miniredis/v2 v2.35.0
+	github.com/alicebob/miniredis/v2 v2.38.0
 	github.com/redis/go-redis/v9 v9.20.1
 )
 
