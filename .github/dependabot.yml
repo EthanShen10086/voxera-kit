@@ -4,11 +4,72 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  # go.work monorepo: avoid /backend root (no go.mod). Skip modules that replace
+  # testkit/database/storage/mq — Dependabot cannot resolve those local graphs.
   - package-ecosystem: gomod
-    directory: /backend
+    directories:
+      - /backend/ad
+      - /backend/aiquota
+      - /backend/analytics
+      - /backend/asr
+      - /backend/audit
+      - /backend/auth
+      - /backend/bulkhead
+      - /backend/cache
+      - /backend/circuitbreaker
+      - /backend/compression
+      - /backend/concurrency
+      - /backend/config
+      - /backend/crypto
+      - /backend/dataparser
+      - /backend/dataprovider
+      - /backend/errors
+      - /backend/experiment
+      - /backend/featureflag
+      - /backend/fixture
+      - /backend/framework
+      - /backend/license
+      - /backend/llm
+      - /backend/loadshed
+      - /backend/messaging
+      - /backend/notification
+      - /backend/observability
+      - /backend/payment
+      - /backend/pii
+      - /backend/ratelimiter
+      - /backend/registry
+      - /backend/retry
+      - /backend/scheduler
+      - /backend/scraper
+      - /backend/secret
+      - /backend/security
+      - /backend/share
+      - /backend/shorturl
+      - /backend/singleflight
+      - /backend/task
+      - /backend/translation
     schedule:
       interval: weekly
+    groups:
+      go-backend:
+        patterns:
+          - "*"
+
   - package-ecosystem: npm
     directory: /frontend
     schedule:
       interval: weekly
+    groups:
+      frontend:
+        patterns:
+          - "*"
+    ignore:
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
