@@ -48,7 +48,7 @@ func New(cfg storage.Config) (*Adapter, error) {
 func putOptions(uploadOpts *storage.UploadOptions) minio.PutObjectOptions {
 	merged := opts.MergeUploadOptions(uploadOpts)
 	options := minio.PutObjectOptions{
-		ContentType: merged.ContentType,
+		ContentType:  merged.ContentType,
 		UserMetadata: merged.Metadata,
 	}
 	return options

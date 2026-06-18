@@ -37,11 +37,6 @@ type pendingMultipart struct {
 	createdAt time.Time
 }
 
-type sidecarMeta struct {
-	ContentType string
-	Metadata    map[string]string
-}
-
 // New creates a filesystem-backed adapter rooted at the given directory.
 func New(root string, cfg storage.Config) (*Adapter, error) {
 	if err := os.MkdirAll(root, 0o755); err != nil {
@@ -352,11 +347,11 @@ func (a *Adapter) CompleteMultipartUpload(_ context.Context, key, uploadID strin
 	if err != nil {
 		return err
 	}
-	if err := os.MkdirAll(filepath.Dir(dest), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(dest), 0o750); err != nil {
 		return err
 	}
 
-	out, err := os.Create(dest)
+	out, err := os.Create(dest) // #nosec G304 -- path validated by objectPath
 	if err != nil {
 		return err
 	}
@@ -367,7 +362,7 @@ func (a *Adapter) CompleteMultipartUpload(_ context.Context, key, uploadID strin
 			_ = os.Remove(dest)
 			return fmt.Errorf("missing part %d", n)
 		}
-		in, err := os.Open(partPath)
+		in, err := os.Open(partPath) // #nosec G304 -- part files created under controlled temp dir
 		if err != nil {
 			_ = out.Close()
 			_ = os.Remove(dest)

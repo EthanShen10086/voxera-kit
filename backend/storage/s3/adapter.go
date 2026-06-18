@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
 	"strings"
 	"time"
@@ -231,11 +232,11 @@ func (a *Adapter) InitiateMultipartUpload(ctx context.Context, key string, uploa
 func (a *Adapter) UploadPart(ctx context.Context, key, uploadID string, partNumber int, reader io.Reader, size int64) (string, error) {
 	key = opts.NormalizeKey(key)
 	out, err := a.client.UploadPart(ctx, &s3.UploadPartInput{
-		Bucket:     a.bucket(),
-		Key:        aws.String(key),
-		UploadId:   aws.String(uploadID),
-		PartNumber: aws.Int32(int32(partNumber)),
-		Body:       reader,
+		Bucket:        a.bucket(),
+		Key:           aws.String(key),
+		UploadId:      aws.String(uploadID),
+		PartNumber:    aws.Int32(safeInt32(partNumber)),
+		Body:          reader,
 		ContentLength: aws.Int64(size),
 	})
 	if err != nil {
@@ -250,7 +251,7 @@ func (a *Adapter) CompleteMultipartUpload(ctx context.Context, key, uploadID str
 	completed := make([]types.CompletedPart, len(parts))
 	for i, p := range parts {
 		completed[i] = types.CompletedPart{
-			PartNumber: aws.Int32(int32(p.PartNumber)),
+			PartNumber: aws.Int32(safeInt32(p.PartNumber)),
 			ETag:       aws.String(p.ETag),
 		}
 	}
@@ -397,16 +398,16 @@ func (a *Adapter) PutLifecycleRules(ctx context.Context, rules []storage.Lifecyc
 			Filter: &types.LifecycleRuleFilter{Prefix: aws.String(r.Prefix)},
 		}
 		if r.ExpirationDays > 0 {
-			rule.Expiration = &types.LifecycleExpiration{Days: aws.Int32(int32(r.ExpirationDays))}
+			rule.Expiration = &types.LifecycleExpiration{Days: aws.Int32(safeInt32(r.ExpirationDays))}
 		}
 		if r.NoncurrentVersionExpirationDays > 0 {
 			rule.NoncurrentVersionExpiration = &types.NoncurrentVersionExpiration{
-				NoncurrentDays: aws.Int32(int32(r.NoncurrentVersionExpirationDays)),
+				NoncurrentDays: aws.Int32(safeInt32(r.NoncurrentVersionExpirationDays)),
 			}
 		}
 		if r.TransitionToIADays > 0 {
 			rule.Transitions = []types.Transition{{
-				Days:         aws.Int32(int32(r.TransitionToIADays)),
+				Days:         aws.Int32(safeInt32(r.TransitionToIADays)),
 				StorageClass: types.TransitionStorageClassStandardIa,
 			}}
 		}
@@ -471,7 +472,7 @@ func (a *Adapter) PutBucketNotification(ctx context.Context, cfg storage.Notific
 		events = append(events, types.Event(ev))
 	}
 	input := &s3.PutBucketNotificationConfigurationInput{
-		Bucket: a.bucket(),
+		Bucket:                    a.bucket(),
 		NotificationConfiguration: &types.NotificationConfiguration{},
 	}
 	switch cfg.Type {

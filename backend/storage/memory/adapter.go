@@ -4,7 +4,7 @@ package memory
 import (
 	"bytes"
 	"context"
-	"crypto/md5"
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -71,10 +71,10 @@ type pendingMultipart struct {
 // New creates a new in-memory storage adapter.
 func New(cfg storage.Config, options ...Options) *Adapter {
 	a := &Adapter{
-		objects:    make(map[string]*storedObject),
-		versions:   make(map[string][]*objectVersion),
-		multipart:  make(map[string]*pendingMultipart),
-		cfg:        cfg,
+		objects:   make(map[string]*storedObject),
+		versions:  make(map[string][]*objectVersion),
+		multipart: make(map[string]*pendingMultipart),
+		cfg:       cfg,
 	}
 	if len(options) > 0 {
 		a.events = options[0].EventPublisher
@@ -89,8 +89,8 @@ func (a *Adapter) publish(key string, event storage.NotificationEvent) {
 }
 
 func etagFor(data []byte) string {
-	sum := md5.Sum(data)
-	return hex.EncodeToString(sum[:])
+	sum := sha256.Sum256(data)
+	return hex.EncodeToString(sum[:16])
 }
 
 func cloneMetadata(m map[string]string) map[string]string {

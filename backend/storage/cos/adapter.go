@@ -135,7 +135,7 @@ func (a *Adapter) List(ctx context.Context, prefix string) ([]*storage.ObjectMet
 			lastModified, _ := time.Parse(time.RFC3339, obj.LastModified)
 			out = append(out, &storage.ObjectMeta{
 				Key:          obj.Key,
-				Size:         int64(obj.Size),
+				Size:         obj.Size,
 				ETag:         strings.Trim(obj.ETag, "\""),
 				LastModified: lastModified,
 			})
@@ -234,7 +234,7 @@ func (a *Adapter) ListVersions(ctx context.Context, key string) ([]*storage.Obje
 		out = append(out, &storage.ObjectVersion{
 			VersionID:    v.VersionId,
 			Key:          v.Key,
-			Size:         int64(v.Size),
+			Size:         v.Size,
 			IsLatest:     v.IsLatest,
 			LastModified: lastModified,
 		})

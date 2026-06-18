@@ -54,6 +54,7 @@ type LifecycleRule struct {
 // NotificationEvent identifies object storage events.
 type NotificationEvent string
 
+// Object storage notification event types.
 const (
 	EventObjectCreated NotificationEvent = "ObjectCreated"
 	EventObjectRemoved NotificationEvent = "ObjectRemoved"
@@ -114,7 +115,9 @@ type NotificationManager interface {
 	DeleteBucketNotification(ctx context.Context) error
 }
 
-// StorageAdmin provides bucket-level administration.
+// StorageAdmin provides bucket-level administration (versioning, lifecycle, notifications).
+//
+//nolint:revive // StorageAdmin is the established port name across adapters.
 type StorageAdmin interface {
 	EnableVersioning(ctx context.Context, enabled bool) error
 	GetVersioning(ctx context.Context) (bool, error)
@@ -124,17 +127,17 @@ type StorageAdmin interface {
 
 // Config holds the connection parameters for an object storage backend.
 type Config struct {
-	Endpoint             string
-	AccessKey            string
-	SecretKey            string
-	Bucket               string
-	Region               string
-	UseSSL               bool
-	PathStyle            bool
-	SessionToken         string
-	DisableSSLVerify     bool
-	PartSize             int64
-	MultipartThreshold   int64
+	Endpoint           string
+	AccessKey          string
+	SecretKey          string
+	Bucket             string
+	Region             string
+	UseSSL             bool
+	PathStyle          bool
+	SessionToken       string
+	DisableSSLVerify   bool
+	PartSize           int64
+	MultipartThreshold int64
 }
 
 // DefaultPartSize is the default multipart part size (8 MiB).
