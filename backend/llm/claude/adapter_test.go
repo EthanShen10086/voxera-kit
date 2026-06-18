@@ -66,6 +66,35 @@ func TestEmbedListModelsAvailable(t *testing.T) {
 	}
 }
 
+func TestChatStream(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "text/event-stream")
+		_, _ = w.Write([]byte("event: message_start\n"))
+		_, _ = w.Write([]byte("data: {\"type\":\"content_block_delta\",\"delta\":{\"type\":\"text_delta\",\"text\":\"hi\"}}\n\n"))
+		_, _ = w.Write([]byte("event: message_stop\n"))
+		_, _ = w.Write([]byte("data: {\"type\":\"message_delta\",\"delta\":{\"stop_reason\":\"end_turn\"}}\n\n"))
+	}))
+	defer srv.Close()
+
+	a := claude.New(llm.Config{Endpoint: srv.URL, APIKey: "key"})
+	ch, err := a.ChatStream(context.Background(), llm.Request{
+		Messages: []llm.Message{{Role: llm.RoleUser, Content: "ping"}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var content string
+	for chunk := range ch {
+		if chunk.Err != nil {
+			t.Fatal(chunk.Err)
+		}
+		content += chunk.Content
+	}
+	if content != "hi" {
+		t.Fatalf("content = %q", content)
+	}
+}
+
 func TestChat_APIError(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)

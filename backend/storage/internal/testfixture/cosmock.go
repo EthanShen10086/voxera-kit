@@ -17,9 +17,10 @@ import (
 )
 
 type cosStore struct {
-	mu      sync.Mutex
-	objects map[string][]byte
-	parts   map[string]map[int][]byte // uploadID -> partNumber -> data
+	mu           sync.Mutex
+	objects      map[string][]byte
+	parts        map[string]map[int][]byte // uploadID -> partNumber -> data
+	lifecycleXML []byte
 }
 
 // StartCOSMock launches an httptest COS-compatible server for adapter tests.
@@ -54,6 +55,10 @@ func handleCOS(w http.ResponseWriter, r *http.Request, store *cosStore) {
 			return
 		}
 		if q.Has("lifecycle") {
+			body, _ := io.ReadAll(r.Body)
+			store.mu.Lock()
+			store.lifecycleXML = append([]byte(nil), body...)
+			store.mu.Unlock()
 			w.WriteHeader(http.StatusOK)
 			return
 		}
@@ -112,7 +117,15 @@ func handleCOS(w http.ResponseWriter, r *http.Request, store *cosStore) {
 			return
 		}
 		if q.Has("lifecycle") {
-			w.WriteHeader(http.StatusNotFound)
+			store.mu.Lock()
+			xmlBody := store.lifecycleXML
+			store.mu.Unlock()
+			if len(xmlBody) == 0 {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			w.Header().Set("Content-Type", "application/xml")
+			_, _ = w.Write(xmlBody)
 			return
 		}
 		if q.Has("prefix") || key == "" || strings.HasSuffix(r.URL.Path, "/") {
@@ -137,6 +150,13 @@ func handleCOS(w http.ResponseWriter, r *http.Request, store *cosStore) {
 		}
 		w.WriteHeader(http.StatusOK)
 	case http.MethodDelete:
+		if q.Has("lifecycle") {
+			store.mu.Lock()
+			store.lifecycleXML = nil
+			store.mu.Unlock()
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
 		if uploadID := q.Get("uploadId"); uploadID != "" {
 			store.mu.Lock()
 			delete(store.parts, uploadID)

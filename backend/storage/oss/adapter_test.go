@@ -1,13 +1,14 @@
 package oss_test
 
 import (
+	"bytes"
 	"context"
 	"testing"
 
 	"github.com/EthanShen10086/voxera-kit/storage"
 	"github.com/EthanShen10086/voxera-kit/storage/contract"
-	ossstore "github.com/EthanShen10086/voxera-kit/storage/oss"
 	"github.com/EthanShen10086/voxera-kit/storage/internal/testfixture"
+	ossstore "github.com/EthanShen10086/voxera-kit/storage/oss"
 )
 
 func newOSSAdapter(t *testing.T) *ossstore.Adapter {
@@ -31,6 +32,40 @@ func TestOSSMultipartContract(t *testing.T) {
 		a := newOSSAdapter(t)
 		return a, a
 	})
+}
+
+func TestOSSLifecycleAndUploadLarge(t *testing.T) {
+	ctx := context.Background()
+	a := newOSSAdapter(t)
+	defer func() { _ = a.Close() }()
+
+	if err := a.PutLifecycleRules(ctx, []storage.LifecycleRule{
+		{ID: "r1", Prefix: "tmp/", Status: "Enabled", ExpirationDays: 3},
+	}); err != nil {
+		t.Fatalf("PutLifecycleRules: %v", err)
+	}
+	rules, err := a.GetLifecycleRules(ctx)
+	if err != nil {
+		t.Fatalf("GetLifecycleRules: %v", err)
+	}
+	if len(rules) == 0 {
+		t.Fatal("expected lifecycle rules")
+	}
+	if err := a.DeleteLifecycleRules(ctx); err != nil {
+		t.Fatalf("DeleteLifecycleRules: %v", err)
+	}
+
+	data := bytes.Repeat([]byte("o"), 2048)
+	cfg := testfixture.StartOSSMock(t, "oss-large")
+	cfg.MultipartThreshold = 1024
+	a2, err := ossstore.New(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = a2.Close() }()
+	if err := a2.UploadLarge(ctx, "large.bin", bytes.NewReader(data), int64(len(data)), nil); err != nil {
+		t.Fatalf("UploadLarge: %v", err)
+	}
 }
 
 func TestOSSAdminStubs(t *testing.T) {

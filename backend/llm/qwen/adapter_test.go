@@ -38,6 +38,36 @@ func TestChatAndHeaders(t *testing.T) {
 	}
 }
 
+func TestChatStream(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("X-DashScope-SSE") != "enable" {
+			t.Errorf("X-DashScope-SSE = %q", r.Header.Get("X-DashScope-SSE"))
+		}
+		w.Header().Set("Content-Type", "text/event-stream")
+		_, _ = w.Write([]byte("data: {\"output\":{\"text\":\"流\",\"finish_reason\":\"\"}}\n\n"))
+		_, _ = w.Write([]byte("data: {\"output\":{\"text\":\"式\",\"finish_reason\":\"stop\"}}\n\n"))
+	}))
+	defer srv.Close()
+
+	a := qwen.New(llm.Config{Endpoint: srv.URL, APIKey: "sk-qwen"})
+	ch, err := a.ChatStream(context.Background(), llm.Request{
+		Messages: []llm.Message{{Role: llm.RoleUser, Content: "hi"}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var content string
+	for chunk := range ch {
+		if chunk.Err != nil {
+			t.Fatal(chunk.Err)
+		}
+		content += chunk.Content
+	}
+	if content != "流式" {
+		t.Fatalf("content = %q", content)
+	}
+}
+
 func TestEmbedListModelsAvailable(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_ = json.NewEncoder(w).Encode(map[string]any{

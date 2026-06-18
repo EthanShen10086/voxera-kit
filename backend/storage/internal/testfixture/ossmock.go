@@ -16,10 +16,11 @@ import (
 )
 
 type ossStore struct {
-	mu        sync.Mutex
-	objects   map[string][]byte
-	uploadIDs map[string]string // uploadID -> object key
-	parts     map[string]map[int][]byte
+	mu           sync.Mutex
+	objects      map[string][]byte
+	uploadIDs    map[string]string // uploadID -> object key
+	parts        map[string]map[int][]byte
+	lifecycleXML []byte
 }
 
 // StartOSSMock launches an httptest OSS-compatible server for adapter tests.
@@ -58,6 +59,10 @@ func handleOSS(w http.ResponseWriter, r *http.Request, bucket string, store *oss
 			return
 		}
 		if q.Has("lifecycle") {
+			body, _ := io.ReadAll(r.Body)
+			store.mu.Lock()
+			store.lifecycleXML = append([]byte(nil), body...)
+			store.mu.Unlock()
 			w.WriteHeader(http.StatusOK)
 			return
 		}
@@ -116,7 +121,15 @@ func handleOSS(w http.ResponseWriter, r *http.Request, bucket string, store *oss
 			return
 		}
 		if q.Has("lifecycle") {
-			w.WriteHeader(http.StatusNotFound)
+			store.mu.Lock()
+			xmlBody := store.lifecycleXML
+			store.mu.Unlock()
+			if len(xmlBody) == 0 {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			w.Header().Set("Content-Type", "application/xml")
+			_, _ = w.Write(xmlBody)
 			return
 		}
 		if q.Has("prefix") || key == "" {
@@ -142,6 +155,13 @@ func handleOSS(w http.ResponseWriter, r *http.Request, bucket string, store *oss
 		}
 		w.WriteHeader(http.StatusOK)
 	case http.MethodDelete:
+		if q.Has("lifecycle") {
+			store.mu.Lock()
+			store.lifecycleXML = nil
+			store.mu.Unlock()
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
 		if uploadID := q.Get("uploadId"); uploadID != "" {
 			store.mu.Lock()
 			delete(store.parts, uploadID)

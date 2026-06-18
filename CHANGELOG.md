@@ -8,6 +8,14 @@
 ## [Unreleased]
 
 ### Added
+- **Go 单元/契约测试（Phase 4 Sprint 4.4 → ~61%）**:
+  - `secret/aws`：Secrets Manager JSON API httptest + 契约测试
+  - `secret/gcp`：离线 helper / NewManager 校验
+  - `secret/tencent`：`isNotFound` 单元测试
+  - `asr/whisper`：Recognize / RecognizeStream / API 错误 httptest
+  - `storage/cos`、`storage/oss`：lifecycle mock 深化 + UploadLarge
+  - `storage/internal/testfixture`：S3/COS/OSS smoke 单测
+  - `llm/claude`、`llm/qwen`：ChatStream SSE 单测
 - **Go 单元/契约测试（Phase 4 Sprint 4.3）**:
   - `storage/cos`、`storage/oss`：httptest vendor mock（`testfixture/cosmock`、`ossmock`）
   - `mq/kafka`、`mq/rabbitmq`：离线校验 + testcontainers 集成契约

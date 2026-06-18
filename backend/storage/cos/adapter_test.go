@@ -1,6 +1,7 @@
 package cos_test
 
 import (
+	"bytes"
 	"context"
 	"testing"
 
@@ -31,6 +32,43 @@ func TestCOSMultipartContract(t *testing.T) {
 		a := newCOSAdapter(t)
 		return a, a
 	})
+}
+
+func TestCOSLifecycleAndUploadLarge(t *testing.T) {
+	ctx := context.Background()
+	a := newCOSAdapter(t)
+	defer func() { _ = a.Close() }()
+
+	if err := a.EnableVersioning(ctx, true); err != nil {
+		t.Fatalf("EnableVersioning: %v", err)
+	}
+	if err := a.PutLifecycleRules(ctx, []storage.LifecycleRule{
+		{ID: "r1", Prefix: "logs/", Status: "Enabled", ExpirationDays: 7},
+	}); err != nil {
+		t.Fatalf("PutLifecycleRules: %v", err)
+	}
+	rules, err := a.GetLifecycleRules(ctx)
+	if err != nil {
+		t.Fatalf("GetLifecycleRules: %v", err)
+	}
+	if len(rules) == 0 {
+		t.Fatal("expected lifecycle rules")
+	}
+	if err := a.DeleteLifecycleRules(ctx); err != nil {
+		t.Fatalf("DeleteLifecycleRules: %v", err)
+	}
+
+	data := bytes.Repeat([]byte("c"), 2048)
+	cfg := testfixture.StartCOSMock(t, "cos-large")
+	cfg.MultipartThreshold = 1024
+	a2, err := cosstore.New(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = a2.Close() }()
+	if err := a2.UploadLarge(ctx, "large.bin", bytes.NewReader(data), int64(len(data)), nil); err != nil {
+		t.Fatalf("UploadLarge: %v", err)
+	}
 }
 
 func TestCOSAdminStubs(t *testing.T) {
