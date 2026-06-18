@@ -5,6 +5,7 @@ package minio_test
 import (
 	"bytes"
 	"context"
+	"io"
 	"strings"
 	"testing"
 
@@ -37,10 +38,47 @@ func TestMinIOObjectStoreContract(t *testing.T) {
 }
 
 func TestMinIOMultipartContract(t *testing.T) {
-	contract.RunMultipartContract(t, func(t *testing.T) (storage.MultipartUploader, storage.ObjectStore) {
-		a := startMinIOAdapter(t)
-		return a, a
-	})
+	ctx := context.Background()
+	a := startMinIOAdapter(t)
+	multipart, store := a, a
+	t.Cleanup(func() { _ = store.Close() })
+
+	// MinIO/S3 require non-terminal parts to be at least 5 MiB.
+	key := "contract/multipart.bin"
+	part1 := bytes.Repeat([]byte("a"), 5<<20)
+	part2 := []byte("part-two")
+	expected := append(append([]byte(nil), part1...), part2...)
+
+	uploadID, err := multipart.InitiateMultipartUpload(ctx, key, &storage.UploadOptions{ContentType: "application/octet-stream"})
+	if err != nil {
+		t.Fatalf("initiate multipart: %v", err)
+	}
+	etag1, err := multipart.UploadPart(ctx, key, uploadID, 1, bytes.NewReader(part1), int64(len(part1)))
+	if err != nil {
+		t.Fatalf("upload part 1: %v", err)
+	}
+	etag2, err := multipart.UploadPart(ctx, key, uploadID, 2, bytes.NewReader(part2), int64(len(part2)))
+	if err != nil {
+		t.Fatalf("upload part 2: %v", err)
+	}
+	if err := multipart.CompleteMultipartUpload(ctx, key, uploadID, []storage.CompletedPart{
+		{PartNumber: 1, ETag: etag1},
+		{PartNumber: 2, ETag: etag2},
+	}); err != nil {
+		t.Fatalf("complete multipart: %v", err)
+	}
+	rc, err := store.Download(ctx, key)
+	if err != nil {
+		t.Fatalf("download: %v", err)
+	}
+	got, err := io.ReadAll(rc)
+	_ = rc.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(got, expected) {
+		t.Fatalf("multipart content mismatch: len(got)=%d len(want)=%d", len(got), len(expected))
+	}
 }
 
 func TestMinIOVersioningAndLifecycle(t *testing.T) {

@@ -277,7 +277,9 @@ func (a *Adapter) PutLifecycleRules(ctx context.Context, rules []storage.Lifecyc
 		rule := lifecycle.Rule{
 			ID:     r.ID,
 			Status: r.Status,
-			Prefix: r.Prefix,
+			RuleFilter: lifecycle.Filter{
+				Prefix: r.Prefix,
+			},
 		}
 		if r.ExpirationDays > 0 {
 			rule.Expiration = lifecycle.Expiration{Days: lifecycle.ExpirationDays(r.ExpirationDays)}
@@ -309,10 +311,14 @@ func (a *Adapter) GetLifecycleRules(ctx context.Context) ([]storage.LifecycleRul
 	}
 	out := make([]storage.LifecycleRule, 0, len(lcfg.Rules))
 	for _, r := range lcfg.Rules {
+		prefix := r.Prefix
+		if prefix == "" {
+			prefix = r.RuleFilter.Prefix
+		}
 		rule := storage.LifecycleRule{
 			ID:     r.ID,
 			Status: r.Status,
-			Prefix: r.Prefix,
+			Prefix: prefix,
 		}
 		if r.Expiration.Days > 0 {
 			rule.ExpirationDays = int(r.Expiration.Days)
