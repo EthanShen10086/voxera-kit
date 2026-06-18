@@ -14,3 +14,4 @@ export {
   resetApiFixtures,
 } from "./api.js";
 export { resetFixtures } from "./reset.js";
+export { createFaker, type FakerPort } from "@voxera-kit/faker";

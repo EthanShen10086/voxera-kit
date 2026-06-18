@@ -11,8 +11,8 @@
 | 后端集成测试 | 无 CI job | 无 testcontainers；MinIO/Redis/NATS/Postgres 未进 pipeline |
 | 前端单测 | 各包 Vitest（api-client、theme、di…） | 无共享 setup、无 MSW 包 |
 | UI / E2E | 无 | 无 Playwright 配置、无 page object 库 |
-| 造数 / Mock | `dataprovider/stub`、`dataparser` stub、各模块 memory | 无跨产品 `@voxera-kit/faker` / `fixture` |
-| 覆盖率门禁 | CHANGELOG 规划 80% | 未 enforced |
+| 造数 / Mock | `backend/fixture`、`@voxera-kit/fixture`、**`@voxera-kit/faker`**（可插拔） | 产品接 testkit（TODO） |
+| 覆盖率门禁 | **8% enforce**（阶梯 15→30→50→80，见 `COVERAGE_ROADMAP.md`） | 下一档 15% |
 
 ## 目标架构
 

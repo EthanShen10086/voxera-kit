@@ -9,6 +9,21 @@
 
 ---
 
+## [0.4.0] - 2026-06-13
+
+测试基建闭环：覆盖率阶梯门禁、`@voxera-kit/faker` 可插拔包、Release train 脚本。
+
+### Added
+- **`@voxera-kit/faker`**: 可插拔 `fakerjs` / `lightweight` adapter；`@voxera-kit/fixture` 重导出
+- **`docs/COVERAGE_ROADMAP.md`**: 8%→15%→30%→50%→80% 阶梯
+- **`scripts/monthly-pin-bump.sh`**: 协调 consumer pin 更新
+
+### Changed
+- **`coverage.sh`**: `MIN_COVERAGE` 门禁（默认 8%），跳过 `testkit`
+- CI / nightly `go-coverage` 启用 enforce
+
+---
+
 ## [0.3.0] - 2026-06-13
 
 基建深化：tencent secret、task 高级能力、NATS JetStream、translation/deepl+google、混元 TC3 签名、Vault 集成测、Release train 文档。

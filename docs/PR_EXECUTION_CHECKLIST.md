@@ -33,4 +33,8 @@ Track merge order for the org-wide standards rollout. Check off as PRs land.
 - [x] **v0.2.0** tag + consumer pin bump (2026-06-13)
 - [x] `docs/RELEASE_TRAIN.md` operational release process
 - [x] **v0.3.0** tag + consumer pin bump (2026-06-13)
+- [x] Coverage ramp + MIN_COVERAGE enforce (`docs/COVERAGE_ROADMAP.md`)
+- [x] `@voxera-kit/faker` pluggable package
+- [x] `scripts/monthly-pin-bump.sh` + RELEASE_TRAIN step
+- [x] ScrollCap remote: dependabot + SECURITY verified
 - [ ] Monthly kit tag → bump consumer pins (operational cadence)

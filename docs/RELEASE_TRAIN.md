@@ -21,7 +21,7 @@ Operational process for **voxera-kit → consumer** coordinated releases.
    ```bash
    gh release create v0.x.y --notes-file /tmp/release-notes.md
    ```
-6. **Bump consumer pins** — update `.github/voxera-kit-pin` in:
+6. **Bump consumer pins** — run `bash scripts/monthly-pin-bump.sh v0.x.y` or manually update `.github/voxera-kit-pin` in:
    - voxera, finera, pulsera, MsgGuard, ciphera, ciphera-vps
 7. **Consumer CI** — push each consumer; fix breaking changes (e.g. `cache/local.New` error return).
 8. **Product tags** (optional) — tag product releases after consumer CI is green.
