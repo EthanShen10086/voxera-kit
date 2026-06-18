@@ -40,8 +40,8 @@ func StartPostgres(ctx context.Context) (*Postgres, error) {
 		return nil, err
 	}
 	return &Postgres{
-		Config: cfg,
-		DSN:    dsn,
+		Config:    cfg,
+		DSN:       dsn,
 		terminate: func(ctx context.Context) error { return c.Terminate(ctx) },
 	}, nil
 }

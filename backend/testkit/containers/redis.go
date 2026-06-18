@@ -26,7 +26,7 @@ func StartRedis(ctx context.Context) (*Redis, error) {
 		return nil, fmt.Errorf("containers: redis endpoint: %w", err)
 	}
 	return &Redis{
-		Address: addr,
+		Address:   addr,
 		terminate: func(ctx context.Context) error { return c.Terminate(ctx) },
 	}, nil
 }

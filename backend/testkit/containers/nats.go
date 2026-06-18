@@ -25,7 +25,7 @@ func StartNATS(ctx context.Context) (*NATS, error) {
 		return nil, fmt.Errorf("containers: nats connection string: %w", err)
 	}
 	return &NATS{
-		URL: url,
+		URL:       url,
 		terminate: func(ctx context.Context) error { return c.Terminate(ctx) },
 	}, nil
 }
