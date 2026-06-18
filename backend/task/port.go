@@ -22,6 +22,8 @@ type Task struct {
 type Handler func(ctx context.Context, t Task) error
 
 // TaskQueue manages enqueueing, scheduling, and cancellation of tasks.
+//
+//nolint:revive // TaskQueue is the established port name across adapters.
 type TaskQueue interface {
 	// Enqueue adds a task for immediate execution.
 	Enqueue(ctx context.Context, t Task) error

@@ -56,6 +56,6 @@ func TestAdapterScheduleCancel(t *testing.T) {
 
 	time.Sleep(700 * time.Millisecond)
 	if ran.Load() {
-		t.Fatal("cancelled task should not run")
+		t.Fatal("canceled task should not run")
 	}
 }
