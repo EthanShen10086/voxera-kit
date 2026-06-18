@@ -10,6 +10,9 @@ Wave T 集成测试基建：testcontainers 封装 + 数据平面 contract smoke 
 | `contract/` | 重导出各模块 `Run*Contract`；`RunDataPlaneSmoke`（integration tag） |
 | `assert/` | 共享断言（`ErrorIs` 等） |
 | `integration/` | CI 集成测试入口 |
+| `assert/` | 共享断言（`ErrorIs` 等） |
+
+相关：`backend/fixture`（Wave T3 造数）、`frontend/packages/fixture`（前端 JSON 工厂）。
 
 ## containers
 

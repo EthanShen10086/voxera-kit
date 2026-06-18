@@ -20,6 +20,7 @@ use (
 	./errors
 	./experiment
 	./featureflag
+	./fixture
 	./framework
 	./license
 	./llm
