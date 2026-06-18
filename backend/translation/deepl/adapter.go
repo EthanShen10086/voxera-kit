@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	defaultEndpoint    = "https://api.deepl.com"
-	freeEndpoint       = "https://api-free.deepl.com"
+	defaultEndpoint     = "https://api.deepl.com"
+	freeEndpoint        = "https://api-free.deepl.com"
 	defaultFreeEndpoint = freeEndpoint
 )
 

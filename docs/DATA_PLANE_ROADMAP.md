@@ -33,7 +33,7 @@
 | 6 | W1 · 分片上传 + `UploadLarge`（minio/s3） | ✅ | `MultipartUploader`、`storage/internal/uploadlarge/` | [storage/README](../backend/storage/README.md) |
 | 7 | W1.5 · 版本 / 生命周期 / 桶通知 + MQ 桥 | 🟡 | `VersionedObjectStore`、`StorageAdmin` 各 adapter；**无独立 bucket→MQ bridge 包** | `task/README` 组合说明 |
 | 8 | W2 · `cache/redis` + `cache/local` + 契约 | ✅ | `backend/cache/redis`、`local`、`cache/contract/` | [cache/README](../backend/cache/README.md) |
-| 9 | W2 · `cache/memcached` + 多级缓存（`tiered`） | ✅ | `backend/cache/tiered/`；L1+L2 读穿/写穿；`cache/README` 用法 | [cache/README](../backend/cache/README.md) |
+| 9 | W2 · `cache/memcached` + 多级缓存（`tiered`） | ✅ | `backend/cache/tiered/`；`bench_test.go`；L1+L2 读穿/写穿 | [cache/README](../backend/cache/README.md)、[benchmark](./cache-memorystore-benchmark.md) |
 | 10 | W2 · `mq/nats` Pub/Sub + 契约 | ✅ | `backend/mq/nats/`；embedded nats-server 单测 | [mq/README](../backend/mq/README.md) |
 | 11 | W2 · `mq/kafka` Pub/Sub | ✅ | `backend/mq/kafka/`；testcontainers 集成 | 同上 |
 | 12 | W2 · `mq/rabbitmq` | ✅ | `backend/mq/rabbitmq/`；testcontainers 集成 | 同上 |
@@ -111,7 +111,11 @@ cd backend/cache && go test ./... -race
 | `memory` | 内置 | 契约 |
 | `tiered` | 组合任意 `Cache` | 契约 + 回填单测 |
 
-**#9 多级缓存：** `cache/tiered` 实现 L1+L2 读穿/写穿；Memorystore 基准文档仍可选。
+**#9 多级缓存：** `cache/tiered` 实现 L1+L2 读穿/写穿；性能基准见 [cache-memorystore-benchmark.md](./cache-memorystore-benchmark.md)。
+
+```bash
+cd backend/cache/tiered && go test -bench=. -benchmem -count=3
+```
 
 ---
 
@@ -199,6 +203,7 @@ go test -tags=integration ./postgres/...
 | [README.md](../README.md) | 全局架构、43 模块状态、企业级对标 |
 | [backend/storage/README.md](../backend/storage/README.md) | 对象存储选型与测试命令 |
 | [backend/cache/README.md](../backend/cache/README.md) | 缓存适配器 |
+| [cache-memorystore-benchmark.md](./cache-memorystore-benchmark.md) | 多级缓存与 Memorystore 性能基准 |
 | [backend/mq/README.md](../backend/mq/README.md) | 消息队列适配器 |
 | [backend/task/README.md](../backend/task/README.md) | 延迟任务 vs cron vs mq |
 | [TESTING_INFRA_PLAN.md](./TESTING_INFRA_PLAN.md) | Wave T 测试基建 |

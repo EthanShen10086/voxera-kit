@@ -1,13 +1,14 @@
 package hunyuan
 
 import (
+	"context"
 	"net/http"
 	"strings"
 	"testing"
 )
 
 func TestTC3Signer_SetsAuthorization(t *testing.T) {
-	req, err := http.NewRequest(http.MethodPost, "https://hunyuan.tencentcloudapi.com/hyllm/v1/chat/completions", strings.NewReader(`{"model":"hunyuan-pro"}`))
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, "https://hunyuan.tencentcloudapi.com/hyllm/v1/chat/completions", strings.NewReader(`{"model":"hunyuan-pro"}`))
 	if err != nil {
 		t.Fatal(err)
 	}

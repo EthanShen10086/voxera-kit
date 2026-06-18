@@ -124,12 +124,12 @@ type natsSubscription struct {
 
 // Subscriber implements the mq.Subscriber interface using NATS.
 type Subscriber struct {
-	conn        *nats.Conn
-	js          nats.JetStreamContext
-	mu          sync.Mutex
-	subs        map[string]*natsSubscription
-	pendingAck  map[string]*nats.Msg
-	cfg         mq.Config
+	conn       *nats.Conn
+	js         nats.JetStreamContext
+	mu         sync.Mutex
+	subs       map[string]*natsSubscription
+	pendingAck map[string]*nats.Msg
+	cfg        mq.Config
 }
 
 // NewSubscriber creates a new NATS Subscriber with the provided configuration.

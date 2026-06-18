@@ -23,7 +23,7 @@ func TestIPFilterModes(t *testing.T) {
 	}
 
 	both := memory.New(security.IPFilterConfig{
-		Mode: security.Both,
+		Mode:         security.Both,
 		WhitelistIPs: []string{"1.1.1.1"},
 		BlacklistIPs: []string{"2.2.2.2"},
 	})

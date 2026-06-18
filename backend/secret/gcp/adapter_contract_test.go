@@ -108,7 +108,7 @@ func startFakeGCP(t *testing.T) *secretmanager.Client {
 	t.Cleanup(func() { srv.Stop() })
 
 	ctx := context.Background()
-	conn, err := grpc.DialContext(ctx, "bufnet",
+	conn, err := grpc.NewClient("passthrough://bufnet",
 		grpc.WithContextDialer(func(context.Context, string) (net.Conn, error) { return lis.Dial() }),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)

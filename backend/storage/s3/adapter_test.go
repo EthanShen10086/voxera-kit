@@ -164,7 +164,7 @@ func TestS3GetLifecycleAndNotificationEmpty(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetLifecycleRules: %v", err)
 	}
-	if rules != nil && len(rules) > 0 {
+	if len(rules) > 0 {
 		t.Fatalf("expected empty lifecycle, got %#v", rules)
 	}
 

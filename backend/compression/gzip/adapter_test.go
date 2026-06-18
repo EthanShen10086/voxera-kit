@@ -3,9 +3,10 @@ package gzip_test
 import (
 	"testing"
 
+	compressgzip "compress/gzip"
+
 	"github.com/EthanShen10086/voxera-kit/compression"
 	"github.com/EthanShen10086/voxera-kit/compression/gzip"
-	compressgzip "compress/gzip"
 )
 
 func TestCompressDecompressRoundtrip(t *testing.T) {

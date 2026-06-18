@@ -3,7 +3,6 @@ package channel_test
 import (
 	"context"
 	"errors"
-	"sync/atomic"
 	"testing"
 	"time"
 
@@ -39,14 +38,46 @@ func TestSemaphore(t *testing.T) {
 
 func TestWorkerPoolSubmitAndShutdown(t *testing.T) {
 	pool := channel.NewWorkerPool(concurrency.WorkerPoolConfig{MaxWorkers: 2, QueueSize: 2})
-	var ran atomic.Int32
+	release := make(chan struct{})
 
-	if err := pool.Submit(func(context.Context) error {
-		ran.Add(1)
+	block := func(context.Context) error {
+		<-release
 		return nil
-	}); err != nil {
+	}
+
+	// Saturate workers first, then fill the queue buffer.
+	for i := 0; i < 2; i++ {
+		if err := pool.Submit(block); err != nil {
+			t.Fatalf("submit worker %d: %v", i, err)
+		}
+	}
+	deadline := time.Now().Add(time.Second)
+	for pool.Running() < 2 && time.Now().Before(deadline) {
+		time.Sleep(time.Millisecond)
+	}
+	for i := 0; i < 2; i++ {
+		if err := pool.Submit(block); err != nil {
+			t.Fatalf("submit queued %d: %v", i, err)
+		}
+	}
+
+	if err := pool.Submit(block); err == nil {
+		t.Fatal("expected queue full error")
+	}
+
+	close(release)
+
+	if err := pool.Shutdown(context.Background()); err != nil {
 		t.Fatal(err)
 	}
+	if err := pool.Submit(block); !errors.Is(err, context.Canceled) {
+		t.Fatalf("submit after shutdown: %v", err)
+	}
+}
+
+func TestWorkerPoolSubmitWait(t *testing.T) {
+	pool := channel.NewWorkerPool(concurrency.WorkerPoolConfig{MaxWorkers: 1, QueueSize: 1})
+	defer func() { _ = pool.Shutdown(context.Background()) }()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
@@ -56,24 +87,5 @@ func TestWorkerPoolSubmitAndShutdown(t *testing.T) {
 	}
 	if result.Duration < 0 {
 		t.Fatal("negative duration")
-	}
-
-	deadline := time.Now().Add(time.Second)
-	for ran.Load() < 1 && time.Now().Before(deadline) {
-		time.Sleep(5 * time.Millisecond)
-	}
-
-	for i := 0; i < 3; i++ {
-		_ = pool.Submit(func(context.Context) error { return nil })
-	}
-	if err := pool.Submit(func(context.Context) error { return nil }); err == nil {
-		t.Fatal("expected queue full error")
-	}
-
-	if err := pool.Shutdown(context.Background()); err != nil {
-		t.Fatal(err)
-	}
-	if err := pool.Submit(func(context.Context) error { return nil }); !errors.Is(err, context.Canceled) {
-		t.Fatalf("submit after shutdown: %v", err)
 	}
 }

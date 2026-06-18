@@ -20,8 +20,8 @@ func TestFetch(t *testing.T) {
 	pool := memory.NewProxyPool()
 	a := scraperhttp.New(scraperhttp.Config{ProxyPool: pool})
 	resp, err := a.Fetch(context.Background(), &scraper.FetchRequest{
-		Method: http.MethodGet,
-		URL:    srv.URL,
+		Method:  http.MethodGet,
+		URL:     srv.URL,
 		Headers: map[string]string{"X-Test": "1"},
 	})
 	if err != nil || resp.StatusCode != http.StatusOK || string(resp.Body) != "page" {

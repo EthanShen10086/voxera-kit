@@ -74,7 +74,7 @@ func TestListAndGetResults(t *testing.T) {
 			_ = json.NewEncoder(w).Encode(map[string]any{
 				"results": []map[string]any{{
 					"id": 1, "name": "Checkout", "description": "btn",
-					"start_date": "2024-01-01",
+					"start_date":   "2024-01-01",
 					"feature_flag": map[string]string{"key": "checkout-exp"},
 				}},
 			})

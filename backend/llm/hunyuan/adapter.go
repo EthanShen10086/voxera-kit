@@ -27,15 +27,15 @@ const (
 // When SecretID and SecretKey are set, requests are signed with TC3-HMAC-SHA256.
 // Otherwise falls back to Bearer APIKey authentication.
 type Adapter struct {
-	apiKey   string
-	secretID string
+	apiKey    string
+	secretID  string
 	secretKey string
-	region   string
-	endpoint string
-	model    string
-	client   *http.Client
-	headers  map[string]string
-	signer   *tc3Signer
+	region    string
+	endpoint  string
+	model     string
+	client    *http.Client
+	headers   map[string]string
+	signer    *tc3Signer
 }
 
 // New creates a new Hunyuan adapter from the given configuration.

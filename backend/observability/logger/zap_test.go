@@ -25,7 +25,7 @@ func TestZapLogger_WritesToFile(t *testing.T) {
 	log.Info("hello zap", logger.Field{Key: "k", Value: "v"})
 	log.WithTraceID("trace-xyz").Warn("warn-msg")
 
-	data, err := os.ReadFile(logPath)
+	data, err := os.ReadFile(logPath) //nolint:gosec // test reads log file under t.TempDir()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -36,7 +36,7 @@ func TestZapLogger_WritesToFile(t *testing.T) {
 }
 
 func TestZapLogger_Interface(t *testing.T) {
-	log, err := logger.NewZapLogger(logger.WithOutputPaths(t.TempDir()+"/z.log"))
+	log, err := logger.NewZapLogger(logger.WithOutputPaths(t.TempDir() + "/z.log"))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/alicebob/miniredis/v2"
 	"github.com/EthanShen10086/voxera-kit/task"
 	"github.com/EthanShen10086/voxera-kit/task/redis"
+	"github.com/alicebob/miniredis/v2"
 	goredis "github.com/redis/go-redis/v9"
 )
 

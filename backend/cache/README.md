@@ -42,6 +42,8 @@ val, err := store.Get(ctx, "user:42")
 
 单测可用 `tiered.New(memory.New(), memory.New())` 跑契约。
 
+性能对标与基准方法见 **[Memorystore 性能基准文档](../../docs/cache-memorystore-benchmark.md)**（含 `go test -bench`）。
+
 ## 测试
 
 ```bash

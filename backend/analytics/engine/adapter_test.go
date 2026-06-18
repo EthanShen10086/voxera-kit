@@ -109,7 +109,7 @@ func TestQueryRetentionPathAndEvents(t *testing.T) {
 	}
 
 	events, err := eng.QueryEvents(ctx, analytics.EventQuery{
-		TenantID: "t1", UserID: "u1", From: ts.Add(-time.Hour), To: ts.Add(72*time.Hour), Limit: 10,
+		TenantID: "t1", UserID: "u1", From: ts.Add(-time.Hour), To: ts.Add(72 * time.Hour), Limit: 10,
 	})
 	if err != nil || len(events) == 0 {
 		t.Fatalf("events: %v err=%v", events, err)

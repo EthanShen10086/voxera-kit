@@ -1,6 +1,7 @@
 package profiling_test
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -37,7 +38,11 @@ func TestRegisterPprofEnabled(t *testing.T) {
 	}
 	srv := httptest.NewServer(mux)
 	defer srv.Close()
-	resp, err := http.Get(srv.URL + "/debug/pprof/")
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, srv.URL+"/debug/pprof/", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -12,13 +12,13 @@ import (
 
 	"github.com/EthanShen10086/voxera-kit/audit"
 	auditmemory "github.com/EthanShen10086/voxera-kit/audit/memory"
-	loadshedadaptive "github.com/EthanShen10086/voxera-kit/loadshed/adaptive"
 	"github.com/EthanShen10086/voxera-kit/loadshed"
+	loadshedadaptive "github.com/EthanShen10086/voxera-kit/loadshed/adaptive"
 	"github.com/EthanShen10086/voxera-kit/observability/logger"
 	"github.com/EthanShen10086/voxera-kit/observability/metrics"
 	"github.com/EthanShen10086/voxera-kit/observability/tracing"
-	piiregex "github.com/EthanShen10086/voxera-kit/pii/regex"
 	"github.com/EthanShen10086/voxera-kit/pii"
+	piiregex "github.com/EthanShen10086/voxera-kit/pii/regex"
 	"github.com/EthanShen10086/voxera-kit/security/headers"
 )
 
@@ -71,13 +71,13 @@ func (s stubChecker) Check(context.Context) error { return s.err }
 
 type stubLogger struct{}
 
-func (stubLogger) Debug(string, ...logger.Field) {}
-func (stubLogger) Info(string, ...logger.Field)  {}
-func (stubLogger) Warn(string, ...logger.Field)  {}
-func (stubLogger) Error(string, ...logger.Field) {}
-func (stubLogger) Fatal(string, ...logger.Field) {}
+func (stubLogger) Debug(string, ...logger.Field)      {}
+func (stubLogger) Info(string, ...logger.Field)       {}
+func (stubLogger) Warn(string, ...logger.Field)       {}
+func (stubLogger) Error(string, ...logger.Field)      {}
+func (stubLogger) Fatal(string, ...logger.Field)      {}
 func (stubLogger) With(...logger.Field) logger.Logger { return stubLogger{} }
-func (stubLogger) WithTraceID(string) logger.Logger { return stubLogger{} }
+func (stubLogger) WithTraceID(string) logger.Logger   { return stubLogger{} }
 
 func TestHealthCheckEndpoints(t *testing.T) {
 	h := Chain(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
@@ -218,10 +218,10 @@ func (stubTracer) Shutdown(context.Context) error { return nil }
 
 type stubSpan struct{}
 
-func (stubSpan) End()                                      {}
-func (stubSpan) SetAttributes(string, any)                 {}
-func (stubSpan) RecordError(error)                         {}
-func (stubSpan) SpanContext() tracing.SpanContext          { return tracing.SpanContext{TraceID: "trace-abc"} }
+func (stubSpan) End()                             {}
+func (stubSpan) SetAttributes(string, any)        {}
+func (stubSpan) RecordError(error)                {}
+func (stubSpan) SpanContext() tracing.SpanContext { return tracing.SpanContext{TraceID: "trace-abc"} }
 
 func TestTracingMiddleware(t *testing.T) {
 	h := Chain(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

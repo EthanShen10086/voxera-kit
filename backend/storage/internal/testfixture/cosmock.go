@@ -189,9 +189,9 @@ func writeCOSList(w http.ResponseWriter, store *cosStore, prefix string) {
 		LastModified string `xml:"LastModified"`
 	}
 	type result struct {
-		XMLName      xml.Name  `xml:"ListBucketResult"`
-		IsTruncated  bool      `xml:"IsTruncated"`
-		Contents     []content `xml:"Contents"`
+		XMLName     xml.Name  `xml:"ListBucketResult"`
+		IsTruncated bool      `xml:"IsTruncated"`
+		Contents    []content `xml:"Contents"`
 	}
 	store.mu.Lock()
 	defer store.mu.Unlock()

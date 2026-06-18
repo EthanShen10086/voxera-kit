@@ -123,10 +123,12 @@ func (a *Adapter) DeadLetterLen() int {
 // PopDue returns the next due task ID and payload, removing it from the queue.
 func (a *Adapter) PopDue(ctx context.Context) (task.Task, bool, error) {
 	now := float64(time.Now().UnixMilli())
-	ids, err := a.client.ZRangeByScore(ctx, a.queueKey, &redis.ZRangeBy{
-		Min:   "-inf",
-		Max:   fmt.Sprintf("%f", now),
-		Count: 1,
+	ids, err := a.client.ZRangeArgs(ctx, redis.ZRangeArgs{
+		Key:     a.queueKey,
+		Start:   "-inf",
+		Stop:    fmt.Sprintf("%f", now),
+		ByScore: true,
+		Count:   1,
 	}).Result()
 	if err != nil {
 		return task.Task{}, false, err

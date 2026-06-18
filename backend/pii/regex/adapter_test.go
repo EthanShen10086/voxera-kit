@@ -28,7 +28,7 @@ func TestRedactFields(t *testing.T) {
 		Rules: []pii.Rule{{FieldName: "ssn", Replacement: "***"}},
 	})
 	out := r.RedactFields(map[string]any{
-		"ssn": "123-45-6789",
+		"ssn":  "123-45-6789",
 		"note": map[string]any{"email": "x@y.com"},
 	})
 	if out["ssn"] != "***" {

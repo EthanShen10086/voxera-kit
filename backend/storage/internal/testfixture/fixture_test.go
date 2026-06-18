@@ -7,9 +7,9 @@ import (
 
 	"github.com/EthanShen10086/voxera-kit/storage"
 	cosstore "github.com/EthanShen10086/voxera-kit/storage/cos"
+	"github.com/EthanShen10086/voxera-kit/storage/internal/testfixture"
 	ossstore "github.com/EthanShen10086/voxera-kit/storage/oss"
 	s3store "github.com/EthanShen10086/voxera-kit/storage/s3"
-	"github.com/EthanShen10086/voxera-kit/storage/internal/testfixture"
 )
 
 func TestS3MockSmoke(t *testing.T) {

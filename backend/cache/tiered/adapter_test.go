@@ -2,7 +2,9 @@ package tiered_test
 
 import (
 	"context"
+	"errors"
 	"testing"
+	"time"
 
 	"github.com/EthanShen10086/voxera-kit/cache"
 	"github.com/EthanShen10086/voxera-kit/cache/contract"
@@ -84,5 +86,47 @@ func TestDeleteEvictsAllLayers(t *testing.T) {
 	}
 	if _, err := l2.Get(ctx, "k"); err != cache.ErrNotFound {
 		t.Fatalf("L2 after delete: %v", err)
+	}
+}
+
+func TestSetWithTTLExistsFlush(t *testing.T) {
+	ctx := context.Background()
+	l1 := memory.New()
+	l2 := memory.New()
+	defer func() { _ = l1.Close(); _ = l2.Close() }()
+
+	c, err := tiered.New(l1, l2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = c.Close() }()
+
+	if err := c.SetWithTTL(ctx, "k", []byte("v"), time.Minute); err != nil {
+		t.Fatal(err)
+	}
+	ok, err := c.Exists(ctx, "k")
+	if err != nil || !ok {
+		t.Fatalf("Exists() = %v, %v", ok, err)
+	}
+	if err := c.Flush(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.Get(ctx, "k"); !errors.Is(err, cache.ErrNotFound) {
+		t.Fatalf("after flush: %v", err)
+	}
+}
+
+func TestGetCanceledContext(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	c, err := tiered.New(memory.New(), memory.New())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = c.Close() }()
+
+	if _, err := c.Get(ctx, "k"); !errors.Is(err, context.Canceled) {
+		t.Fatalf("Get: %v", err)
 	}
 }
