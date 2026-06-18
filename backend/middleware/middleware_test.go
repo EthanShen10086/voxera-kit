@@ -1,9 +1,17 @@
 package middleware
 
 import (
+	"context"
+	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
+
+	"github.com/EthanShen10086/voxera-kit/observability/logger"
+	"github.com/EthanShen10086/voxera-kit/observability/metrics"
+	"github.com/EthanShen10086/voxera-kit/security/headers"
 )
 
 func TestChainOrder(t *testing.T) {
@@ -45,4 +53,148 @@ func TestRequestIDPropagates(t *testing.T) {
 	if rec.Header().Get("X-Request-ID") != "test-req-id" {
 		t.Fatal("response header missing id")
 	}
+}
+
+type stubChecker struct {
+	err error
+}
+
+func (s stubChecker) Check(context.Context) error { return s.err }
+
+type stubLogger struct{}
+
+func (stubLogger) Debug(string, ...logger.Field) {}
+func (stubLogger) Info(string, ...logger.Field)  {}
+func (stubLogger) Warn(string, ...logger.Field)  {}
+func (stubLogger) Error(string, ...logger.Field) {}
+func (stubLogger) Fatal(string, ...logger.Field) {}
+func (stubLogger) With(...logger.Field) logger.Logger { return stubLogger{} }
+func (stubLogger) WithTraceID(string) logger.Logger { return stubLogger{} }
+
+func TestHealthCheckEndpoints(t *testing.T) {
+	h := Chain(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusTeapot)
+	}), HealthCheck(map[string]HealthChecker{
+		"db": stubChecker{},
+	}))
+
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/health", nil))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("/health status = %d", rec.Code)
+	}
+
+	rec = httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/ready", nil))
+	var resp healthResponse
+	if err := json.NewDecoder(rec.Body).Decode(&resp); err != nil {
+		t.Fatal(err)
+	}
+	if resp.Status != "ok" || resp.Checks["db"] != "ok" {
+		t.Fatalf("ready ok: %+v", resp)
+	}
+
+	hDegraded := Chain(http.NotFoundHandler(), HealthCheck(map[string]HealthChecker{
+		"cache": stubChecker{err: errors.New("down")},
+	}))
+	rec = httptest.NewRecorder()
+	hDegraded.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/ready", nil))
+	if rec.Code != http.StatusServiceUnavailable {
+		t.Fatalf("degraded status = %d", rec.Code)
+	}
+}
+
+func TestSecurityHeaders(t *testing.T) {
+	cfg := headers.DefaultStrict()
+	h := Chain(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {}), SecurityHeaders(cfg))
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/", nil))
+	if rec.Header().Get("Content-Security-Policy") == "" {
+		t.Fatal("missing CSP")
+	}
+	if rec.Header().Get("X-Frame-Options") != "DENY" {
+		t.Fatalf("X-Frame-Options = %q", rec.Header().Get("X-Frame-Options"))
+	}
+}
+
+func TestRecoveryCatchesPanic(t *testing.T) {
+	h := Chain(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+		panic("boom")
+	}), Recovery(stubLogger{}))
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/panic", nil))
+	if rec.Code != http.StatusInternalServerError {
+		t.Fatalf("status = %d", rec.Code)
+	}
+}
+
+func TestTimeoutReturns503(t *testing.T) {
+	h := Chain(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		select {
+		case <-r.Context().Done():
+			return
+		case <-time.After(200 * time.Millisecond):
+			w.WriteHeader(http.StatusOK)
+		}
+	}), Timeout(20*time.Millisecond))
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/slow", nil))
+	if rec.Code != http.StatusServiceUnavailable {
+		t.Fatalf("status = %d", rec.Code)
+	}
+}
+
+func TestLoggingMiddleware(t *testing.T) {
+	var logged bool
+	h := Chain(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusCreated)
+	}), Logging(stubLoggerWithHook{stubLogger: stubLogger{}, onInfo: func() { logged = true }}))
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/api", nil))
+	if rec.Code != http.StatusCreated || !logged {
+		t.Fatalf("status=%d logged=%v", rec.Code, logged)
+	}
+}
+
+type stubLoggerWithHook struct {
+	stubLogger
+	onInfo func()
+}
+
+func (s stubLoggerWithHook) Info(string, ...logger.Field) {
+	if s.onInfo != nil {
+		s.onInfo()
+	}
+}
+
+func TestContextHelpers(t *testing.T) {
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, CtxTraceID, "trace-1")
+	ctx = context.WithValue(ctx, CtxUserID, "user-1")
+	ctx = context.WithValue(ctx, CtxTenantID, "tenant-1")
+	if TraceIDFromContext(ctx) != "trace-1" {
+		t.Fatal("trace id")
+	}
+	if UserIDFromContext(ctx) != "user-1" || TenantIDFromContext(ctx) != "tenant-1" {
+		t.Fatal("user/tenant id")
+	}
+}
+
+type stubRecorder struct{}
+
+func (stubRecorder) Counter(string, float64, map[string]string)   {}
+func (stubRecorder) Gauge(string, float64, map[string]string)     {}
+func (stubRecorder) Histogram(string, float64, map[string]string) {}
+func (stubRecorder) Timer(string) func()                          { return func() {} }
+
+func TestMetricsMiddleware(t *testing.T) {
+	h := Chain(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusAccepted)
+	}), Metrics(stubRecorder{}))
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodPost, "/metrics-demo", nil))
+	if rec.Code != http.StatusAccepted {
+		t.Fatalf("status = %d", rec.Code)
+	}
+	var _ metrics.Recorder = stubRecorder{}
 }

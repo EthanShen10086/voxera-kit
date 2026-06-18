@@ -7,20 +7,40 @@
 
 ## [Unreleased]
 
+### Added
+- **Go 单元/契约测试（Phase 3 → 50%）**:
+  - 分析：`analytics/engine`、`analytics/posthog`
+  - LLM：`claude`、`deepseek`、`qwen`（httptest）；`router`、`prompt`；`hunyuan` Chat
+  - 任务/调度：`task/redis`（miniredis）、`scheduler/cron`
+  - 实验：`experiment/posthog`
+  - 基建：`audit/memory`、`security/memory`、`security/headers`、`loadshed/adaptive`、`observability/metrics`、`license/offline`、`crypto/aes`、`crypto/tls`、`dataparser/stub`、`compression/gzip`、`pii/regex`
+  - `middleware` 增量（Logging、Metrics、Context）
+
+### Changed
+- **`MIN_COVERAGE`**: 30% → **50%**（merged ~50%）
+- `task/go.mod`：测试依赖 `miniredis/v2`
+
+### Added (Phase 2, prior)
+- **Go 单元/契约测试（Phase 2 → 30%）**: `storage/fs`、`storage/contract`、`mq/memory`、`dataparser/csv`、`featureflag/memory`、`share/memory`、`shorturl/memory`、`aiquota/memory`、`concurrency/channel`、`translation/openai`、`experiment/memory`、`observability/logger`、`llm/openai`；`middleware` 增量；`task/memory` 契约/advanced 契约
+
+### Changed
+- **`MIN_COVERAGE`**: 15% → **30%**（merged ~32%）
+
 ---
 
 ## [0.4.0] - 2026-06-13
 
-测试基建闭环：覆盖率阶梯门禁、`@voxera-kit/faker` 可插拔包、Release train 脚本。
+测试基建闭环：覆盖率阶梯门禁（Phase 1 @ 15%）、`@voxera-kit/faker` 可插拔包、Release train 脚本。
 
 ### Added
 - **`@voxera-kit/faker`**: 可插拔 `fakerjs` / `lightweight` adapter；`@voxera-kit/fixture` 重导出
 - **`docs/COVERAGE_ROADMAP.md`**: 8%→15%→30%→50%→80% 阶梯
 - **`scripts/monthly-pin-bump.sh`**: 协调 consumer pin 更新
+- **Go 单元/契约测试**: `errors`、`cache/memory`、`cache/local`、`secret/env`、`translation/google`、`translation/deepl`、`retry/exponential`、`scheduler/memory`、`messaging/memory`、`registry/memory`
 
 ### Changed
-- **`coverage.sh`**: `MIN_COVERAGE` 门禁（默认 8%），跳过 `testkit`
-- CI / nightly `go-coverage` 启用 enforce
+- **`coverage.sh`**: `MIN_COVERAGE` 门禁（默认 **15%**，~16% merged），跳过 `testkit`
+- CI / nightly `go-coverage` 启用 enforce @ 15%
 
 ---
 

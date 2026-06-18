@@ -2,7 +2,7 @@
 # Merge per-module Go coverage profiles from go.work modules.
 #
 # Environment:
-#   MIN_COVERAGE     — fail if merged total is below this % (default: 8, ramp见 docs/COVERAGE_ROADMAP.md)
+#   MIN_COVERAGE     — fail if merged total is below this % (default: 50, ramp见 docs/COVERAGE_ROADMAP.md)
 #   COVERAGE_SKIP    — space-separated module names to skip (default: testkit)
 #   COVERAGE_ENFORCE — "true" (default) to exit non-zero when below MIN_COVERAGE
 set -euo pipefail
@@ -11,7 +11,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUT="${ROOT}/coverage"
 mkdir -p "${OUT}"
 
-MIN_COVERAGE="${MIN_COVERAGE:-8}"
+MIN_COVERAGE="${MIN_COVERAGE:-50}"
 COVERAGE_ENFORCE="${COVERAGE_ENFORCE:-true}"
 COVERAGE_SKIP="${COVERAGE_SKIP:-testkit}"
 

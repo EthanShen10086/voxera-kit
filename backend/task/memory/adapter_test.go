@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/EthanShen10086/voxera-kit/task"
+	"github.com/EthanShen10086/voxera-kit/task/contract"
 	"github.com/EthanShen10086/voxera-kit/task/memory"
 )
 
@@ -58,4 +59,18 @@ func TestAdapterScheduleCancel(t *testing.T) {
 	if ran.Load() {
 		t.Fatal("canceled task should not run")
 	}
+}
+
+func TestTaskContract_Memory(t *testing.T) {
+	contract.RunTaskContract(t, func(t *testing.T, handler task.Handler) (task.TaskQueue, func()) {
+		q := memory.New(memory.Config{Handler: handler})
+		return q, nil
+	})
+}
+
+func TestTaskAdvancedContract_Memory(t *testing.T) {
+	contract.RunTaskAdvancedContract(t, func(t *testing.T, handler task.Handler) (task.TaskQueue, func()) {
+		q := memory.New(memory.Config{Handler: handler})
+		return q, nil
+	})
 }
