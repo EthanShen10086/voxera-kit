@@ -4,9 +4,11 @@
 
 | voxera-kit commit / tag | Go | MsgGuard | voxera | finera | pulsera |
 |-------------------------|-----|----------|--------|--------|---------|
-| `58be0db` / **v0.1.0** (2026-06-17) | 1.22+ | **v0.1.0** | master | master | master |
-| `c037520` (2026-06) | 1.22+ | ≥ `v0.1.0` | master | master | master |
-| _future `v0.2.0`_ | 1.22+ | TBD | TBD | TBD | TBD |
+| _see tag **v0.2.0**_ / **v0.2.0** (2026-06-13) | 1.22+ | pin updated | pin updated | pin updated | pin updated |
+| `58be0db` / **v0.1.0** (2026-06-17) | 1.22+ | **v0.1.0** | superseded | superseded | superseded |
+| `c037520` (2026-06) | 1.22+ | historical | historical | historical | historical |
+
+> **v0.2.0** 包含数据平面 W1–W7 与测试基建 T1–T6。`cache/local.New` 签名变更：consumer 须 `_, err := local.New(cfg)`。
 
 ## Coordinated release train
 

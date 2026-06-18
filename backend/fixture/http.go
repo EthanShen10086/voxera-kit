@@ -12,11 +12,11 @@ import (
 
 // HTTPRequestBuilder constructs *http.Request values for handler and middleware tests.
 type HTTPRequestBuilder struct {
-	method string
-	target string
-	header http.Header
-	body   io.Reader
-	ctx    context.Context
+	method  string
+	target  string
+	header  http.Header
+	body    io.Reader
+	ctx     context.Context
 }
 
 // NewHTTPRequest starts building an HTTP request for the given method and URL.

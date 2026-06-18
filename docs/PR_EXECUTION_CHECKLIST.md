@@ -30,4 +30,5 @@ Track merge order for the org-wide standards rollout. Check off as PRs land.
 
 ## Phase 5 — Coordinated release
 - [x] `docs/COMPATIBILITY.md` in voxera-kit
-- [ ] Monthly kit tag → bump consumer pins (operational)
+- [x] **v0.2.0** tag + consumer pin bump (2026-06-13)
+- [ ] Monthly kit tag → bump consumer pins (operational cadence)

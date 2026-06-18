@@ -7,25 +7,30 @@
 
 ## [Unreleased]
 
+---
+
+## [0.2.0] - 2026-06-13
+
+数据平面 W1–W7 与测试基建 Wave T1–T6 首版打包；产品仓可 pin 本 tag 获取 storage/cache/mq/database/task/secret 实现与 testkit。
+
 ### Added
 - **testkit (Wave T1)**：`backend/testkit/containers`（Redis/NATS/Postgres/MinIO testcontainers）+ `integration` smoke tests
-- **CI**：`go-integration` job 运行 testkit 集成测试`storage`（minio/s3/oss/cos/memory/fs）、`cache`（redis/local/memcached）、`mq`（nats/kafka/rabbitmq/memory）、`database`（postgres/mysql/mongodb）、`task`（memory/redis）、`secret`（vault/aws/gcp）
+- **CI**：`go-integration` job 运行 testkit 集成测试；`storage`（minio/s3/oss/cos/memory/fs）、`cache`（redis/local/memcached）、`mq`（nats/kafka/rabbitmq/memory）、`database`（postgres/mysql/mongodb）、`task`（memory/redis）、`secret`（vault/aws/gcp）
 - **storage 高级能力**：分片上传、版本控制、生命周期、桶通知（port + memory/minio/s3 等）
-- **契约测试**：`storage/contract`、`cache/contract`、`mq/contract`
-- **文档**：`backend/storage/README.md`、数据层 README 状态诚实化（🟡）
+- **契约测试**：`storage/contract`、`cache/contract`、`mq/contract`、`database/contract`、`task/contract`、`secret/contract`
+- **文档**：`backend/storage/README.md`、数据层 README 状态诚实化；**`docs/testing.md`** 产品接入指南
 - **testing (Wave T4)**：`@voxera-kit/testing`（Vitest setup、MSW handlers、renderWithProviders）
 - **fixture (Wave T3)**：`backend/fixture`、`@voxera-kit/fixture`
 - **E2E 模板 (Wave T5)**：`templates/e2e-playwright`（Playwright 登录 smoke + CI 片段）
-- **CI (Wave T6)**：PR 跑契约测试；main 跑 integration + E2E smoke；合并 Go coverage + Codecov
+- **CI (Wave T6)**：PR 跑契约测试；main 跑 integration + E2E smoke；合并 Go coverage + Codecov；`nightly.yml`
 
 ### Changed
-- `cache/local.New` 现返回 `(*Adapter, error)`（ristretto 初始化）
+- `cache/local.New` 现返回 `(*Adapter, error)`（ristretto 初始化）— **破坏性变更**，finera 等 consumer 需处理 error
 
-### Planned (Wave T)
-- [x] `backend/testkit/containers` + MinIO/Redis/NATS/Postgres 集成 CI（T1）
-- [x] `frontend/packages/testing`（MSW + Vitest setup）（T4）
-- [x] E2E Playwright 模板（T5）
-- [x] CI 质量门禁：PR 契约 / main 集成 + coverage（T6）
+### Known gaps (post-0.2.0)
+- `secret/tencent` 仍为 stub
+- task 高级能力（DLQ、幂等 key、JetStream）未纳入 port
+- 覆盖率 80% 门禁未 enforce
 
 ---
 
