@@ -358,7 +358,7 @@ func (a *Adapter) RestoreVersion(ctx context.Context, key, versionID string) err
 	if err != nil {
 		return err
 	}
-	defer rc.Close()
+	defer func() { _ = rc.Close() }()
 	return a.Upload(ctx, key, rc, nil)
 }
 

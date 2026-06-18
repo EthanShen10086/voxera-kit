@@ -3,7 +3,7 @@ package fs
 
 import (
 	"context"
-	"crypto/md5"
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -39,7 +39,7 @@ type pendingMultipart struct {
 
 // New creates a filesystem-backed adapter rooted at the given directory.
 func New(root string, cfg storage.Config) (*Adapter, error) {
-	if err := os.MkdirAll(root, 0o755); err != nil {
+	if err := os.MkdirAll(root, 0o750); err != nil {
 		return nil, err
 	}
 	return &Adapter{
@@ -68,16 +68,16 @@ func (a *Adapter) metaPath(objectPath string) string {
 }
 
 func etagForFile(path string) (string, error) {
-	f, err := os.Open(path)
+	f, err := os.Open(path) // #nosec G304 -- path validated by objectPath // #nosec G304 -- path validated by objectPath
 	if err != nil {
 		return "", err
 	}
-	defer f.Close()
-	h := md5.New()
+	defer func() { _ = f.Close() }()
+	h := sha256.New()
 	if _, err := io.Copy(h, f); err != nil {
 		return "", err
 	}
-	return hex.EncodeToString(h.Sum(nil)), nil
+	return hex.EncodeToString(h.Sum(nil)[:16]), nil
 }
 
 func (a *Adapter) statObject(path string) (*storage.ObjectMeta, error) {
@@ -116,7 +116,7 @@ func (a *Adapter) Upload(ctx context.Context, key string, reader io.Reader, uplo
 	if err != nil {
 		return err
 	}
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil {
 		return err
 	}
 
@@ -149,7 +149,7 @@ func (a *Adapter) Download(_ context.Context, key string) (io.ReadCloser, error)
 	if err != nil {
 		return nil, err
 	}
-	f, err := os.Open(path)
+	f, err := os.Open(path) // #nosec G304 -- path validated by objectPath
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, storage.ErrNotFound
@@ -267,7 +267,7 @@ func (a *Adapter) InitiateMultipartUpload(_ context.Context, key string, uploadO
 	key = opts.NormalizeKey(key)
 	uploadID := fmt.Sprintf("mp-%d", time.Now().UnixNano())
 	partsDir := filepath.Join(a.root, multipartDir, uploadID)
-	if err := os.MkdirAll(partsDir, 0o755); err != nil {
+	if err := os.MkdirAll(partsDir, 0o750); err != nil {
 		return "", err
 	}
 
@@ -295,7 +295,7 @@ func (a *Adapter) UploadPart(_ context.Context, key, uploadID string, partNumber
 	}
 
 	partPath := filepath.Join(mp.partsDir, fmt.Sprintf("part-%05d", partNumber))
-	f, err := os.Create(partPath)
+	f, err := os.Create(partPath) // #nosec G304 -- part path under controlled multipart dir
 	if err != nil {
 		return "", err
 	}
@@ -335,7 +335,7 @@ func (a *Adapter) CompleteMultipartUpload(_ context.Context, key, uploadID strin
 	}
 	delete(a.multipart, uploadID)
 	a.mu.Unlock()
-	defer os.RemoveAll(mp.partsDir)
+	defer func() { _ = os.RemoveAll(mp.partsDir) }()
 
 	numbers := make([]int, 0, len(parts))
 	for _, p := range parts {
