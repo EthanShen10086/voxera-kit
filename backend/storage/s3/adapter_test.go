@@ -3,6 +3,7 @@ package s3_test
 import (
 	"bytes"
 	"context"
+	"io"
 	"testing"
 	"time"
 
@@ -69,6 +70,40 @@ func TestS3VersioningAndAdmin(t *testing.T) {
 
 	if err := a.Delete(ctx, key); err != nil {
 		t.Fatalf("Delete: %v", err)
+	}
+}
+
+func TestS3DownloadVersion(t *testing.T) {
+	ctx := context.Background()
+	a := newS3Adapter(t)
+	defer func() { _ = a.Close() }()
+
+	if err := a.EnableVersioning(ctx, true); err != nil {
+		t.Fatalf("EnableVersioning: %v", err)
+	}
+
+	key := "restore/me.txt"
+	if err := a.Upload(ctx, key, bytes.NewReader([]byte("v1")), nil); err != nil {
+		t.Fatal(err)
+	}
+	if err := a.Upload(ctx, key, bytes.NewReader([]byte("v2")), nil); err != nil {
+		t.Fatal(err)
+	}
+
+	versions, err := a.ListVersions(ctx, key)
+	if err != nil || len(versions) < 2 {
+		t.Fatalf("ListVersions: %v err=%v", versions, err)
+	}
+
+	oldVersion := versions[0].VersionID
+	rc, err := a.DownloadVersion(ctx, key, oldVersion)
+	if err != nil {
+		t.Fatalf("DownloadVersion: %v", err)
+	}
+	body, _ := io.ReadAll(rc)
+	_ = rc.Close()
+	if string(body) != "v1" {
+		t.Fatalf("version body = %q", body)
 	}
 }
 

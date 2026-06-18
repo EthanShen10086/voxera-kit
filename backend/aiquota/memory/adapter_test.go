@@ -46,9 +46,20 @@ func TestWhitelistAndTier(t *testing.T) {
 	if err := s.CheckQuota(ctx, "vip", "gpt-4o", 1_000_000); err != nil {
 		t.Fatalf("whitelisted should bypass quota: %v", err)
 	}
+	if err := s.RemoveFromWhitelist(ctx, "vip"); err != nil {
+		t.Fatal(err)
+	}
+	ok, _ = s.IsWhitelisted(ctx, "vip")
+	if ok {
+		t.Fatal("expected removed from whitelist")
+	}
 
 	if err := s.SetTier(ctx, "pro-user", aiquota.TierPro); err != nil {
 		t.Fatal(err)
+	}
+	q, err := s.GetQuota(ctx, "pro-user")
+	if err != nil || q.Tier != aiquota.TierPro {
+		t.Fatalf("GetQuota: %+v err=%v", q, err)
 	}
 	if err := s.CheckQuota(ctx, "pro-user", "gpt-4o-mini", 1000); err != nil {
 		t.Fatalf("pro tier model: %v", err)

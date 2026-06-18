@@ -64,3 +64,46 @@ func TestListModels(t *testing.T) {
 		t.Fatalf("models: %v err=%v", models, err)
 	}
 }
+
+func TestChatStream(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "text/event-stream")
+		_, _ = w.Write([]byte("data: {\"choices\":[{\"delta\":{\"content\":\"混\"},\"finish_reason\":\"\"}]}\n\n"))
+		_, _ = w.Write([]byte("data: {\"choices\":[{\"delta\":{\"content\":\"元\"},\"finish_reason\":\"stop\"}]}\n\n"))
+		_, _ = w.Write([]byte("data: [DONE]\n\n"))
+	}))
+	defer srv.Close()
+
+	a := hunyuan.New(llm.Config{Endpoint: srv.URL, APIKey: "hk-test"})
+	ch, err := a.ChatStream(context.Background(), llm.Request{
+		Messages: []llm.Message{{Role: llm.RoleUser, Content: "hi"}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var content string
+	for chunk := range ch {
+		if chunk.Err != nil {
+			t.Fatal(chunk.Err)
+		}
+		content += chunk.Content
+	}
+	if content != "混元" {
+		t.Fatalf("content = %q", content)
+	}
+}
+
+func TestChatAPIError(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusUnauthorized)
+	}))
+	defer srv.Close()
+
+	a := hunyuan.New(llm.Config{Endpoint: srv.URL, APIKey: "bad"})
+	_, err := a.Chat(context.Background(), llm.Request{
+		Messages: []llm.Message{{Role: llm.RoleUser, Content: "x"}},
+	})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+}

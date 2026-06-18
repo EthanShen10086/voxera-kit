@@ -8,6 +8,13 @@
 ## [Unreleased]
 
 ### Added
+- **Go 单元/契约测试（Phase 4 Sprint 4.5 → ~67%）**:
+  - noop/stub 快赢：`ad/noop`、`aiquota/noop`、`analytics/noop`、`experiment/noop`、`audit/noop`、`notification/stub`、`dataprovider/stub`、`bulkhead/semaphore`、`singleflight/sync`
+  - `storage/internal/opts`、`storage/internal/uploadlarge` 单元测试
+  - `mq/rabbitmq`、`mq/kafka` 离线 internal 单测（`deliveryToMessage`、Ack 校验等）
+  - `llm/hunyuan` ChatStream + API 错误；`task/redis` Worker 单测
+  - `storage/s3` DownloadVersion；`ad` Router + google/selfhosted；`cache/redis` miniredis
+  - partial：`aiquota/pricing`、`scraper/memory`、`notification/wecom|feishu`、`license/online`、`auth/jwt|oauth2|oidc`、`payment/*`、`crypto/bcrypt`
 - **Go 单元/契约测试（Phase 4 Sprint 4.4 → ~61%）**:
   - `secret/aws`：Secrets Manager JSON API httptest + 契约测试
   - `secret/gcp`：离线 helper / NewManager 校验
