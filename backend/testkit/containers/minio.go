@@ -3,6 +3,7 @@ package containers
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/EthanShen10086/voxera-kit/storage"
@@ -19,9 +20,7 @@ type MinIO struct {
 
 // StartMinIO launches minio/minio and creates the target bucket.
 func StartMinIO(ctx context.Context, bucket string) (*MinIO, error) {
-	if bucket == "" {
-		bucket = "voxera-test"
-	}
+	bucket = sanitizeBucketName(bucket)
 	c, err := tcminio.Run(ctx, "minio/minio:RELEASE.2024-01-16T16-07-38Z",
 		tcminio.WithUsername("minioadmin"),
 		tcminio.WithPassword("minioadmin"),
@@ -75,6 +74,27 @@ func (m *MinIO) Terminate(ctx context.Context) error {
 		return nil
 	}
 	return m.terminate(ctx)
+}
+
+var bucketNameSanitizer = regexp.MustCompile(`[^a-z0-9.-]`)
+
+func sanitizeBucketName(name string) string {
+	name = strings.ToLower(strings.TrimSpace(name))
+	name = bucketNameSanitizer.ReplaceAllString(name, "-")
+	name = strings.Trim(name, ".-")
+	for strings.Contains(name, "..") {
+		name = strings.ReplaceAll(name, "..", "-")
+	}
+	if len(name) < 3 {
+		return "voxera-test"
+	}
+	if len(name) > 63 {
+		name = strings.Trim(name[:63], ".-")
+	}
+	if len(name) < 3 {
+		return "voxera-test"
+	}
+	return name
 }
 
 // S3CompatConfig returns storage.Config suitable for the S3 adapter against this MinIO instance.
