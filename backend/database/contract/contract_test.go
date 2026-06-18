@@ -38,11 +38,10 @@ func (m *mockTransaction) Commit() error { return nil }
 
 func (m *mockTransaction) Rollback() error { return nil }
 
-func TestDatabasePing(t *testing.T) {
-	var db database.Database = &mockDatabase{}
-	if err := db.Ping(context.Background()); err != nil {
-		t.Fatalf("Ping() = %v, want nil", err)
-	}
+func TestDatabaseContract_Mock(t *testing.T) {
+	RunDatabaseContract(t, func(t *testing.T) (database.Database, func()) {
+		return &mockDatabase{}, nil
+	})
 }
 
 func TestDatabasePingError(t *testing.T) {
@@ -60,22 +59,5 @@ func TestDatabaseClose(t *testing.T) {
 	}
 	if !mock.closed {
 		t.Fatal("Close() did not mark database as closed")
-	}
-}
-
-func TestTransactionLifecycle(t *testing.T) {
-	var tx database.Transaction = &mockTransaction{}
-	nested, err := tx.Begin(context.Background())
-	if err != nil {
-		t.Fatalf("Begin() = %v", err)
-	}
-	if nested == nil {
-		t.Fatal("Begin() returned nil transaction")
-	}
-	if err := nested.Commit(); err != nil {
-		t.Fatalf("Commit() = %v", err)
-	}
-	if err := tx.Rollback(); err != nil {
-		t.Fatalf("Rollback() = %v", err)
 	}
 }

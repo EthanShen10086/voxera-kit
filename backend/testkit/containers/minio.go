@@ -76,3 +76,20 @@ func (m *MinIO) Terminate(ctx context.Context) error {
 	}
 	return m.terminate(ctx)
 }
+
+// S3CompatConfig returns storage.Config suitable for the S3 adapter against this MinIO instance.
+func (m *MinIO) S3CompatConfig() storage.Config {
+	if m == nil {
+		return storage.Config{}
+	}
+	cfg := m.Config
+	if cfg.Endpoint != "" && !strings.HasPrefix(cfg.Endpoint, "http") {
+		scheme := "http"
+		if cfg.UseSSL {
+			scheme = "https"
+		}
+		cfg.Endpoint = scheme + "://" + cfg.Endpoint
+	}
+	cfg.DisableSSLVerify = true
+	return cfg
+}

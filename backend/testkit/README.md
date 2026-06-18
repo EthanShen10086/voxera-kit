@@ -1,6 +1,15 @@
 # testkit
 
-Wave T1 集成测试基建：testcontainers 封装 + 数据平面 smoke tests。
+Wave T 集成测试基建：testcontainers 封装 + 数据平面 contract smoke tests。
+
+## 结构
+
+| 包 | 职责 |
+|----|------|
+| `containers/` | testcontainers 封装：Redis、NATS、Postgres、MinIO |
+| `contract/` | 重导出各模块 `Run*Contract`；`RunDataPlaneSmoke`（integration tag） |
+| `assert/` | 共享断言（`ErrorIs` 等） |
+| `integration/` | CI 集成测试入口 |
 
 ## containers
 
@@ -8,14 +17,19 @@ Wave T1 集成测试基建：testcontainers 封装 + 数据平面 smoke tests。
 |------|------|------|
 | `StartRedis` | redis:7-alpine | cache/redis 契约 |
 | `StartNATS` | nats:2.10-alpine | mq/nats 契约 |
-| `StartPostgres` | postgres:16-alpine | database/postgres Ping |
-| `StartMinIO` | minio/minio | storage/minio 契约 |
+| `StartPostgres` | postgres:16-alpine | database/postgres 契约 |
+| `StartMinIO` | minio/minio | storage/minio + s3 兼容契约 |
 
 ## 运行
 
 ```bash
-# 单元（无外部依赖）
-cd backend/testkit && go test ./containers/...
+# 单元（无 Docker）
+cd backend/testkit && go test ./...
+
+# 各模块契约（无 Docker）
+cd backend/database && go test ./contract/...
+cd backend/task && go test ./contract/...
+cd backend/secret && go test ./contract/...
 
 # 集成（需要 Docker）
 cd backend/testkit && go test -tags=integration -race -timeout=15m ./...
