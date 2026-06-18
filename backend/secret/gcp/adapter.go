@@ -132,6 +132,10 @@ func (m *Manager) Close() error {
 }
 
 func secretIDFromName(name string) string {
+	const marker = "/secrets/"
+	if i := strings.Index(name, marker); i >= 0 {
+		return name[i+len(marker):]
+	}
 	parts := strings.Split(name, "/")
 	if len(parts) == 0 {
 		return name

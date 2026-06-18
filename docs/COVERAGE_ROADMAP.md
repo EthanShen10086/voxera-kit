@@ -8,7 +8,7 @@ Stepped enforcement for `backend/scripts/coverage.sh` / CI `go-coverage` job.
 | **1** | **15%** | v0.4.0 | done (~16% merged) |
 | **2** | **30%** | v0.5.0 | done (~32% merged) |
 | **3** | **50%** | v0.6.0 | done (~50% merged) |
-| **4** | **80%** | v1.0.0 | in progress (~67% merged) |
+| **4** | **80%** | v1.0.0 | in progress (~70% merged) |
 
 ## Phase 4 sprints (50% → 80%)
 
@@ -19,7 +19,8 @@ Stepped enforcement for `backend/scripts/coverage.sh` / CI `go-coverage` job.
 | **4.3** | `storage/cos/oss`, `mq/kafka/rabbitmq`, partial `fs/middleware/llm` | httptest vendor mocks + testcontainers | done (~57%) |
 | **4.4** | `secret/aws/gcp/tencent`, `asr/whisper`, cos/oss lifecycle, `llm/claude/qwen` stream, testfixture smoke | unit + httptest | done (~61%) |
 | **4.5** | noop/stub 快赢、`uploadlarge/opts`、`mq` 离线、`hunyuan` stream、`task/redis` Worker、`s3` 版本、ad/cache/scraper 等 | unit + httptest | done (~67%) |
-| **4.6** | `storage/minio`、`secret/vault/gcp` Client、integration 纳入或 mock 深化 | testcontainers + httptest | planned (→70%+) |
+| **4.6** | `secret/vault/gcp` httptest/grpc mock、`storage/minio` internal、database mysql/mongodb、asr stubs、scraper/share/shorturl | unit + httptest | done (~70%) |
+| **4.7** | `storage/minio` integration 纳入 probe、`mq` consume 深化、向 80% 推进 | testcontainers + httptest | planned |
 
 Bump `MIN_COVERAGE` to **80** only when merged coverage is stable ≥80%.
 

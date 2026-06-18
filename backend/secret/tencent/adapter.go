@@ -83,9 +83,9 @@ func (m *Manager) Set(ctx context.Context, key string, value string) error {
 		return err
 	}
 
-	_, err := m.client.GetSecretValue(&ssm.GetSecretValueRequest{
-		SecretName: common.StringPtr(key),
-	})
+	req := ssm.NewGetSecretValueRequest()
+	req.SecretName = common.StringPtr(key)
+	_, err := m.client.GetSecretValue(req)
 	if err != nil {
 		if isNotFound(err) {
 			createReq := ssm.NewCreateSecretRequest()

@@ -19,6 +19,9 @@ func TestSecretIDFromName(t *testing.T) {
 	if got := secretIDFromName("projects/p/secrets/my-key"); got != "my-key" {
 		t.Fatalf("secretIDFromName = %q", got)
 	}
+	if got := secretIDFromName("projects/p/secrets/prefix/a"); got != "prefix/a" {
+		t.Fatalf("nested secretIDFromName = %q", got)
+	}
 	if got := secretIDFromName(""); got != "" {
 		t.Fatalf("empty name = %q", got)
 	}

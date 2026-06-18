@@ -9,8 +9,8 @@ import (
 
 	"github.com/EthanShen10086/voxera-kit/storage"
 	"github.com/EthanShen10086/voxera-kit/storage/contract"
-	s3store "github.com/EthanShen10086/voxera-kit/storage/s3"
 	"github.com/EthanShen10086/voxera-kit/storage/internal/testfixture"
+	s3store "github.com/EthanShen10086/voxera-kit/storage/s3"
 )
 
 func newS3Adapter(t *testing.T) *s3store.Adapter {

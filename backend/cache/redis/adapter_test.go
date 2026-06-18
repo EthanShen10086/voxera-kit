@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/alicebob/miniredis/v2"
 	"github.com/EthanShen10086/voxera-kit/cache"
 	"github.com/EthanShen10086/voxera-kit/cache/redis"
+	"github.com/alicebob/miniredis/v2"
 )
 
 func newAdapter(t *testing.T) (*redis.Adapter, *miniredis.Miniredis) {

@@ -7,7 +7,18 @@
 
 ## [Unreleased]
 
+### Fixed
+- `secret/tencent`：`Set` 使用 `NewGetSecretValueRequest()` 避免 nil request panic
+- `secret/gcp`：`secretIDFromName` 正确解析含 `/` 的 secret 路径
+
 ### Added
+- **Go 单元/契约测试（Phase 4 Sprint 4.6 → ~70%）**:
+  - `secret/vault`：httptest KV v2 mock + 契约测试
+  - `secret/gcp`：bufconn gRPC fake + 契约测试；修复 `secretIDFromName` 斜杠路径
+  - `storage/minio`：`mapError`/`putOptions`/`New` 离线单测
+  - `database/mysql`、`database/mongodb`：离线 Ping/Connect 失败路径
+  - `asr/aliyun|azure|selfhosted`、`notification/email`、`scraper/http` 单测
+  - `share/link`、`shorturl/ResolveOptions` 单测
 - **Go 单元/契约测试（Phase 4 Sprint 4.5 → ~67%）**:
   - noop/stub 快赢：`ad/noop`、`aiquota/noop`、`analytics/noop`、`experiment/noop`、`audit/noop`、`notification/stub`、`dataprovider/stub`、`bulkhead/semaphore`、`singleflight/sync`
   - `storage/internal/opts`、`storage/internal/uploadlarge` 单元测试
