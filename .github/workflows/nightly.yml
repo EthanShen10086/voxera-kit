@@ -1,9 +1,10 @@
 name: Nightly
 
+# Scheduled runs paused — use workflow_dispatch to run manually.
 on:
-  schedule:
-    - cron: "0 3 * * *"
   workflow_dispatch:
+  # schedule:
+  #   - cron: "0 3 * * *"
 
 concurrency:
   group: nightly-${{ github.ref }}

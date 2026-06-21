@@ -1,16 +1,18 @@
 name: Changelog Release
 
+# Auto-release on push is paused. Run workflow_dispatch manually, or set repo
+# variable CI_RELEASE_ENABLED=true and restore the push trigger below.
 on:
   workflow_dispatch:
-  push:
-    branches: [main, master]
+  # push:
+  #   branches: [main, master]
 
 permissions:
   contents: write
 
 jobs:
   changelog-release:
-    if: vars.CI_RELEASE_ENABLED != 'false'
+    if: github.event_name == 'workflow_dispatch' || vars.CI_RELEASE_ENABLED == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
