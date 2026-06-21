@@ -15,7 +15,7 @@ jobs:
     name: Go Integration (testcontainers)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v6
         with:
           go-version: "1.25"
@@ -35,8 +35,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
       - name: Install and run Playwright template
@@ -50,7 +50,7 @@ jobs:
     name: Go Coverage Report
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v6
         with:
           go-version: "1.25"
@@ -70,13 +70,13 @@ jobs:
           COVERAGE_SKIP: testkit
           COVERAGE_TAGS: integration
         run: bash scripts/coverage.sh
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: go-coverage-nightly
           path: backend/coverage/merged.out
           retention-days: 14
       - name: Upload to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v7
         with:
           files: backend/coverage/merged.out
           flags: backend
