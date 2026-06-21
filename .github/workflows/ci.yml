@@ -15,7 +15,7 @@ jobs:
     name: Go Lint & Vet
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v6
         with:
           go-version: "1.25"
@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: go-lint
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v6
         with:
           go-version: "1.25"
@@ -57,7 +57,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: go-lint
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v6
         with:
           go-version: "1.25"
@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: go-lint
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v6
         with:
           go-version: "1.25"
@@ -95,7 +95,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: go-test
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v6
         with:
           go-version: "1.25"
@@ -107,13 +107,13 @@ jobs:
           COVERAGE_ENFORCE: "true"
           COVERAGE_SKIP: testkit
         run: bash scripts/coverage.sh
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: go-coverage
           path: backend/coverage/merged.out
           retention-days: 7
       - name: Upload to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v7
         with:
           files: backend/coverage/merged.out
           flags: backend
@@ -125,7 +125,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: go-lint
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v6
         with:
           go-version: "1.25"
@@ -146,8 +146,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
       - name: Run Playwright template smoke
@@ -161,11 +161,11 @@ jobs:
     name: TypeScript Vitest
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
         with:
           version: 9
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: pnpm
@@ -180,10 +180,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: go-build
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           path: voxera-kit
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: EthanShen10086/MsgGuard
           path: MsgGuard
@@ -201,11 +201,11 @@ jobs:
     name: TypeScript Lint & Typecheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
         with:
           version: 9
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: pnpm
