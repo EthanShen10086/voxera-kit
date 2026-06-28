@@ -3,10 +3,10 @@ module github.com/EthanShen10086/voxera-kit/cache
 go 1.25.0
 
 require (
-	github.com/alicebob/miniredis/v2 v2.35.0
+	github.com/alicebob/miniredis/v2 v2.38.0
 	github.com/bradfitz/gomemcache v0.0.0-20260422231931-4d751bb6e37c
 	github.com/dgraph-io/ristretto v0.2.0
-	github.com/redis/go-redis/v9 v9.20.1
+	github.com/redis/go-redis/v9 v9.21.0
 )
 
 require (
